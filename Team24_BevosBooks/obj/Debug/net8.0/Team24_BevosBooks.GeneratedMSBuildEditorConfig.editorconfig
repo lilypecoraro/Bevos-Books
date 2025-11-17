@@ -17,3 +17,11 @@ build_property.SupportLocalizedComponentNames =
 build_property.GenerateRazorMetadataSourceChecksumAttributes = 
 build_property.MSBuildProjectDirectory = /Users/lilypecoraro/Projects/Team24_BevosBooks/Team24_BevosBooks
 build_property._RazorSourceGeneratorDebug = 
+
+[/Users/lilypecoraro/Projects/Team24_BevosBooks/Team24_BevosBooks/Views/_ViewImports.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3MvX1ZpZXdJbXBvcnRzLmNzaHRtbA==
+build_metadata.AdditionalFiles.CssScope = 
+
+[/Users/lilypecoraro/Projects/Team24_BevosBooks/Team24_BevosBooks/Views/_ViewStart.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3MvX1ZpZXdTdGFydC5jc2h0bWw=
+build_metadata.AdditionalFiles.CssScope = 

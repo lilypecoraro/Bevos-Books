@@ -13,7 +13,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("Team24_BevosBooks")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+d2d9d0ec8a33350e63a06103c4168d07e6e25497")]
 [assembly: System.Reflection.AssemblyProductAttribute("Team24_BevosBooks")]
 [assembly: System.Reflection.AssemblyTitleAttribute("Team24_BevosBooks")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]
