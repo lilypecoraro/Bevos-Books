@@ -1,7 +1,7 @@
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 
-namespace BevosBooks.Models
+namespace Team24_BevosBooks.Models
 {
     public class Genre
     {
