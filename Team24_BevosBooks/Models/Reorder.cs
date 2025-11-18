@@ -1,22 +1,30 @@
+using System;
+using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
+
+namespace BevosBooks.Models
+{
     public class Reorder
     {
         [Key]
-        public int ReorderID { get; set; }   
+        public int ReorderID { get; set; }   // PK
 
         [ForeignKey("Book")]
-        public int BookID { get; set; }   
+        public int BookID { get; set; }      // FK
 
         [Required, Column(TypeName = "decimal(18,2)")]
-        public decimal Cost { get; set; }   
+        public decimal Cost { get; set; }    // Supplier cost at reorder
 
         [Required]
-        public int Quantity { get; set; }  
+        public int Quantity { get; set; }    // Number of copies ordered
 
         [DataType(DataType.Date)]
-        public DateTime Date { get; set; } 
+        public DateTime Date { get; set; }   // Reorder date
 
         [Required, StringLength(50)]
-        public string ReorderStatus { get; set; }  
+        public string ReorderStatus { get; set; }  // e.g., Pending, Completed
 
+        // Navigation property
         public Book Book { get; set; }
     }
+}
