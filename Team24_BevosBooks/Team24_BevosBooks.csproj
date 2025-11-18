@@ -18,12 +18,8 @@
     <None Remove="Views\Shared\" />
   </ItemGroup>
   <ItemGroup>
-    <Folder Include="Controllers\" />
     <Folder Include="Models\" />
-    <Folder Include="DAL\" />
     <Folder Include="Migrations\" />
-    <Folder Include="Seeding\" />
-    <Folder Include="Utilities\" />
     <Folder Include="wwwroot\lib\" />
   </ItemGroup>
   <ItemGroup>
