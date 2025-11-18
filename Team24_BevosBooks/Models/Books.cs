@@ -1,13 +1,19 @@
-    public class Books
+using System;
+using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
+
+namespace BevosBooks.Models
+{
+    public class Book
     {
         [Key]
-        public int BookID { get; set; }  
+        public int BookID { get; set; }   // PK
 
         [ForeignKey("Genre")]
-        public int GenreID { get; set; } 
+        public int GenreID { get; set; }  // FK
 
         [Required]
-        public int BookNumber { get; set; }  
+        public int BookNumber { get; set; }  // Unique consecutive number (e.g., 222001+)
 
         [Required, StringLength(200)]
         public string Title { get; set; }
@@ -16,10 +22,10 @@
         public string Description { get; set; }
 
         [Required, Column(TypeName = "decimal(18,2)")]
-        public decimal Price { get; set; }   
+        public decimal Price { get; set; }   // Selling price
 
         [Required, Column(TypeName = "decimal(18,2)")]
-        public decimal Cost { get; set; }    
+        public decimal Cost { get; set; }    // Supplier cost
 
         [DataType(DataType.Date)]
         public DateTime PublishDate { get; set; }
@@ -31,10 +37,12 @@
         public int ReorderPoint { get; set; }
 
         [Required, StringLength(200)]
-        public string Authors { get; set; }  
+        public string Authors { get; set; }  // Simplified as string list
 
         [Required, StringLength(50)]
-        public string BookStatus { get; set; }  
+        public string BookStatus { get; set; }  // e.g., Active, Discontinued
 
+        // Navigation property
         public Genre Genre { get; set; }
     }
+}
