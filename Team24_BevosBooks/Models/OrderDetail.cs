@@ -6,7 +6,7 @@ namespace Team24_BevosBooks.Models
     public class OrderDetail
     {
         [Key]
-        public int OrderDetailsID { get; set; }   // PK
+        public int OrderDetailID { get; set; }   // PK
 
         [ForeignKey("Order")]
         public int OrderID { get; set; }          // FK to Order
