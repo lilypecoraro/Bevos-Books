@@ -2,7 +2,7 @@
 
 namespace Team24_BevosBooks.Models
 {
-    public class Cards
+    public class Card
     {
         // Primary key
         [Key]
@@ -33,4 +33,5 @@ namespace Team24_BevosBooks.Models
             Discover
         }
     }
+
 }
