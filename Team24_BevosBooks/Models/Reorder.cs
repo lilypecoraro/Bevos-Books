@@ -4,7 +4,7 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Team24_BevosBooks.Models
 {
-    public class Reorders
+    public class Reorder
     {
         [Key]
         public int ReorderID { get; set; }   // PK
