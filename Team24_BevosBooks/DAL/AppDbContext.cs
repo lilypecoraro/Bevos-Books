@@ -4,6 +4,7 @@ using Microsoft.EntityFrameworkCore;
 using Team24_BevosBooks.Models;
 using System;
 using System.Collections.Generic;
+using BevosBooks.Models;
 
 //TODO: Make this namespace match your project name
 namespace Team24_BevosBooks.DAL
@@ -24,10 +25,16 @@ namespace Team24_BevosBooks.DAL
         }
 
         //TODO: Add Dbsets here.  Products is included as an example.  
-        public DbSet<Supplier> Suppliers { get; set; }
+        public DbSet<Book> Books { get; set; }
+        public DbSet<Card> Cards { get; set; }
+        public DbSet<Coupon> Coupons { get; set; }
+        public DbSet<Customer> Customers { get; set; }
+        public DbSet<Employee> Employees { get; set; }
+        public DbSet<Genre> Genres { get; set; }
         public DbSet<Order> Orders { get; set; }
         public DbSet<OrderDetail> OrderDetails { get; set; }
-        public DbSet<Product> Products { get; set; }
+        public DbSet<Reorder> Reorders { get; set; }
+        public DbSet<Review> Reviews { get; set; }
 
     }
 }
