@@ -2,7 +2,7 @@
 
 namespace Team24_BevosBooks.Models
 {
-    public class Reviews
+    public class Review
     {
         [Key]
         [Display(Name = "Review ID")]
@@ -43,4 +43,5 @@ namespace Team24_BevosBooks.Models
         public AppUser Approver { get; set; }
 
     }
+
 }
