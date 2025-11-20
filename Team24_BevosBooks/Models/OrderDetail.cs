@@ -15,7 +15,7 @@ namespace Team24_BevosBooks.Models
         public int BookID { get; set; }           // FK to Book
 
         [ForeignKey("Card")]
-        public int CardID { get; set; }           // FK to Card used for payment
+        public int? CardID { get; set; }           // FK to Card used for payment
 
         [ForeignKey("Coupon")]
         public int? CouponID { get; set; }        // Optional FK to Coupon
@@ -32,7 +32,7 @@ namespace Team24_BevosBooks.Models
         // Navigation properties
         public Order Order { get; set; }
         public Book Book { get; set; }
-        public Card Card { get; set; }
+        public Card? Card { get; set; }
         public Coupon Coupon { get; set; }
     }
 }

@@ -1,10 +1,8 @@
-using System;
-using System.Collections.Generic;
+﻿using System;
 using System.Linq;
+using System.Collections.Generic;
 using Team24_BevosBooks.DAL;
 using Team24_BevosBooks.Models;
-using Microsoft.Data.SqlClient;
-using Microsoft.EntityFrameworkCore;
 
 namespace Team24_BevosBooks.Seeding
 {
@@ -12,139 +10,210 @@ namespace Team24_BevosBooks.Seeding
     {
         public static void SeedAllOrders(AppDbContext db)
         {
-            Int32 ordersAdded = 0;
-            Int32 detailsAdded = 0;
-            string current = "START";
-
+            // Prevent double-seeding
             if (db.Orders.Any()) return;
 
-            // Helper: get UserID from First + Last name
-            string User(string fullName)
+            // -------- Helper mappers --------
+            string UID(string email)
             {
-                var parts = fullName.Split(' ');
-                string first = parts[0].Trim();
-                string last = parts[1].Trim();
-
-                var u = db.Users.FirstOrDefault(x =>
-                    x.FirstName == first && x.LastName == last);
-
-                if (u == null)
-                    throw new Exception($"No AppUser found for name: {fullName}");
-
-                return u.Id;
+                var user = db.Users.FirstOrDefault(u => u.Email.ToLower() == email.ToLower());
+                if (user == null) throw new Exception($"❌ No AppUser found for: {email}");
+                return user.Id;
             }
 
-            // Helper: book lookup
-            int Book(string title)
+            int BID(string title)
             {
-                var b = db.Books.FirstOrDefault(x => x.Title == title);
-                if (b == null)
-                    throw new Exception($"No Book found for title: {title}");
-                return b.BookID;
+                var book = db.Books.FirstOrDefault(b => b.Title == title);
+                if (book == null) throw new Exception($"❌ No Book found for: {title}");
+                return book.BookID;
             }
 
-            // Helper: CardID lookup
-            int? Card(int? cardId)
+            // -------- Helper to add Order + its details --------
+            void AddOrder(string email, DateTime? date, decimal shipping, string status,
+                          List<(string title, int qty, decimal price, decimal cost, int? card)> lines)
             {
-                if (cardId == null) return null;
-                return db.Cards.FirstOrDefault(c => c.CardID == cardId)?.CardID;
-            }
-
-            // ================================
-            // Build your Order + OrderDetail rows
-            // Copied EXACTLY from your Excel Screenshot
-            // ================================
-
-            var rows = new List<dynamic>
-            {
-                new { OrderID=10001, Customer="Christopher Baker", CardID=(int?)null, CouponID=(int?)null, OrderDate=new DateTime(2025,10,1), ShippingFee=23.95m, OrderStatus="InCart", Book="The Art Of Racing In The Rain", Price=23.95m, Cost=10.30m, Qty=3 },
-                new { OrderID=10001, Customer="Christopher Baker", CardID=(int?)null, CouponID=(int?)null, OrderDate=new DateTime(2025,10,1), ShippingFee=25.99m, OrderStatus="InCart", Book="The Host", Price=25.99m, Cost=13.25m, Qty=1 },
-
-                new { OrderID=10002, Customer="Todd Jacobs", CardID=(int?)null, CouponID=(int?)null, OrderDate=new DateTime(2025,10,1), ShippingFee=24.99m, OrderStatus="InCart", Book="Roses", Price=24.99m, Cost=20.99m, Qty=2 },
-
-                new { OrderID=10003, Customer="Charles Miller", CardID=(int?)null, CouponID=(int?)null, OrderDate=new DateTime(2025,10,1), ShippingFee=27.99m, OrderStatus="InCart", Book="Alter of Eden", Price=27.99m, Cost=25.75m, Qty=2 },
-
-                new { OrderID=10004, Customer="Wendy Chang", CardID=1004, CouponID=(int?)null, OrderDate=new DateTime(2025,10,31), ShippingFee=3.5m, OrderStatus="Ordered", Book="The Professional", Price=26.95m, Cost=7.01m, Qty=1 },
-
-                new { OrderID=10005, Customer="Christopher Baker", CardID=1002, CouponID=(int?)null, OrderDate=new DateTime(2025,10,1), ShippingFee=9.5m, OrderStatus="Ordered", Book="Say Goodbye", Price=25.00m, Cost=11.25m, Qty=5 },
-                new { OrderID=10005, Customer="Christopher Baker", CardID=1002, CouponID=(int?)null, OrderDate=new DateTime(2025,10,1), ShippingFee=3.5m, OrderStatus="Ordered", Book="Chasing Darkness", Price=25.95m, Cost=9.08m, Qty=1 },
-
-                new { OrderID=10006, Customer="Lim Chou", CardID=1005, CouponID=(int?)null, OrderDate=new DateTime(2025,10,5), ShippingFee=107m, OrderStatus="Ordered", Book="The Other Queen", Price=25.95m, Cost=23.61m, Qty=1 },
-                new { OrderID=10006, Customer="Lim Chou", CardID=1005, CouponID=(int?)null, OrderDate=new DateTime(2025,10,5), ShippingFee=25m, OrderStatus="Ordered", Book="Wrecked", Price=25.00m, Cost=18.00m, Qty=1 },
-                new { OrderID=10006, Customer="Lim Chou", CardID=1005, CouponID=(int?)null, OrderDate=new DateTime(2025,10,5), ShippingFee=36.5m, OrderStatus="Ordered", Book="Reckless", Price=22.00m, Cost=9.46m, Qty=23 },
-
-                new { OrderID=10007, Customer="Wendy Chang", CardID=1004, CouponID=(int?)null, OrderDate=new DateTime(2025,10,30), ShippingFee=3.5m, OrderStatus="Ordered", Book="The Professional", Price=26.95m, Cost=7.01m, Qty=1 },
-
-                new { OrderID=10008, Customer="Jeffrey Hampton", CardID=1006, CouponID=(int?)null, OrderDate=new DateTime(2025,11,1), ShippingFee=5m, OrderStatus="Ordered", Book="The Professional", Price=26.95m, Cost=7.01m, Qty=1 },
-
-                new { OrderID=10009, Customer="Charles Miller", CardID=1007, CouponID=(int?)null, OrderDate=new DateTime(2025,11,3), ShippingFee=3.5m, OrderStatus="Ordered", Book="Say Goodbye", Price=25.00m, Cost=11.25m, Qty=1 },
-
-                new { OrderID=10010, Customer="Ernest Lowe", CardID=1008, CouponID=(int?)null, OrderDate=new DateTime(2025,11,2), ShippingFee=6.5m, OrderStatus="Ordered", Book="Wrecked", Price=25.00m, Cost=18.00m, Qty=1 },
-                new { OrderID=10010, Customer="Ernest Lowe", CardID=1008, CouponID=(int?)null, OrderDate=new DateTime(2025,11,2), ShippingFee=18.5m, OrderStatus="Ordered", Book="Reckless", Price=22.00m, Cost=9.46m, Qty=11 }
-            };
-
-            // Group by OrderID
-            var orderGroups = rows.GroupBy(r => r.OrderID);
-
-            using var transaction = db.Database.BeginTransaction();
-
-            try
-            {
-                // Turn ON identity insert
-                db.Database.ExecuteSqlRaw("SET IDENTITY_INSERT Orders ON");
-
-                foreach (var group in orderGroups)
+                var order = new Order
                 {
-                    int orderId = group.Key;
-                    current = $"ORDER {orderId}";
+                    UserID = UID(email),
+                    OrderDate = date ?? DateTime.Now,
+                    ShippingFee = shipping,
+                    OrderStatus = status
+                };
 
-                    var first = group.First();
+                db.Orders.Add(order);
+                db.SaveChanges(); // order now has OrderID
 
-                    Order o = new Order
+                foreach (var item in lines)
+                {
+                    db.OrderDetails.Add(new OrderDetail
                     {
-                        OrderID = orderId,
-                        UserID = User(first.Customer),
-                        OrderDate = first.OrderDate,
-                        ShippingFee = first.ShippingFee,
-                        OrderStatus = first.OrderStatus
-                    };
-
-                    db.Orders.Add(o);
-                    db.SaveChanges();
-                    ordersAdded++;
-
-                    // Add order details
-                    foreach (var row in group)
-                    {
-                        OrderDetail d = new OrderDetail
-                        {
-                            OrderID = orderId,
-                            BookID = Book(row.Book),
-                            CardID = row.CardID,
-                            CouponID = row.CouponID,
-                            Quantity = row.Qty,
-                            Price = row.Price,
-                            Cost = row.Cost
-                        };
-
-                        db.OrderDetails.Add(d);
-                        db.SaveChanges();
-                        detailsAdded++;
-                    }
+                        OrderID = order.OrderID,
+                        BookID = BID(item.title),
+                        Quantity = item.qty,
+                        Price = item.price,
+                        Cost = item.cost,
+                        CardID = item.card  // may be null for carts
+                    });
                 }
 
-                // Turn OFF identity insert
-                db.Database.ExecuteSqlRaw("SET IDENTITY_INSERT Orders OFF");
+                db.SaveChanges(); // commit all details
+            }
 
-                transaction.Commit();
-            }
-            catch (Exception ex)
-            {
-                transaction.Rollback();
-                throw new Exception(
-                    $"FAILED inserting Orders at {current} | Orders Added: {ordersAdded} | Details Added: {detailsAdded} | {ex.Message}"
-                );
-            }
-        }
+            // ======================================================
+            //                     ORDERS
+            // ======================================================
+
+            // ----- CARTS -----
+            AddOrder(
+                email: "cbaker@example.com",
+                date: null,
+                shipping: 0m,
+                status: "InCart",
+                new List<(string, int, decimal, decimal, int?)>
+                {
+                    ("The Art Of Racing In The Rain", 3, 23.95m, 10.30m, null),
+                    ("The Host", 1, 25.99m, 13.25m, null)
+                }
+            );
+
+            AddOrder(
+                email: "toddj@yourmom.com",
+                date: null,
+                shipping: 0m,
+                status: "InCart",
+                new List<(string, int, decimal, decimal, int?)>
+                {
+                    ("Roses", 2, 24.99m, 20.99m, null)
+                }
+            );
+
+            AddOrder(
+                email: "cmiller@bob.com",
+                date: null,
+                shipping: 0m,
+                status: "InCart",
+                new List<(string, int, decimal, decimal, int?)>
+                {
+                    ("Altar of Eden", 2, 27.99m, 25.75m, null)
+                }
+            );
+
+            AddOrder(
+                email: "knelson@aoll.com",
+                date: null,
+                shipping: 0m,
+                status: "InCart",
+                new List<(string, int, decimal, decimal, int?)>
+                {
+                    ("The Cast", 1, 21.95m, 12.95m, null)
+                }
+            );
+
+            AddOrder(
+                email: "cluce@gogle.com",
+                date: null,
+                shipping: 0m,
+                status: "InCart",
+                new List<(string, int, decimal, decimal, int?)>
+                {
+                    ("Brooklyn", 4, 18.95m, 3.60m, null)
+                }
+            );
+
+            AddOrder(
+                email: "erynrice@aoll.com",
+                date: null,
+                shipping: 0m,
+                status: "InCart",
+                new List<(string, int, decimal, decimal, int?)>
+                {
+                    ("Dexter By Design", 1, 25.00m, 2.75m, null),
+                    ("The Midnight House", 3, 25.95m, 3.11m, null)
+                }
+            );
+
+            // ----- ACTUAL ORDERS -----
+            AddOrder(
+                email: "wchang@example.com",
+                date: DateTime.Parse("2025-10-31"),
+                shipping: 3.50m,
+                status: "Ordered",
+                new List<(string, int, decimal, decimal, int?)>
+                {
+                    ("The Professional", 1, 26.95m, 7.01m, 1004)
+                }
+            );
+
+            AddOrder(
+                email: "cbaker@example.com",
+                date: DateTime.Parse("2025-10-01"),
+                shipping: 9.50m,
+                status: "Ordered",
+                new List<(string, int, decimal, decimal, int?)>
+                {
+                    ("Say Goodbye", 5, 25.00m, 11.25m, 1002),
+                    ("Chasing Darkness", 1, 25.95m, 9.08m, 1002)
+                }
+            );
+
+            AddOrder(
+                email: "limchou@gogle.com",
+                date: DateTime.Parse("2025-10-05"),
+                shipping: 107.00m,
+                status: "Ordered",
+                new List<(string, int, decimal, decimal, int?)>
+                {
+                    ("The Other Queen", 70, 25.95m, 23.61m, 1005),
+                    ("Wrecked", 10, 25.00m, 18.00m, 1005),
+                    ("Reckless", 23, 22.00m, 9.46m, 1005)
+                }
+            );
+
+            AddOrder(
+                email: "wchang@example.com",
+                date: DateTime.Parse("2025-10-30"),
+                shipping: 3.50m,
+                status: "Ordered",
+                new List<(string, int, decimal, decimal, int?)>
+                {
+                    ("The Professional", 1, 26.95m, 7.01m, 1004)
+                }
+            );
+
+            AddOrder(
+                email: "jeffh@sonic.com",
+                date: DateTime.Parse("2025-11-01"),
+                shipping: 5.00m,
+                status: "Ordered",
+                new List<(string, int, decimal, decimal, int?)>
+                {
+                    ("The Professional", 2, 26.95m, 7.01m, 1006)
+                }
+            );
+
+            AddOrder(
+                email: "cmiller@bob.com",
+                date: DateTime.Parse("2025-11-03"),
+                shipping: 3.50m,
+                status: "Ordered",
+                new List<(string, int, decimal, decimal, int?)>
+                {
+                    ("Say Goodbye", 1, 25.00m, 11.25m, 1007)
+                }
+            );
+
+            AddOrder(
+                email: "elowe@netscare.net",
+                date: DateTime.Parse("2025-11-02"),
+                shipping: 6.50m,
+                status: "Ordered",
+                new List<(string, int, decimal, decimal, int?)>
+                {
+                    ("Wrecked", 3, 25.00m, 18.00m, 1008),
+                    ("Reckless", 11, 22.00m, 9.46m, 1008)
+                }
+            );
+
+        } // end SeedAllOrders
     }
 }
