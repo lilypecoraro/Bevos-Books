@@ -1,8 +1,10 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using Team24_BevosBooks.Models;
 using Team24_BevosBooks.DAL;
+using Team24_BevosBooks.Models;
+using Microsoft.Data.SqlClient;
+using Microsoft.EntityFrameworkCore;
 
 namespace Team24_BevosBooks.Seeding
 {
@@ -10,322 +12,139 @@ namespace Team24_BevosBooks.Seeding
     {
         public static void SeedAllOrders(AppDbContext db)
         {
-            List<Order> Orders = new List<Order>();
-            List<OrderDetail> Details = new List<OrderDetail>();
+            Int32 ordersAdded = 0;
+            Int32 detailsAdded = 0;
+            string current = "START";
 
-            Orders.Add(new Order {
-                OrderID = 10001,
-                UserID = db.Users
-                    .FirstOrDefault(u => u.FirstName == "Christopher" && u.LastName == "Baker").Id,
-                OrderDate = new DateTime(2025,1,1),
-                ShippingFee = 0m,
-                OrderStatus = "InCart"
-            });
+            if (db.Orders.Any()) return;
 
-            Details.Add(new OrderDetail {
-                OrderID = 10001,
-                BookID = db.Books.FirstOrDefault(b => b.Title == "The Art Of Racing In The Rain").BookID,
-                CardID = 0,
-                CouponID = null,
-                Quantity = 3,
-                Price = 23.95m,
-                Cost = 10.3m
-            });
+            // Helper: get UserID from First + Last name
+            string User(string fullName)
+            {
+                var parts = fullName.Split(' ');
+                string first = parts[0].Trim();
+                string last = parts[1].Trim();
 
-            Details.Add(new OrderDetail {
-                OrderID = 10001,
-                BookID = db.Books.FirstOrDefault(b => b.Title == "The Host").BookID,
-                CardID = 0,
-                CouponID = null,
-                Quantity = 1,
-                Price = 25.99m,
-                Cost = 13.25m
-            });
+                var u = db.Users.FirstOrDefault(x =>
+                    x.FirstName == first && x.LastName == last);
 
-            Orders.Add(new Order {
-                OrderID = 10002,
-                UserID = db.Users
-                    .FirstOrDefault(u => u.FirstName == "Todd" && u.LastName == "Jacobs").Id,
-                OrderDate = new DateTime(2025,1,1),
-                ShippingFee = 0m,
-                OrderStatus = "InCart"
-            });
+                if (u == null)
+                    throw new Exception($"No AppUser found for name: {fullName}");
 
-            Details.Add(new OrderDetail {
-                OrderID = 10002,
-                BookID = db.Books.FirstOrDefault(b => b.Title == "Roses").BookID,
-                CardID = 0,
-                CouponID = null,
-                Quantity = 2,
-                Price = 24.99m,
-                Cost = 20.99m
-            });
+                return u.Id;
+            }
 
-            Orders.Add(new Order {
-                OrderID = 10003,
-                UserID = db.Users
-                    .FirstOrDefault(u => u.FirstName == "Charles" && u.LastName == "Miller").Id,
-                OrderDate = new DateTime(2025,1,1),
-                ShippingFee = 0m,
-                OrderStatus = "InCart"
-            });
+            // Helper: book lookup
+            int Book(string title)
+            {
+                var b = db.Books.FirstOrDefault(x => x.Title == title);
+                if (b == null)
+                    throw new Exception($"No Book found for title: {title}");
+                return b.BookID;
+            }
 
-            Details.Add(new OrderDetail {
-                OrderID = 10003,
-                BookID = db.Books.FirstOrDefault(b => b.Title == "Alter of Eden").BookID,
-                CardID = 0,
-                CouponID = null,
-                Quantity = 2,
-                Price = 27.99m,
-                Cost = 25.75m
-            });
+            // Helper: CardID lookup
+            int? Card(int? cardId)
+            {
+                if (cardId == null) return null;
+                return db.Cards.FirstOrDefault(c => c.CardID == cardId)?.CardID;
+            }
 
-            Orders.Add(new Order {
-                OrderID = 10004,
-                UserID = db.Users
-                    .FirstOrDefault(u => u.FirstName == "Wendy" && u.LastName == "Chang").Id,
-                OrderDate = new DateTime(2025, 10, 31),
-                ShippingFee = 3.5m,
-                OrderStatus = "Ordered"
-            });
+            // ================================
+            // Build your Order + OrderDetail rows
+            // Copied EXACTLY from your Excel Screenshot
+            // ================================
 
-            Details.Add(new OrderDetail {
-                OrderID = 10004,
-                BookID = db.Books.FirstOrDefault(b => b.Title == "The Professional").BookID,
-                CardID = 1004,
-                CouponID = null,
-                Quantity = 1,
-                Price = 26.95m,
-                Cost = 7.01m
-            });
+            var rows = new List<dynamic>
+            {
+                new { OrderID=10001, Customer="Christopher Baker", CardID=(int?)null, CouponID=(int?)null, OrderDate=new DateTime(2025,10,1), ShippingFee=23.95m, OrderStatus="InCart", Book="The Art Of Racing In The Rain", Price=23.95m, Cost=10.30m, Qty=3 },
+                new { OrderID=10001, Customer="Christopher Baker", CardID=(int?)null, CouponID=(int?)null, OrderDate=new DateTime(2025,10,1), ShippingFee=25.99m, OrderStatus="InCart", Book="The Host", Price=25.99m, Cost=13.25m, Qty=1 },
 
-            Orders.Add(new Order {
-                OrderID = 10005,
-                UserID = db.Users
-                    .FirstOrDefault(u => u.FirstName == "Christopher" && u.LastName == "Baker").Id,
-                OrderDate = new DateTime(2025, 10, 1),
-                ShippingFee = 9.5m,
-                OrderStatus = "Ordered"
-            });
+                new { OrderID=10002, Customer="Todd Jacobs", CardID=(int?)null, CouponID=(int?)null, OrderDate=new DateTime(2025,10,1), ShippingFee=24.99m, OrderStatus="InCart", Book="Roses", Price=24.99m, Cost=20.99m, Qty=2 },
 
-            Details.Add(new OrderDetail {
-                OrderID = 10005,
-                BookID = db.Books.FirstOrDefault(b => b.Title == "Say Goodbye").BookID,
-                CardID = 1002,
-                CouponID = null,
-                Quantity = 5,
-                Price = 25m,
-                Cost = 11.25m
-            });
+                new { OrderID=10003, Customer="Charles Miller", CardID=(int?)null, CouponID=(int?)null, OrderDate=new DateTime(2025,10,1), ShippingFee=27.99m, OrderStatus="InCart", Book="Alter of Eden", Price=27.99m, Cost=25.75m, Qty=2 },
 
-            Details.Add(new OrderDetail {
-                OrderID = 10005,
-                BookID = db.Books.FirstOrDefault(b => b.Title == "Chasing Darkness").BookID,
-                CardID = 1002,
-                CouponID = null,
-                Quantity = 1,
-                Price = 25.95m,
-                Cost = 9.08m
-            });
+                new { OrderID=10004, Customer="Wendy Chang", CardID=1004, CouponID=(int?)null, OrderDate=new DateTime(2025,10,31), ShippingFee=3.5m, OrderStatus="Ordered", Book="The Professional", Price=26.95m, Cost=7.01m, Qty=1 },
 
-            Orders.Add(new Order {
-                OrderID = 10006,
-                UserID = db.Users
-                    .FirstOrDefault(u => u.FirstName == "Lim" && u.LastName == "Chou").Id,
-                OrderDate = new DateTime(2025, 10, 5),
-                ShippingFee = 107m,
-                OrderStatus = "Ordered"
-            });
+                new { OrderID=10005, Customer="Christopher Baker", CardID=1002, CouponID=(int?)null, OrderDate=new DateTime(2025,10,1), ShippingFee=9.5m, OrderStatus="Ordered", Book="Say Goodbye", Price=25.00m, Cost=11.25m, Qty=5 },
+                new { OrderID=10005, Customer="Christopher Baker", CardID=1002, CouponID=(int?)null, OrderDate=new DateTime(2025,10,1), ShippingFee=3.5m, OrderStatus="Ordered", Book="Chasing Darkness", Price=25.95m, Cost=9.08m, Qty=1 },
 
-            Details.Add(new OrderDetail {
-                OrderID = 10006,
-                BookID = db.Books.FirstOrDefault(b => b.Title == "The Other Queen").BookID,
-                CardID = 1005,
-                CouponID = null,
-                Quantity = 70,
-                Price = 25.95m,
-                Cost = 23.61m
-            });
+                new { OrderID=10006, Customer="Lim Chou", CardID=1005, CouponID=(int?)null, OrderDate=new DateTime(2025,10,5), ShippingFee=107m, OrderStatus="Ordered", Book="The Other Queen", Price=25.95m, Cost=23.61m, Qty=1 },
+                new { OrderID=10006, Customer="Lim Chou", CardID=1005, CouponID=(int?)null, OrderDate=new DateTime(2025,10,5), ShippingFee=25m, OrderStatus="Ordered", Book="Wrecked", Price=25.00m, Cost=18.00m, Qty=1 },
+                new { OrderID=10006, Customer="Lim Chou", CardID=1005, CouponID=(int?)null, OrderDate=new DateTime(2025,10,5), ShippingFee=36.5m, OrderStatus="Ordered", Book="Reckless", Price=22.00m, Cost=9.46m, Qty=23 },
 
-            Details.Add(new OrderDetail {
-                OrderID = 10006,
-                BookID = db.Books.FirstOrDefault(b => b.Title == "Wrecked").BookID,
-                CardID = 1005,
-                CouponID = null,
-                Quantity = 10,
-                Price = 25m,
-                Cost = 18m
-            });
+                new { OrderID=10007, Customer="Wendy Chang", CardID=1004, CouponID=(int?)null, OrderDate=new DateTime(2025,10,30), ShippingFee=3.5m, OrderStatus="Ordered", Book="The Professional", Price=26.95m, Cost=7.01m, Qty=1 },
 
-            Details.Add(new OrderDetail {
-                OrderID = 10006,
-                BookID = db.Books.FirstOrDefault(b => b.Title == "Reckless").BookID,
-                CardID = 1005,
-                CouponID = null,
-                Quantity = 23,
-                Price = 22m,
-                Cost = 9.46m
-            });
+                new { OrderID=10008, Customer="Jeffrey Hampton", CardID=1006, CouponID=(int?)null, OrderDate=new DateTime(2025,11,1), ShippingFee=5m, OrderStatus="Ordered", Book="The Professional", Price=26.95m, Cost=7.01m, Qty=1 },
 
-            Orders.Add(new Order {
-                OrderID = 10007,
-                UserID = db.Users
-                    .FirstOrDefault(u => u.FirstName == "Wendy" && u.LastName == "Chang").Id,
-                OrderDate = new DateTime(2025, 10, 30),
-                ShippingFee = 3.5m,
-                OrderStatus = "Ordered"
-            });
+                new { OrderID=10009, Customer="Charles Miller", CardID=1007, CouponID=(int?)null, OrderDate=new DateTime(2025,11,3), ShippingFee=3.5m, OrderStatus="Ordered", Book="Say Goodbye", Price=25.00m, Cost=11.25m, Qty=1 },
 
-            Details.Add(new OrderDetail {
-                OrderID = 10007,
-                BookID = db.Books.FirstOrDefault(b => b.Title == "The Professional").BookID,
-                CardID = 1004,
-                CouponID = null,
-                Quantity = 1,
-                Price = 26.95m,
-                Cost = 7.01m
-            });
+                new { OrderID=10010, Customer="Ernest Lowe", CardID=1008, CouponID=(int?)null, OrderDate=new DateTime(2025,11,2), ShippingFee=6.5m, OrderStatus="Ordered", Book="Wrecked", Price=25.00m, Cost=18.00m, Qty=1 },
+                new { OrderID=10010, Customer="Ernest Lowe", CardID=1008, CouponID=(int?)null, OrderDate=new DateTime(2025,11,2), ShippingFee=18.5m, OrderStatus="Ordered", Book="Reckless", Price=22.00m, Cost=9.46m, Qty=11 }
+            };
 
-            Orders.Add(new Order {
-                OrderID = 10008,
-                UserID = db.Users
-                    .FirstOrDefault(u => u.FirstName == "Jeffrey" && u.LastName == "Hampton").Id,
-                OrderDate = new DateTime(2025, 11, 1),
-                ShippingFee = 5m,
-                OrderStatus = "Ordered"
-            });
+            // Group by OrderID
+            var orderGroups = rows.GroupBy(r => r.OrderID);
 
-            Details.Add(new OrderDetail {
-                OrderID = 10008,
-                BookID = db.Books.FirstOrDefault(b => b.Title == "The Professional").BookID,
-                CardID = 1006,
-                CouponID = null,
-                Quantity = 2,
-                Price = 26.95m,
-                Cost = 7.01m
-            });
+            using var transaction = db.Database.BeginTransaction();
 
-            Orders.Add(new Order {
-                OrderID = 10009,
-                UserID = db.Users
-                    .FirstOrDefault(u => u.FirstName == "Charles" && u.LastName == "Miller").Id,
-                OrderDate = new DateTime(2025, 11, 3),
-                ShippingFee = 3.5m,
-                OrderStatus = "Ordered"
-            });
+            try
+            {
+                // Turn ON identity insert
+                db.Database.ExecuteSqlRaw("SET IDENTITY_INSERT Orders ON");
 
-            Details.Add(new OrderDetail {
-                OrderID = 10009,
-                BookID = db.Books.FirstOrDefault(b => b.Title == "Say Goodbye").BookID,
-                CardID = 1007,
-                CouponID = null,
-                Quantity = 1,
-                Price = 25m,
-                Cost = 11.25m
-            });
+                foreach (var group in orderGroups)
+                {
+                    int orderId = group.Key;
+                    current = $"ORDER {orderId}";
 
-            Orders.Add(new Order {
-                OrderID = 10010,
-                UserID = db.Users
-                    .FirstOrDefault(u => u.FirstName == "Ernest" && u.LastName == "Lowe").Id,
-                OrderDate = new DateTime(2025, 11, 2),
-                ShippingFee = 6.5m,
-                OrderStatus = "Ordered"
-            });
+                    var first = group.First();
 
-            Details.Add(new OrderDetail {
-                OrderID = 10010,
-                BookID = db.Books.FirstOrDefault(b => b.Title == "Wrecked").BookID,
-                CardID = 1008,
-                CouponID = null,
-                Quantity = 3,
-                Price = 25m,
-                Cost = 18m
-            });
+                    Order o = new Order
+                    {
+                        OrderID = orderId,
+                        UserID = User(first.Customer),
+                        OrderDate = first.OrderDate,
+                        ShippingFee = first.ShippingFee,
+                        OrderStatus = first.OrderStatus
+                    };
 
-            Details.Add(new OrderDetail {
-                OrderID = 10010,
-                BookID = db.Books.FirstOrDefault(b => b.Title == "Reckless").BookID,
-                CardID = 1008,
-                CouponID = null,
-                Quantity = 11,
-                Price = 22m,
-                Cost = 9.46m
-            });
+                    db.Orders.Add(o);
+                    db.SaveChanges();
+                    ordersAdded++;
 
-            Orders.Add(new Order {
-                OrderID = 10011,
-                UserID = db.Users
-                    .FirstOrDefault(u => u.FirstName == "Kelly" && u.LastName == "Nelson").Id,
-                OrderDate = new DateTime(2025,1,1),
-                ShippingFee = 0m,
-                OrderStatus = "InCart"
-            });
+                    // Add order details
+                    foreach (var row in group)
+                    {
+                        OrderDetail d = new OrderDetail
+                        {
+                            OrderID = orderId,
+                            BookID = Book(row.Book),
+                            CardID = row.CardID,
+                            CouponID = row.CouponID,
+                            Quantity = row.Qty,
+                            Price = row.Price,
+                            Cost = row.Cost
+                        };
 
-            Details.Add(new OrderDetail {
-                OrderID = 10011,
-                BookID = db.Books.FirstOrDefault(b => b.Title == "The Cast").BookID,
-                CardID = 0,
-                CouponID = null,
-                Quantity = 1,
-                Price = 21.95m,
-                Cost = 12.95m
-            });
+                        db.OrderDetails.Add(d);
+                        db.SaveChanges();
+                        detailsAdded++;
+                    }
+                }
 
-            Orders.Add(new Order {
-                OrderID = 10012,
-                UserID = db.Users
-                    .FirstOrDefault(u => u.FirstName == "Chuck" && u.LastName == "Luce").Id,
-                OrderDate = new DateTime(2025,1,1),
-                ShippingFee = 0m,
-                OrderStatus = "InCart"
-            });
+                // Turn OFF identity insert
+                db.Database.ExecuteSqlRaw("SET IDENTITY_INSERT Orders OFF");
 
-            Details.Add(new OrderDetail {
-                OrderID = 10012,
-                BookID = db.Books.FirstOrDefault(b => b.Title == "Brooklyn").BookID,
-                CardID = 0,
-                CouponID = null,
-                Quantity = 4,
-                Price = 18.95m,
-                Cost = 3.6m
-            });
-
-            Orders.Add(new Order {
-                OrderID = 10013,
-                UserID = db.Users
-                    .FirstOrDefault(u => u.FirstName == "Eryn" && u.LastName == "Rice").Id,
-                OrderDate = new DateTime(2025,1,1),
-                ShippingFee = 0m,
-                OrderStatus = "InCart"
-            });
-
-            Details.Add(new OrderDetail {
-                OrderID = 10013,
-                BookID = db.Books.FirstOrDefault(b => b.Title == "Dexter By Design").BookID,
-                CardID = 0,
-                CouponID = null,
-                Quantity = 1,
-                Price = 25m,
-                Cost = 2.75m
-            });
-
-            Details.Add(new OrderDetail {
-                OrderID = 10013,
-                BookID = db.Books.FirstOrDefault(b => b.Title == "The Midnight House").BookID,
-                CardID = 0,
-                CouponID = null,
-                Quantity = 3,
-                Price = 25.95m,
-                Cost = 3.11m
-            });
-
-            foreach (var o in Orders)
-                db.Orders.Add(o);
-            foreach (var d in Details)
-                db.OrderDetails.Add(d);
-            db.SaveChanges();
+                transaction.Commit();
+            }
+            catch (Exception ex)
+            {
+                transaction.Rollback();
+                throw new Exception(
+                    $"FAILED inserting Orders at {current} | Orders Added: {ordersAdded} | Details Added: {detailsAdded} | {ex.Message}"
+                );
+            }
         }
     }
 }
-
