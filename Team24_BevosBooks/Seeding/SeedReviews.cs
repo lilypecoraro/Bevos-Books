@@ -1,164 +1,187 @@
-using Team24_BevosBooks.DAL;
-using Team24_BevosBooks.Models;
-using System;
+Ôªøusing System;
 using System.Collections.Generic;
 using System.Linq;
+using Team24_BevosBooks.DAL;
+using Team24_BevosBooks.Models;
 
 namespace Team24_BevosBooks.Seeding
 {
-	public static class SeedReviews
-	{
-		public static void SeedAllReviews(AppDbContext db)
-		{
-			Int32 intReviewsAdded = 0;
-			String strReviewFlag = "Begin";
+    public static class SeedReviews
+    {
+        public static void SeedAllReviews(AppDbContext db)
+        {
+            int reviewsAdded = 0;
+            string current = "NONE";
 
-			List<Review> Reviews = new List<Review>();
+            // Prevent duplicate seeding
+            if (db.Reviews.Any()) return;
 
-			Review r1 = new Review()
-			{
-				Rating = 5,
-				ReviewText = "ìIncredible pacing and tension throughoutócouldnít stop reading!î",
-				DisputeStatus = "Approve"
-			};
-			r1.Reviewer = db.Customers.FirstOrDefault(c => c.FirstName == "Christopher" && c.LastName == "Baker");
-			r1.Book = db.Books.FirstOrDefault(b => b.Title == "Say Goodbye");
-			r1.Approver = db.Employees.FirstOrDefault(e => e.FirstName == "Susan" && e.LastName == "Barnes");
-			Reviews.Add(r1);
+            // ===============================
+            // Helper: Get AppUserID by name
+            // ===============================
+            string GetUserId(string fullName)
+            {
+                var parts = fullName.Split(' ');
+                string first = parts[0].Trim();
+                string last = parts[1].Trim();
 
-			Review r2 = new Review()
-			{
-				Rating = 4,
-				ReviewText = "ìTight mystery with solid twists; a bit slow in the middle.î",
-				DisputeStatus = "Reject"
-			};
-			r2.Reviewer = db.Customers.FirstOrDefault(c => c.FirstName == "Christopher" && c.LastName == "Baker");
-			r2.Book = db.Books.FirstOrDefault(b => b.Title == "Chasing Darkness");
-			r2.Approver = db.Employees.FirstOrDefault(e => e.FirstName == "Jack" && e.LastName == "Mason");
-			Reviews.Add(r2);
+                var user = db.Users.FirstOrDefault(u =>
+                    u.FirstName.ToLower() == first.ToLower() &&
+                    u.LastName.ToLower() == last.ToLower());
 
-			Review r3 = new Review()
-			{
-				Rating = 4,
-				ReviewText = "ìClassic Spenser. Sharp dialogue and old-school charm.î",
-				DisputeStatus = "Approve"
-			};
-			r3.Reviewer = db.Customers.FirstOrDefault(c => c.FirstName == "Wendy" && c.LastName == "Chang");
-			r3.Book = db.Books.FirstOrDefault(b => b.Title == "The Professional");
-			r3.Approver = db.Employees.FirstOrDefault(e => e.FirstName == "Cindy" && e.LastName == "Silva");
-			Reviews.Add(r3);
+                if (user == null)
+                    throw new Exception($"‚ùå No AppUser found for name: {fullName}");
 
-			Review r4 = new Review()
-			{
-				Rating = 3,
-				ReviewText = "ìRich historical detail, but pacing drags at times.î",
-				DisputeStatus = "Approve"
-			};
-			r4.Reviewer = db.Customers.FirstOrDefault(c => c.FirstName == "Lim" && c.LastName == "Chou");
-			r4.Book = db.Books.FirstOrDefault(b => b.Title == "The Other Queen");
-			r4.Approver = db.Employees.FirstOrDefault(e => e.FirstName == "Eric" && e.LastName == "Stuart");
-			Reviews.Add(r4);
+                return user.Id;
+            }
 
-			Review r5 = new Review()
-			{
-				Rating = 5,
-				ReviewText = "ìFast-moving and witty. Loved the Cape Cod setting.î",
-				DisputeStatus = "Approve"
-			};
-			r5.Reviewer = db.Customers.FirstOrDefault(c => c.FirstName == "Lim" && c.LastName == "Chou");
-			r5.Book = db.Books.FirstOrDefault(b => b.Title == "Wrecked");
-			r5.Approver = db.Employees.FirstOrDefault(e => e.FirstName == "Allen" && e.LastName == "Rogers");
-			Reviews.Add(r5);
+            // ===============================
+            // Helper: Get AppUserID by email
+            // ===============================
+            string GetUserIdByEmail(string email)
+            {
+                var user = db.Users.FirstOrDefault(u =>
+                    u.Email.ToLower() == email.ToLower());
 
-			Review r6 = new Review()
-			{
-				Rating = 4,
-				ReviewText = "ìEmotional and thrilling. Hauckís motives feel real.î",
-				DisputeStatus = "Approve"
-			};
-			r6.Reviewer = db.Customers.FirstOrDefault(c => c.FirstName == "Lim" && c.LastName == "Chou");
-			r6.Book = db.Books.FirstOrDefault(b => b.Title == "Reckless");
-			r6.Approver = db.Employees.FirstOrDefault(e => e.FirstName == "Hector" && e.LastName == "Garcia");
-			Reviews.Add(r6);
+                if (user == null)
+                    throw new Exception($"‚ùå No AppUser found for email: {email}");
 
-			Review r7 = new Review()
-			{
-				Rating = 5,
-				ReviewText = "ìLean, witty Spenser caseócouldnít put it down.î",
-				DisputeStatus = "Approve"
-			};
-			r7.Reviewer = db.Customers.FirstOrDefault(c => c.FirstName == "Jeffery" && c.LastName == "Hampton");
-			r7.Book = db.Books.FirstOrDefault(b => b.Title == "The Professional");
-			r7.Approver = db.Employees.FirstOrDefault(e => e.FirstName == "Cindy" && e.LastName == "Silva");
-			Reviews.Add(r7);
+                return user.Id;
+            }
 
-			Review r8 = new Review()
-			{
-				Rating = 4,
-				ReviewText = "ìCreepy, clever, and tightly plotted.î",
-				DisputeStatus = "Reject"
-			};
-			r8.Reviewer = db.Customers.FirstOrDefault(c => c.FirstName == "Charles" && c.LastName == "Miller");
-			r8.Book = db.Books.FirstOrDefault(b => b.Title == "Say Goodbye");
-			r8.Approver = db.Employees.FirstOrDefault(e => e.FirstName == "Allen" && e.LastName == "Rogers");
-			Reviews.Add(r8);
+            // ===============================
+            // Helper: Get BookID by Title
+            // ===============================
+            int GetBookId(string title)
+            {
+                var book = db.Books.FirstOrDefault(b =>
+                    b.Title.ToLower() == title.ToLower());
 
-			Review r9 = new Review()
-			{
-				Rating = 4,
-				ReviewText = "ìLight, fun mystery with brisk pacing.î",
-				DisputeStatus = "Approve"
-			};
-			r9.Reviewer = db.Customers.FirstOrDefault(c => c.FirstName == "Ernest" && c.LastName == "Lowe");
-			r9.Book = db.Books.FirstOrDefault(b => b.Title == "Wrecked");
-			r9.Approver = db.Employees.FirstOrDefault(e => e.FirstName == "Eric" && e.LastName == "Stuart");
-			Reviews.Add(r9);
+                if (book == null)
+                    throw new Exception($"‚ùå No Book found with title: {title}");
 
-			Review r10 = new Review()
-			{
-				Rating = 3,
-				ReviewText = "ìGritty and tense, but a bit uneven.î",
-				DisputeStatus = "Approve"
-			};
-			r10.Reviewer = db.Customers.FirstOrDefault(c => c.FirstName == "Ernest" && c.LastName == "Lowe");
-			r10.Book = db.Books.FirstOrDefault(b => b.Title == "Reckless");
-			r10.Approver = db.Employees.FirstOrDefault(e => e.FirstName == "Eric" && e.LastName == "Stuart");
-			Reviews.Add(r10);
+                return book.BookID;
+            }
 
-			try
-			{
-				foreach (Review reviewToAdd in Reviews)
-				{
-					strReviewFlag = reviewToAdd.ReviewText;
+            // ===============================
+            // Build the list of reviews
+            // ===============================
+            List<Review> reviews = new List<Review>
+            {
+                new Review {
+                    ReviewerID = GetUserId("Christopher Baker"),
+                    BookID = GetBookId("Say Goodbye"),
+                    ApproverID = GetUserIdByEmail("s.barnes@bevosbooks.com"),
+                    Rating = 5,
+                    ReviewText = "Incredible pacing and tension throughout‚Äîcouldn‚Äôt stop reading.",
+                    DisputeStatus = "Approve"
+                },
 
-					Review dbReview = db.Reviews.FirstOrDefault(r => 
-					    r.Reviewer.CustomerID == reviewToAdd.Reviewer.CustomerID &&
-					    r.Book.BookID == reviewToAdd.Book.BookID);
-					if (dbReview == null)
-					{
-						db.Reviews.Add(reviewToAdd);
-						db.SaveChanges();
-						intReviewsAdded += 1;
-					}
+                new Review {
+                    ReviewerID = GetUserId("Christopher Baker"),
+                    BookID = GetBookId("Chasing Darkness"),
+                    ApproverID = GetUserIdByEmail("j.mason@bevosbooks.com"),
+                    Rating = 4,
+                    ReviewText = "Tight mystery with solid twists; a bit slow in the middle.",
+                    DisputeStatus = "Reject"
+                },
 
-					else
-					{
-						dbReview.Rating = reviewToAdd.Rating;
-						dbReview.ReviewText = reviewToAdd.ReviewText;
-						dbReview.DisputeStatus = reviewToAdd.DisputeStatus;
-						dbReview.Approver = reviewToAdd.Approver;
-						db.Update(dbReview);
-						db.SaveChanges();
-						intReviewsAdded += 1;
-					}
-				}
-			}
+                new Review {
+                    ReviewerID = GetUserId("Wendy Chang"),
+                    BookID = GetBookId("The Professional"),
+                    ApproverID = GetUserIdByEmail("c.silva@bevosbooks.com"),
+                    Rating = 4,
+                    ReviewText = "Classic Spenser. Sharp dialogue and old-school charm.",
+                    DisputeStatus = "Approve"
+                },
 
-			catch (Exception ex)
-			{
-				String msg = " Reviews added: " + intReviewsAdded + "; Error on " + strReviewFlag;
-				throw new InvalidOperationException(ex.Message + msg);
-			}
-		}
-	}
+                new Review {
+                    ReviewerID = GetUserId("Lim Chou"),
+                    BookID = GetBookId("The Other Queen"),
+                    ApproverID = GetUserIdByEmail("e.stuart@bevosbooks.com"),
+                    Rating = 3,
+                    ReviewText = "Rich historical detail, but pacing drags at times.",
+                    DisputeStatus = "Approve"
+                },
+
+                new Review {
+                    ReviewerID = GetUserId("Lim Chou"),
+                    BookID = GetBookId("Wrecked"),
+                    ApproverID = GetUserIdByEmail("a.rogers@bevosbooks.com"),
+                    Rating = 5,
+                    ReviewText = "Fast-moving and witty. Loved the Cape Cod setting.",
+                    DisputeStatus = "Approve"
+                },
+
+                new Review {
+                    ReviewerID = GetUserId("Lim Chou"),
+                    BookID = GetBookId("Reckless"),
+                    ApproverID = GetUserIdByEmail("h.garcia@bevosbooks.com"),
+                    Rating = 4,
+                    ReviewText = "Emotional and thrilling. Hauck‚Äôs motives feel real.",
+                    DisputeStatus = "Approve"
+                },
+
+                new Review {
+                    ReviewerID = GetUserId("Jeffrey Hampton"),
+                    BookID = GetBookId("The Professional"),
+                    ApproverID = GetUserIdByEmail("c.silva@bevosbooks.com"),
+                    Rating = 5,
+                    ReviewText = "Lean, witty Spenser case‚Äîcouldn‚Äôt put it down.",
+                    DisputeStatus = "Approve"
+                },
+
+                new Review {
+                    ReviewerID = GetUserId("Charles Miller"),
+                    BookID = GetBookId("Say Goodbye"),
+                    ApproverID = GetUserIdByEmail("a.rogers@bevosbooks.com"),
+                    Rating = 4,
+                    ReviewText = "Creepy, clever, and tightly plotted.",
+                    DisputeStatus = "Reject"
+                },
+
+                new Review {
+                    ReviewerID = GetUserId("Ernest Lowe"),
+                    BookID = GetBookId("Wrecked"),
+                    ApproverID = GetUserIdByEmail("e.stuart@bevosbooks.com"),
+                    Rating = 4,
+                    ReviewText = "Light, fun mystery with brisk pacing.",
+                    DisputeStatus = "Approve"
+                },
+
+                new Review {
+                    ReviewerID = GetUserId("Ernest Lowe"),
+                    BookID = GetBookId("Reckless"),
+                    ApproverID = GetUserIdByEmail("e.stuart@bevosbooks.com"),
+                    Rating = 3,
+                    ReviewText = "Gritty and tense, but a bit uneven.",
+                    DisputeStatus = "Approve"
+                }
+            };
+
+            // ===============================
+            // Save to DB
+            // ===============================
+            try
+            {
+                foreach (Review r in reviews)
+                {
+                    current = $"{r.ReviewerID} ‚Üí {r.BookID}";
+                    db.Reviews.Add(r);
+                    db.SaveChanges();
+                    reviewsAdded++;
+                }
+            }
+            catch (Exception ex)
+            {
+                string inner1 = ex.InnerException?.Message ?? "NONE";
+                string inner2 = ex.InnerException?.InnerException?.Message ?? "NONE";
+
+                throw new Exception(
+                    $"‚ùå ERROR Seeding Reviews | Current Review: {current} | Added: {reviewsAdded}\n" +
+                    $"EX: {ex.Message}\nINNER1: {inner1}\nINNER2: {inner2}"
+                );
+            }
+        }
+    }
 }

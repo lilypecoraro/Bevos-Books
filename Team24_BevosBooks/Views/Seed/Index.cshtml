@@ -2,19 +2,27 @@
     ViewData["Title"] = "Seeding Tools";
 }
 
-<div class="container py-5">
-    <div class="row justify-content-center">
-        <div class="col-md-8 text-center">
-            <h2 class="mb-4">Seeding Tools</h2>
-            <p class="lead mb-4">Use the buttons below to seed data for your application.</p>
-            <div class="d-grid gap-3 col-6 mx-auto">
-                <a asp-controller="Seed" asp-action="SeedBooks" class="btn btn-primary btn-lg">Seed Books</a>
-                <a asp-controller="Seed" asp-action="SeedCards" class="btn btn-secondary btn-lg">Seed Cards</a>
-                <a asp-controller="Seed" asp-action="SeedCustomers" class="btn btn-success btn-lg">Seed Customers</a>
-                <a asp-controller="Seed" asp-action="SeedEmployees" class="btn btn-info btn-lg">Seed Employees</a>
-                <a asp-controller="Seed" asp-action="SeedOrders" class="btn btn-warning btn-lg">Seed Orders</a>
-                <a asp-controller="Seed" asp-action="SeedReviews" class="btn btn-dark btn-lg">Seed Reviews</a>
-            </div>
-        </div>
-    </div>
+<h2>Database Seeding</h2>
+<p>Select any dataset to seed:</p>
+
+<div style="display:flex; flex-direction:column; gap:10px; max-width:300px;">
+
+    <!-- Identity-Based Seeding -->
+    <a class="btn btn-primary" asp-controller="Seed" asp-action="SeedRoles">Seed Roles</a>
+    <a class="btn btn-primary" asp-controller="Seed" asp-action="SeedUsers">Seed Users (Customers + Employees)</a>
+
+    <!-- AppDbContext Seeding -->
+    <a class="btn btn-primary" asp-controller="Seed" asp-action="SeedGenres">Seed Genres</a>
+    <a class="btn btn-primary" asp-controller="Seed" asp-action="SeedBooks">Seed Books</a>
+    <a class="btn btn-primary" asp-controller="Seed" asp-action="SeedCards">Seed Cards</a>
+    <a class="btn btn-primary" asp-controller="Seed" asp-action="SeedReviews">Seed Reviews</a>
+    <a class="btn btn-primary" asp-controller="Seed" asp-action="SeedOrders">Seed Orders</a>
+
 </div>
+
+<hr />
+
+<p style="margin-top:20px; font-size:0.9rem; color:#777;">
+    <strong>Recommended Seeding Order:</strong><br />
+    Roles ? Users ? Genres ? Books ? Cards ? Reviews ? Orders
+</p>

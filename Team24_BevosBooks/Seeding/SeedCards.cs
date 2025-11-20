@@ -1,129 +1,114 @@
-using Team24_BevosBooks.DAL;
-using Team24_BevosBooks.Models;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using Team24_BevosBooks.DAL;
+using Team24_BevosBooks.Models;
 
 namespace Team24_BevosBooks.Seeding
 {
-	public static class SeedCards
-	{
-		public static void SeedAllCards(AppDbContext db)
-		{
-			Int32 intCardsAdded = 0;
-			String strCardFlag = "Begin";
+    public static class SeedCards
+    {
+        public static void SeedAllCards(AppDbContext db)
+        {
+            Int32 cardsAdded = 0;
+            String currentCard = "Beginning";
 
-			List<Card> Cards = new List<Card>();
+            // Do not double-seed
+            if (db.Cards.Any()) return;
 
-			Card c1 = new Card()
-			{
-				CardID = 1001,
-				CardNumber = "3517193267072490",
-				CardType = "Visa"
-			};
-			c1.Customer = db.Customers.FirstOrDefault(c => c.CustomerID == 9010);
-			Cards.Add(c1);
+            // -----------------------------------------------
+            // Helper: Map email → UserID (string)
+            // -----------------------------------------------
+            string GetUserId(string email)
+            {
+                var user = db.Users.FirstOrDefault(u => u.Email.ToLower() == email.ToLower());
 
-			Card c2 = new Card()
-			{
-				CardID = 1002,
-				CardNumber = "5653264624505624",
-				CardType = "Mastercard"
-			};
-			c2.Customer = db.Customers.FirstOrDefault(c => c.CustomerID == 9010);
-			Cards.Add(c2);
+                if (user == null)
+                    throw new Exception($"❌ ERROR: No AppUser found with email {email}. Did you seed users first?");
 
-			Card c3 = new Card()
-			{
-				CardID = 1003,
-				CardNumber = "2340139018242888",
-				CardType = "Mastercard"
-			};
-			c3.Customer = db.Customers.FirstOrDefault(c => c.CustomerID == 9012);
-			Cards.Add(c3);
+                return user.Id;
+            }
 
-			Card c4 = new Card()
-			{
-				CardID = 1004,
-				CardNumber = "4888561830797648",
-				CardType = "Visa"
-			};
-			c4.Customer = db.Customers.FirstOrDefault(c => c.CustomerID == 9013);
-			Cards.Add(c4);
+            // -----------------------------------------------
+            // Card Seed Data (NO CardID — SQL generates it!)
+            // -----------------------------------------------
+            List<Card> cards = new List<Card>()
+            {
+                new Card {
+                    UserID = GetUserId("cbaker@example.com"),
+                    CardNumber = "3517193267072490",
+                    CardType = Card.CardTypes.Visa
+                },
 
-			Card c5 = new Card()
-			{
-				CardID = 1005,
-				CardNumber = "7874839329412510",
-				CardType = "AmericanExpress"
-			};
-			c5.Customer = db.Customers.FirstOrDefault(c => c.CustomerID == 9014);
-			Cards.Add(c5);
+                new Card {
+                    UserID = GetUserId("cbaker@example.com"),
+                    CardNumber = "5653264624505624",
+                    CardType = Card.CardTypes.MasterCard
+                },
 
-			Card c6 = new Card()
-			{
-				CardID = 1006,
-				CardNumber = "8882933892564410",
-				CardType = "Visa"
-			};
-			c6.Customer = db.Customers.FirstOrDefault(c => c.CustomerID == 9021);
-			Cards.Add(c6);
+                new Card {
+                    UserID = GetUserId("franco@example.com"),
+                    CardNumber = "2340139018242888",
+                    CardType = Card.CardTypes.MasterCard
+                },
 
-			Card c7 = new Card()
-			{
-				CardID = 1007,
-				CardNumber = "9577230402048890",
-				CardType = "Mastercard"
-			};
-			c7.Customer = db.Customers.FirstOrDefault(c => c.CustomerID == 9034);
-			Cards.Add(c7);
+                new Card {
+                    UserID = GetUserId("wchang@example.com"),
+                    CardNumber = "4888561830797648",
+                    CardType = Card.CardTypes.Visa
+                },
 
-			Card c8 = new Card()
-			{
-				CardID = 1008,
-				CardNumber = "3391194669212420",
-				CardType = "AmericanExpress"
-			};
-			c8.Customer = db.Customers.FirstOrDefault(c => c.CustomerID == 9028);
-			Cards.Add(c8);
+                new Card {
+                    UserID = GetUserId("limchou@gogle.com"),
+                    CardNumber = "7874839329412510",
+                    CardType = Card.CardTypes.AmericanExpress
+                },
 
-			Card c9 = new Card()
-			{
-				CardID = 1009,
-				CardNumber = "4186773703003410",
-				CardType = "Visa"
-			};
-			c9.Customer = db.Customers.FirstOrDefault(c => c.CustomerID == 9035);
-			Cards.Add(c9);
+                new Card {
+                    UserID = GetUserId("jeffh@sonic.com"),
+                    CardNumber = "8882933892564410",
+                    CardType = Card.CardTypes.Visa
+                },
 
-			try
-			{
-				foreach (Card c in Cards)
-				{
-					strCardFlag = c.CardNumber;
-					Card dbCard = db.Cards.FirstOrDefault(x => x.CardID == c.CardID);
-					if (dbCard == null)
-					{
-						db.Cards.Add(c);
-						db.SaveChanges();
-						intCardsAdded += 1;
-					}
-				else
-					{
-						dbCard.CardNumber = c.CardNumber;
-						dbCard.CardType = c.CardType;
-						dbCard.Customer = c.Customer;
-						db.Update(dbCard);
-						db.SaveChanges();
-						intCardsAdded += 1;
-					}
-				}
-			}
-			catch (Exception ex)
-			{
-				String msg = " Cards added: " + intCardsAdded + "; Error on " + strCardFlag;
-				throw new InvalidOperationException(ex.Message + msg);
-			}
-		}
-	}
+                new Card {
+                    UserID = GetUserId("cmiller@bob.com"),
+                    CardNumber = "9577230402048890",
+                    CardType = Card.CardTypes.MasterCard
+                },
+
+                new Card {
+                    UserID = GetUserId("elowe@netscare.net"),
+                    CardNumber = "3391194669212420",
+                    CardType = Card.CardTypes.AmericanExpress
+                },
+
+                new Card {
+                    UserID = GetUserId("knelson@aoll.com"),
+                    CardNumber = "4186773703003410",
+                    CardType = Card.CardTypes.Visa
+                }
+            };
+
+            // -----------------------------------------------
+            // Save Cards
+            // -----------------------------------------------
+            try
+            {
+                foreach (Card c in cards)
+                {
+                    currentCard = c.CardNumber;
+
+                    db.Cards.Add(c);
+                    db.SaveChanges();
+                    cardsAdded++;
+                }
+            }
+            catch (Exception ex)
+            {
+                throw new InvalidOperationException(
+                    $"❌ SeedCards FAILED Card#: {currentCard}  Cards Added: {cardsAdded}  EX: {ex.Message}  INNER: {ex.InnerException?.Message}"
+                );
+            }
+        }
+    }
 }

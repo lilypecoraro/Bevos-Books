@@ -1,29 +1,31 @@
 ﻿using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Team24_BevosBooks.Models
 {
     public class Card
     {
-        // Primary key
         [Key]
         [Display(Name = "Card ID")]
         public int CardID { get; set; }
-        
-        // foreign key
-        [Required]
-        [Display(Name = "Customer ID")]
-        public int CustomerID { get; set; }
 
-        // Review-specific scalar properties
+        // FK → AppUser
+        [Required]
+        [ForeignKey("User")]
+        [Display(Name = "User ID")]
+        public string UserID { get; set; }   // AppUser.Id is string
+
+        [Required]
         [Display(Name = "Card Number")]
-        public int CardNumber { get; set; }
-        [Display(Name = "Card Type")] 
+        [MaxLength(30)]
+        public string CardNumber { get; set; }
+
+        [Required]
+        [Display(Name = "Card Type")]
         public CardTypes CardType { get; set; }
 
-        // navigational properties
-        // note, AppUser is the User class in the ERD. AppUser inherits from Identity template
-        // further note, "Customer" is "CustomerID". ID is automatically added to foreign key names by EF Core
-        public AppUser Customer { get; set; }
+        // Navigation
+        public AppUser User { get; set; }
 
         public enum CardTypes
         {
@@ -33,5 +35,4 @@ namespace Team24_BevosBooks.Models
             Discover
         }
     }
-
 }
