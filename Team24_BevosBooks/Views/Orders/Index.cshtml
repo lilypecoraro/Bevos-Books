@@ -1,0 +1,35 @@
+@model IEnumerable<Team24_BevosBooks.Models.Order>
+
+@{
+    ViewData["Title"] = "Orders";
+}
+
+<div class="alert alert-info mt-3 mb-4" role="alert" style="font-size:0.95rem;">
+    For viewing seeding data and milestone #1 only. Will be adjusted later.
+</div>
+
+<table class="table table-bordered table-striped table-hover">
+    <thead class="table-dark">
+        <tr>
+            <th>Order ID</th>
+            <th>Customer ID</th>
+            <th>Order Date</th>
+            <th>Shipping Fee</th>
+            <th>Order Status</th>
+            <th>Order Details Count</th>
+        </tr>
+    </thead>
+    <tbody>
+    @foreach (var order in Model)
+    {
+        <tr>
+            <td>@order.OrderID</td>
+            <td>@order.UserID</td>
+            <td>@order.OrderDate.ToShortDateString()</td>
+            <td>@order.ShippingFee.ToString("C")</td>
+            <td>@order.OrderStatus</td>
+            <td>@(order.OrderDetails != null ? order.OrderDetails.Count : 0)</td>
+        </tr>
+    }
+    </tbody>
+</table>

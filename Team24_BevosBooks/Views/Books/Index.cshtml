@@ -1,0 +1,43 @@
+@model IEnumerable<Team24_BevosBooks.Models.Book>
+
+@{
+    ViewData["Title"] = "All Books";
+}
+
+<h2 class="mb-4">All Books</h2>
+
+<table class="table table-bordered table-striped table-hover">
+    <thead class="table-dark">
+        <tr>
+            <th>Book Number</th>
+            <th>Title</th>
+            <th>Authors</th>
+            <th>Description</th>
+            <th>Price</th>
+            <th>Cost</th>
+            <th>Inventory Quantity</th>
+            <th>Reorder Point</th>
+            <th>Publish Date</th>
+            <th>Status</th>
+            <th>Genre</th>
+        </tr>
+    </thead>
+    <tbody>
+    @foreach (var book in Model)
+    {
+        <tr>
+            <td>@book.BookNumber</td>
+            <td>@book.Title</td>
+            <td>@book.Authors</td>
+            <td>@book.Description</td>
+            <td>@book.Price.ToString("C")</td>
+            <td>@book.Cost.ToString("C")</td>
+            <td>@book.InventoryQuantity</td>
+            <td>@book.ReorderPoint</td>
+            <td>@book.PublishDate.ToShortDateString()</td>
+            <td>@book.BookStatus</td>
+            <td>@book.Genre?.GenreName</td>
+        </tr>
+    }
+    </tbody>
+</table>

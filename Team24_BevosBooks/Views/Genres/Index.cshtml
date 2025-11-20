@@ -1,0 +1,27 @@
+@model IEnumerable<Team24_BevosBooks.Models.Genre>
+
+@{
+    ViewData["Title"] = "Genres";
+}
+
+<div class="alert alert-info mt-3 mb-4" role="alert" style="font-size:0.95rem;">
+    For viewing seeding data and milestone #1 only. Will be adjusted later.
+</div>
+
+<table class="table table-bordered table-striped table-hover">
+    <thead class="table-dark">
+        <tr>
+            <th>Genre ID</th>
+            <th>Genre Name</th>
+        </tr>
+    </thead>
+    <tbody>
+    @foreach (var genre in Model)
+    {
+        <tr>
+            <td>@genre.GenreID</td>
+            <td>@genre.GenreName</td>
+        </tr>
+    }
+    </tbody>
+</table>

@@ -1,0 +1,37 @@
+@model IEnumerable<Team24_BevosBooks.Models.Review>
+
+@{
+    ViewData["Title"] = "Reviews";
+}
+
+<div class="alert alert-info mt-3 mb-4" role="alert" style="font-size:0.95rem;">
+    For viewing seeding data and milestone #1 only. Will be adjusted later.
+</div>
+
+<table class="table table-bordered table-striped table-hover">
+    <thead class="table-dark">
+        <tr>
+            <th>Review ID</th>
+            <th>Reviewer ID</th>
+            <th>Book ID</th>
+            <th>Approver ID</th>
+            <th>Rating</th>
+            <th>Review Text</th>
+            <th>Dispute Status</th>
+        </tr>
+    </thead>
+    <tbody>
+    @foreach (var review in Model)
+    {
+        <tr>
+            <td>@review.ReviewID</td>
+            <td>@review.ReviewerID</td>
+            <td>@review.BookID</td>
+            <td>@review.ApproverID</td>
+            <td>@review.Rating</td>
+            <td>@review.ReviewText</td>
+            <td>@review.DisputeStatus</td>
+        </tr>
+    }
+    </tbody>
+</table>

@@ -1,0 +1,35 @@
+@model IEnumerable<Team24_BevosBooks.Models.Coupon>
+
+@{
+    ViewData["Title"] = "Coupons";
+}
+
+<div class="alert alert-info mt-3 mb-4" role="alert" style="font-size:0.95rem;">
+    For viewing seeding data and milestone #1 only. Will be adjusted later.
+</div>
+
+<table class="table table-bordered table-striped table-hover">
+    <thead class="table-dark">
+        <tr>
+            <th>Coupon ID</th>
+            <th>Coupon Code</th>
+            <th>Coupon Type</th>
+            <th>Discount Percent</th>
+            <th>Free Threshold</th>
+            <th>Status</th>
+        </tr>
+    </thead>
+    <tbody>
+    @foreach (var coupon in Model)
+    {
+        <tr>
+            <td>@coupon.CouponID</td>
+            <td>@coupon.CouponCode</td>
+            <td>@coupon.CouponType</td>
+            <td>@(coupon.DiscountPercent.HasValue ? coupon.DiscountPercent.Value.ToString("F2") + "%" : "-")</td>
+            <td>@(coupon.FreeThreshold.HasValue ? coupon.FreeThreshold.Value.ToString("C") : "-")</td>
+            <td>@coupon.Status</td>
+        </tr>
+    }
+    </tbody>
+</table>
