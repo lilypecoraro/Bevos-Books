@@ -1,0 +1,19 @@
+﻿@model List<string>
+
+@{
+    ViewBag.Title = "Seeding Error";
+}
+
+<div class="alert alert-danger" role="alert">
+    <h4>Error Occurred</h4>
+    <p>There was a problem while seeding the database:</p>
+
+    <ul>
+        @foreach (var err in Model)
+        {
+            <li>@err</li>
+        }
+    </ul>
+</div>
+
+<a asp-action="Index" class="btn btn-secondary">Back to Seeding Menu</a>

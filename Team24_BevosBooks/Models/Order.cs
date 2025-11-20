@@ -8,23 +8,23 @@ namespace Team24_BevosBooks.Models
     public class Order
     {
         [Key]
-        public int OrderID { get; set; }   // PK
+        public int OrderID { get; set; }
 
-        [ForeignKey("Customer")]
-        public int CustomerID { get; set; }  // FK to User (Customer)
+        // FK to AppUser (the customer placing the order)
+        [ForeignKey("User")]
+        public string UserID { get; set; }   // AppUser.Id is a string
 
-        [Required]
-        [DataType(DataType.Date)]
+        public AppUser User { get; set; }
+
         public DateTime OrderDate { get; set; }
 
         [Column(TypeName = "decimal(18,2)")]
         public decimal ShippingFee { get; set; }
 
-        [Required, StringLength(50)]
-        public string OrderStatus { get; set; }  // e.g., Placed, Shipped, Cancelled
+        [Required]
+        public string OrderStatus { get; set; }
 
-        // Navigation properties
-        public User Customer { get; set; }
+        // Navigation to details
         public ICollection<OrderDetail> OrderDetails { get; set; }
     }
 }

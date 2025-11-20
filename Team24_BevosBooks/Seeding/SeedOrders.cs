@@ -1,369 +1,331 @@
-using Team24_BevosBooks.DAL;
-using Team24_BevosBooks.Models;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using Team24_BevosBooks.Models;
+using Team24_BevosBooks.DAL;
 
 namespace Team24_BevosBooks.Seeding
 {
-	public static class SeedOrders
-	{
-		public static void SeedAllOrders(AppDbContext db)
-		{
-			Int32 intOrdersAdded = 0;
-			String strOrderFlag = "Begin";
+    public static class SeedOrders
+    {
+        public static void SeedAllOrders(AppDbContext db)
+        {
+            List<Order> Orders = new List<Order>();
+            List<OrderDetail> Details = new List<OrderDetail>();
 
-			List<Order> Orders = new List<Order>();
+            Orders.Add(new Order {
+                OrderID = 10001,
+                UserID = db.Users
+                    .FirstOrDefault(u => u.FirstName == "Christopher" && u.LastName == "Baker").Id,
+                OrderDate = new DateTime(2025,1,1),
+                ShippingFee = 0m,
+                OrderStatus = "InCart"
+            });
 
-			Order o1 = new Order()
-			{
-				OrderDate = new DateTime(2025, 1, 1),
-				Subtotal = The Art Of Racing In The Rainm,
-				Tax = 23.95m,
-				ShippingCost = 10.3m,
-				Total = 3m
-			};
-			o1.Customer = db.Customers.FirstOrDefault(c => c.CustomerID == );
-			o1.CreditCard = db.CreditCards.FirstOrDefault(cc => cc.CardID == );
-			o1.OrderDetails = new List<OrderDetail>();
-			Orders.Add(o1);
+            Details.Add(new OrderDetail {
+                OrderID = 10001,
+                BookID = db.Books.FirstOrDefault(b => b.Title == "The Art Of Racing In The Rain").BookID,
+                CardID = 0,
+                CouponID = null,
+                Quantity = 3,
+                Price = 23.95m,
+                Cost = 10.3m
+            });
 
-			OrderDetail od2 = new OrderDetail()
-			{
-				Quantity = ,
-				BookPrice = InCartm
-			};
-			od2.Book = db.Books.FirstOrDefault(b => b.Title == "");
-			o1.OrderDetails.Add(od2);
+            Details.Add(new OrderDetail {
+                OrderID = 10001,
+                BookID = db.Books.FirstOrDefault(b => b.Title == "The Host").BookID,
+                CardID = 0,
+                CouponID = null,
+                Quantity = 1,
+                Price = 25.99m,
+                Cost = 13.25m
+            });
 
-			OrderDetail od3 = new OrderDetail()
-			{
-				Quantity = ,
-				BookPrice = InCartm
-			};
-			od3.Book = db.Books.FirstOrDefault(b => b.Title == "");
-			o1.OrderDetails.Add(od3);
+            Orders.Add(new Order {
+                OrderID = 10002,
+                UserID = db.Users
+                    .FirstOrDefault(u => u.FirstName == "Todd" && u.LastName == "Jacobs").Id,
+                OrderDate = new DateTime(2025,1,1),
+                ShippingFee = 0m,
+                OrderStatus = "InCart"
+            });
 
-			Order o2 = new Order()
-			{
-				OrderDate = new DateTime(2025, 1, 1),
-				Subtotal = Rosesm,
-				Tax = 24.99m,
-				ShippingCost = 20.99m,
-				Total = 2m
-			};
-			o2.Customer = db.Customers.FirstOrDefault(c => c.CustomerID == );
-			o2.CreditCard = db.CreditCards.FirstOrDefault(cc => cc.CardID == );
-			o2.OrderDetails = new List<OrderDetail>();
-			Orders.Add(o2);
+            Details.Add(new OrderDetail {
+                OrderID = 10002,
+                BookID = db.Books.FirstOrDefault(b => b.Title == "Roses").BookID,
+                CardID = 0,
+                CouponID = null,
+                Quantity = 2,
+                Price = 24.99m,
+                Cost = 20.99m
+            });
 
-			OrderDetail od4 = new OrderDetail()
-			{
-				Quantity = ,
-				BookPrice = InCartm
-			};
-			od4.Book = db.Books.FirstOrDefault(b => b.Title == "");
-			o2.OrderDetails.Add(od4);
+            Orders.Add(new Order {
+                OrderID = 10003,
+                UserID = db.Users
+                    .FirstOrDefault(u => u.FirstName == "Charles" && u.LastName == "Miller").Id,
+                OrderDate = new DateTime(2025,1,1),
+                ShippingFee = 0m,
+                OrderStatus = "InCart"
+            });
 
-			Order o3 = new Order()
-			{
-				OrderDate = new DateTime(2025, 1, 1),
-				Subtotal = Alter of Edenm,
-				Tax = 27.99m,
-				ShippingCost = 25.75m,
-				Total = 2m
-			};
-			o3.Customer = db.Customers.FirstOrDefault(c => c.CustomerID == );
-			o3.CreditCard = db.CreditCards.FirstOrDefault(cc => cc.CardID == );
-			o3.OrderDetails = new List<OrderDetail>();
-			Orders.Add(o3);
+            Details.Add(new OrderDetail {
+                OrderID = 10003,
+                BookID = db.Books.FirstOrDefault(b => b.Title == "Alter of Eden").BookID,
+                CardID = 0,
+                CouponID = null,
+                Quantity = 2,
+                Price = 27.99m,
+                Cost = 25.75m
+            });
 
-			OrderDetail od5 = new OrderDetail()
-			{
-				Quantity = ,
-				BookPrice = InCartm
-			};
-			od5.Book = db.Books.FirstOrDefault(b => b.Title == "");
-			o3.OrderDetails.Add(od5);
+            Orders.Add(new Order {
+                OrderID = 10004,
+                UserID = db.Users
+                    .FirstOrDefault(u => u.FirstName == "Wendy" && u.LastName == "Chang").Id,
+                OrderDate = new DateTime(2025, 10, 31),
+                ShippingFee = 3.5m,
+                OrderStatus = "Ordered"
+            });
 
-			Order o4 = new Order()
-			{
-				OrderDate = new DateTime(2025, 1, 1),
-				Subtotal = The Professionalm,
-				Tax = 26.95m,
-				ShippingCost = 7.01m,
-				Total = 1m
-			};
-			o4.Customer = db.Customers.FirstOrDefault(c => c.CustomerID == 1004);
-			o4.CreditCard = db.CreditCards.FirstOrDefault(cc => cc.CardID == );
-			o4.OrderDetails = new List<OrderDetail>();
-			Orders.Add(o4);
+            Details.Add(new OrderDetail {
+                OrderID = 10004,
+                BookID = db.Books.FirstOrDefault(b => b.Title == "The Professional").BookID,
+                CardID = 1004,
+                CouponID = null,
+                Quantity = 1,
+                Price = 26.95m,
+                Cost = 7.01m
+            });
 
-			OrderDetail od6 = new OrderDetail()
-			{
-				Quantity = 3.5,
-				BookPrice = Orderedm
-			};
-			od6.Book = db.Books.FirstOrDefault(b => b.Title == "10/31/2025");
-			o4.OrderDetails.Add(od6);
+            Orders.Add(new Order {
+                OrderID = 10005,
+                UserID = db.Users
+                    .FirstOrDefault(u => u.FirstName == "Christopher" && u.LastName == "Baker").Id,
+                OrderDate = new DateTime(2025, 10, 1),
+                ShippingFee = 9.5m,
+                OrderStatus = "Ordered"
+            });
 
-			Order o5 = new Order()
-			{
-				OrderDate = new DateTime(2025, 1, 1),
-				Subtotal = Say Goodbyem,
-				Tax = 25m,
-				ShippingCost = 11.25m,
-				Total = 5m
-			};
-			o5.Customer = db.Customers.FirstOrDefault(c => c.CustomerID == 1002);
-			o5.CreditCard = db.CreditCards.FirstOrDefault(cc => cc.CardID == );
-			o5.OrderDetails = new List<OrderDetail>();
-			Orders.Add(o5);
+            Details.Add(new OrderDetail {
+                OrderID = 10005,
+                BookID = db.Books.FirstOrDefault(b => b.Title == "Say Goodbye").BookID,
+                CardID = 1002,
+                CouponID = null,
+                Quantity = 5,
+                Price = 25m,
+                Cost = 11.25m
+            });
 
-			OrderDetail od7 = new OrderDetail()
-			{
-				Quantity = 9.5,
-				BookPrice = Orderedm
-			};
-			od7.Book = db.Books.FirstOrDefault(b => b.Title == "10/1/2025");
-			o5.OrderDetails.Add(od7);
+            Details.Add(new OrderDetail {
+                OrderID = 10005,
+                BookID = db.Books.FirstOrDefault(b => b.Title == "Chasing Darkness").BookID,
+                CardID = 1002,
+                CouponID = null,
+                Quantity = 1,
+                Price = 25.95m,
+                Cost = 9.08m
+            });
 
-			OrderDetail od8 = new OrderDetail()
-			{
-				Quantity = 3.5,
-				BookPrice = Orderedm
-			};
-			od8.Book = db.Books.FirstOrDefault(b => b.Title == "10/1/2025");
-			o5.OrderDetails.Add(od8);
+            Orders.Add(new Order {
+                OrderID = 10006,
+                UserID = db.Users
+                    .FirstOrDefault(u => u.FirstName == "Lim" && u.LastName == "Chou").Id,
+                OrderDate = new DateTime(2025, 10, 5),
+                ShippingFee = 107m,
+                OrderStatus = "Ordered"
+            });
 
-			Order o6 = new Order()
-			{
-				OrderDate = new DateTime(2025, 1, 1),
-				Subtotal = The Other Queenm,
-				Tax = 25.95m,
-				ShippingCost = 23.61m,
-				Total = 70m
-			};
-			o6.Customer = db.Customers.FirstOrDefault(c => c.CustomerID == 1005);
-			o6.CreditCard = db.CreditCards.FirstOrDefault(cc => cc.CardID == );
-			o6.OrderDetails = new List<OrderDetail>();
-			Orders.Add(o6);
+            Details.Add(new OrderDetail {
+                OrderID = 10006,
+                BookID = db.Books.FirstOrDefault(b => b.Title == "The Other Queen").BookID,
+                CardID = 1005,
+                CouponID = null,
+                Quantity = 70,
+                Price = 25.95m,
+                Cost = 23.61m
+            });
 
-			OrderDetail od9 = new OrderDetail()
-			{
-				Quantity = 107,
-				BookPrice = Orderedm
-			};
-			od9.Book = db.Books.FirstOrDefault(b => b.Title == "10/5/2025");
-			o6.OrderDetails.Add(od9);
+            Details.Add(new OrderDetail {
+                OrderID = 10006,
+                BookID = db.Books.FirstOrDefault(b => b.Title == "Wrecked").BookID,
+                CardID = 1005,
+                CouponID = null,
+                Quantity = 10,
+                Price = 25m,
+                Cost = 18m
+            });
 
-			OrderDetail od10 = new OrderDetail()
-			{
-				Quantity = 17,
-				BookPrice = Orderedm
-			};
-			od10.Book = db.Books.FirstOrDefault(b => b.Title == "10/5/2025");
-			o6.OrderDetails.Add(od10);
+            Details.Add(new OrderDetail {
+                OrderID = 10006,
+                BookID = db.Books.FirstOrDefault(b => b.Title == "Reckless").BookID,
+                CardID = 1005,
+                CouponID = null,
+                Quantity = 23,
+                Price = 22m,
+                Cost = 9.46m
+            });
 
-			OrderDetail od11 = new OrderDetail()
-			{
-				Quantity = 36.5,
-				BookPrice = Orderedm
-			};
-			od11.Book = db.Books.FirstOrDefault(b => b.Title == "10/5/2025");
-			o6.OrderDetails.Add(od11);
+            Orders.Add(new Order {
+                OrderID = 10007,
+                UserID = db.Users
+                    .FirstOrDefault(u => u.FirstName == "Wendy" && u.LastName == "Chang").Id,
+                OrderDate = new DateTime(2025, 10, 30),
+                ShippingFee = 3.5m,
+                OrderStatus = "Ordered"
+            });
 
-			Order o7 = new Order()
-			{
-				OrderDate = new DateTime(2025, 1, 1),
-				Subtotal = The Professionalm,
-				Tax = 26.95m,
-				ShippingCost = 7.01m,
-				Total = 1m
-			};
-			o7.Customer = db.Customers.FirstOrDefault(c => c.CustomerID == 1004);
-			o7.CreditCard = db.CreditCards.FirstOrDefault(cc => cc.CardID == );
-			o7.OrderDetails = new List<OrderDetail>();
-			Orders.Add(o7);
+            Details.Add(new OrderDetail {
+                OrderID = 10007,
+                BookID = db.Books.FirstOrDefault(b => b.Title == "The Professional").BookID,
+                CardID = 1004,
+                CouponID = null,
+                Quantity = 1,
+                Price = 26.95m,
+                Cost = 7.01m
+            });
 
-			OrderDetail od12 = new OrderDetail()
-			{
-				Quantity = 3.5,
-				BookPrice = Orderedm
-			};
-			od12.Book = db.Books.FirstOrDefault(b => b.Title == "10/30/2025");
-			o7.OrderDetails.Add(od12);
+            Orders.Add(new Order {
+                OrderID = 10008,
+                UserID = db.Users
+                    .FirstOrDefault(u => u.FirstName == "Jeffrey" && u.LastName == "Hampton").Id,
+                OrderDate = new DateTime(2025, 11, 1),
+                ShippingFee = 5m,
+                OrderStatus = "Ordered"
+            });
 
-			Order o8 = new Order()
-			{
-				OrderDate = new DateTime(2025, 1, 1),
-				Subtotal = The Professionalm,
-				Tax = 26.95m,
-				ShippingCost = 7.01m,
-				Total = 2m
-			};
-			o8.Customer = db.Customers.FirstOrDefault(c => c.CustomerID == 1006);
-			o8.CreditCard = db.CreditCards.FirstOrDefault(cc => cc.CardID == );
-			o8.OrderDetails = new List<OrderDetail>();
-			Orders.Add(o8);
+            Details.Add(new OrderDetail {
+                OrderID = 10008,
+                BookID = db.Books.FirstOrDefault(b => b.Title == "The Professional").BookID,
+                CardID = 1006,
+                CouponID = null,
+                Quantity = 2,
+                Price = 26.95m,
+                Cost = 7.01m
+            });
 
-			OrderDetail od13 = new OrderDetail()
-			{
-				Quantity = 5,
-				BookPrice = Orderedm
-			};
-			od13.Book = db.Books.FirstOrDefault(b => b.Title == "11/1/2025");
-			o8.OrderDetails.Add(od13);
+            Orders.Add(new Order {
+                OrderID = 10009,
+                UserID = db.Users
+                    .FirstOrDefault(u => u.FirstName == "Charles" && u.LastName == "Miller").Id,
+                OrderDate = new DateTime(2025, 11, 3),
+                ShippingFee = 3.5m,
+                OrderStatus = "Ordered"
+            });
 
-			Order o9 = new Order()
-			{
-				OrderDate = new DateTime(2025, 1, 1),
-				Subtotal = Say Goodbyem,
-				Tax = 25m,
-				ShippingCost = 11.25m,
-				Total = 1m
-			};
-			o9.Customer = db.Customers.FirstOrDefault(c => c.CustomerID == 1007);
-			o9.CreditCard = db.CreditCards.FirstOrDefault(cc => cc.CardID == );
-			o9.OrderDetails = new List<OrderDetail>();
-			Orders.Add(o9);
+            Details.Add(new OrderDetail {
+                OrderID = 10009,
+                BookID = db.Books.FirstOrDefault(b => b.Title == "Say Goodbye").BookID,
+                CardID = 1007,
+                CouponID = null,
+                Quantity = 1,
+                Price = 25m,
+                Cost = 11.25m
+            });
 
-			OrderDetail od14 = new OrderDetail()
-			{
-				Quantity = 3.5,
-				BookPrice = Orderedm
-			};
-			od14.Book = db.Books.FirstOrDefault(b => b.Title == "11/3/2025");
-			o9.OrderDetails.Add(od14);
+            Orders.Add(new Order {
+                OrderID = 10010,
+                UserID = db.Users
+                    .FirstOrDefault(u => u.FirstName == "Ernest" && u.LastName == "Lowe").Id,
+                OrderDate = new DateTime(2025, 11, 2),
+                ShippingFee = 6.5m,
+                OrderStatus = "Ordered"
+            });
 
-			Order o10 = new Order()
-			{
-				OrderDate = new DateTime(2025, 1, 1),
-				Subtotal = Wreckedm,
-				Tax = 25m,
-				ShippingCost = 18m,
-				Total = 3m
-			};
-			o10.Customer = db.Customers.FirstOrDefault(c => c.CustomerID == 1008);
-			o10.CreditCard = db.CreditCards.FirstOrDefault(cc => cc.CardID == );
-			o10.OrderDetails = new List<OrderDetail>();
-			Orders.Add(o10);
+            Details.Add(new OrderDetail {
+                OrderID = 10010,
+                BookID = db.Books.FirstOrDefault(b => b.Title == "Wrecked").BookID,
+                CardID = 1008,
+                CouponID = null,
+                Quantity = 3,
+                Price = 25m,
+                Cost = 18m
+            });
 
-			OrderDetail od15 = new OrderDetail()
-			{
-				Quantity = 6.5,
-				BookPrice = Orderedm
-			};
-			od15.Book = db.Books.FirstOrDefault(b => b.Title == "11/2/2025");
-			o10.OrderDetails.Add(od15);
+            Details.Add(new OrderDetail {
+                OrderID = 10010,
+                BookID = db.Books.FirstOrDefault(b => b.Title == "Reckless").BookID,
+                CardID = 1008,
+                CouponID = null,
+                Quantity = 11,
+                Price = 22m,
+                Cost = 9.46m
+            });
 
-			OrderDetail od16 = new OrderDetail()
-			{
-				Quantity = 18.5,
-				BookPrice = Orderedm
-			};
-			od16.Book = db.Books.FirstOrDefault(b => b.Title == "11/2/2025");
-			o10.OrderDetails.Add(od16);
+            Orders.Add(new Order {
+                OrderID = 10011,
+                UserID = db.Users
+                    .FirstOrDefault(u => u.FirstName == "Kelly" && u.LastName == "Nelson").Id,
+                OrderDate = new DateTime(2025,1,1),
+                ShippingFee = 0m,
+                OrderStatus = "InCart"
+            });
 
-			Order o11 = new Order()
-			{
-				OrderDate = new DateTime(2025, 1, 1),
-				Subtotal = The Castm,
-				Tax = 21.95m,
-				ShippingCost = 12.95m,
-				Total = 1m
-			};
-			o11.Customer = db.Customers.FirstOrDefault(c => c.CustomerID == );
-			o11.CreditCard = db.CreditCards.FirstOrDefault(cc => cc.CardID == );
-			o11.OrderDetails = new List<OrderDetail>();
-			Orders.Add(o11);
+            Details.Add(new OrderDetail {
+                OrderID = 10011,
+                BookID = db.Books.FirstOrDefault(b => b.Title == "The Cast").BookID,
+                CardID = 0,
+                CouponID = null,
+                Quantity = 1,
+                Price = 21.95m,
+                Cost = 12.95m
+            });
 
-			OrderDetail od17 = new OrderDetail()
-			{
-				Quantity = ,
-				BookPrice = InCartm
-			};
-			od17.Book = db.Books.FirstOrDefault(b => b.Title == "");
-			o11.OrderDetails.Add(od17);
+            Orders.Add(new Order {
+                OrderID = 10012,
+                UserID = db.Users
+                    .FirstOrDefault(u => u.FirstName == "Chuck" && u.LastName == "Luce").Id,
+                OrderDate = new DateTime(2025,1,1),
+                ShippingFee = 0m,
+                OrderStatus = "InCart"
+            });
 
-			Order o12 = new Order()
-			{
-				OrderDate = new DateTime(2025, 1, 1),
-				Subtotal = Brooklynm,
-				Tax = 18.95m,
-				ShippingCost = 3.6m,
-				Total = 4m
-			};
-			o12.Customer = db.Customers.FirstOrDefault(c => c.CustomerID == );
-			o12.CreditCard = db.CreditCards.FirstOrDefault(cc => cc.CardID == );
-			o12.OrderDetails = new List<OrderDetail>();
-			Orders.Add(o12);
+            Details.Add(new OrderDetail {
+                OrderID = 10012,
+                BookID = db.Books.FirstOrDefault(b => b.Title == "Brooklyn").BookID,
+                CardID = 0,
+                CouponID = null,
+                Quantity = 4,
+                Price = 18.95m,
+                Cost = 3.6m
+            });
 
-			OrderDetail od18 = new OrderDetail()
-			{
-				Quantity = ,
-				BookPrice = InCartm
-			};
-			od18.Book = db.Books.FirstOrDefault(b => b.Title == "");
-			o12.OrderDetails.Add(od18);
+            Orders.Add(new Order {
+                OrderID = 10013,
+                UserID = db.Users
+                    .FirstOrDefault(u => u.FirstName == "Eryn" && u.LastName == "Rice").Id,
+                OrderDate = new DateTime(2025,1,1),
+                ShippingFee = 0m,
+                OrderStatus = "InCart"
+            });
 
-			Order o13 = new Order()
-			{
-				OrderDate = new DateTime(2025, 1, 1),
-				Subtotal = Dexter By Designm,
-				Tax = 25m,
-				ShippingCost = 2.75m,
-				Total = 1m
-			};
-			o13.Customer = db.Customers.FirstOrDefault(c => c.CustomerID == );
-			o13.CreditCard = db.CreditCards.FirstOrDefault(cc => cc.CardID == );
-			o13.OrderDetails = new List<OrderDetail>();
-			Orders.Add(o13);
+            Details.Add(new OrderDetail {
+                OrderID = 10013,
+                BookID = db.Books.FirstOrDefault(b => b.Title == "Dexter By Design").BookID,
+                CardID = 0,
+                CouponID = null,
+                Quantity = 1,
+                Price = 25m,
+                Cost = 2.75m
+            });
 
-			OrderDetail od19 = new OrderDetail()
-			{
-				Quantity = ,
-				BookPrice = InCartm
-			};
-			od19.Book = db.Books.FirstOrDefault(b => b.Title == "");
-			o13.OrderDetails.Add(od19);
+            Details.Add(new OrderDetail {
+                OrderID = 10013,
+                BookID = db.Books.FirstOrDefault(b => b.Title == "The Midnight House").BookID,
+                CardID = 0,
+                CouponID = null,
+                Quantity = 3,
+                Price = 25.95m,
+                Cost = 3.11m
+            });
 
-			OrderDetail od20 = new OrderDetail()
-			{
-				Quantity = ,
-				BookPrice = InCartm
-			};
-			od20.Book = db.Books.FirstOrDefault(b => b.Title == "");
-			o13.OrderDetails.Add(od20);
-
-			try
-			{
-				foreach (Order o in Orders)
-				{
-				Order dbOrder = db.Orders.FirstOrDefault(x => x.Customer.CustomerID == o.Customer.CustomerID && x.OrderDate == o.OrderDate);
-				if (dbOrder == null)
-				{
-					db.Orders.Add(o);
-					db.SaveChanges();
-					intOrdersAdded += 1;
-				}
-				else
-				{
-					dbOrder.Subtotal = o.Subtotal;
-					dbOrder.Tax = o.Tax;
-					dbOrder.ShippingCost = o.ShippingCost;
-					dbOrder.Total = o.Total;
-					db.Update(dbOrder);
-					db.SaveChanges();
-					intOrdersAdded += 1;
-				}
-				}
-			}
-			catch (Exception ex)
-			{
-				String msg = " Orders added: " + intOrdersAdded + "; Error on " + strOrderFlag;
-				throw new InvalidOperationException(ex.Message + msg);
-			}
-		}
-	}
+            foreach (var o in Orders)
+                db.Orders.Add(o);
+            foreach (var d in Details)
+                db.OrderDetails.Add(d);
+            db.SaveChanges();
+        }
+    }
 }
+

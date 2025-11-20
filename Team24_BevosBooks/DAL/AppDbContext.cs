@@ -4,7 +4,7 @@ using Microsoft.EntityFrameworkCore;
 using Team24_BevosBooks.Models;
 using System;
 using System.Collections.Generic;
-using BevosBooks.Models;
+using Team24_BevosBooks.Models;
 
 //TODO: Make this namespace match your project name
 namespace Team24_BevosBooks.DAL
@@ -16,20 +16,31 @@ namespace Team24_BevosBooks.DAL
     {
         public AppDbContext(DbContextOptions<AppDbContext> options) : base(options){ }
 
-        protected override void OnModelCreating(ModelBuilder builder)
+        protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
-            //this code makes sure the database is re-created on the $5/month Azure tier
-            builder.HasPerformanceLevel("Basic");
-            builder.HasServiceTier("Basic");
-            base.OnModelCreating(builder);
+            base.OnModelCreating(modelBuilder);
+
+            // Prevent cascade delete cycle between Order and OrderDetail
+            modelBuilder.Entity<OrderDetail>()
+                .HasOne(od => od.Order)
+                .WithMany(o => o.OrderDetails)
+                .HasForeignKey(od => od.OrderID)
+                .OnDelete(DeleteBehavior.Restrict); // or DeleteBehavior.NoAction
+
+            // Prevent cascade on Book → OrderDetail too
+            modelBuilder.Entity<OrderDetail>()
+                .HasOne(od => od.Book)
+                .WithMany()
+                .HasForeignKey(od => od.BookID)
+                .OnDelete(DeleteBehavior.Restrict); // or DeleteBehavior.NoAction
         }
+
 
         //TODO: Add Dbsets here.  Products is included as an example.  
         public DbSet<Book> Books { get; set; }
         public DbSet<Card> Cards { get; set; }
         public DbSet<Coupon> Coupons { get; set; }
-        public DbSet<Customer> Customers { get; set; }
-        public DbSet<Employee> Employees { get; set; }
+        public DbSet<AppUser> Users { get; set; }
         public DbSet<Genre> Genres { get; set; }
         public DbSet<Order> Orders { get; set; }
         public DbSet<OrderDetail> OrderDetails { get; set; }

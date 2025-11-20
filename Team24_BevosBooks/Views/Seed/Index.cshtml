@@ -1,0 +1,28 @@
+﻿@{
+    ViewBag.Title = "Database Seeding";
+}
+
+<h2>Database Seeding</h2>
+<p>Select any dataset to seed:</p>
+
+<div style="display:flex; flex-direction:column; gap:10px; max-width:300px;">
+
+    <!-- Identity-Based Seeding -->
+    <a class="btn btn-primary" asp-controller="Seed" asp-action="SeedRoles">Seed Roles</a>
+    <a class="btn btn-primary" asp-controller="Seed" asp-action="SeedUsers">Seed Users (Customers + Employees)</a>
+
+    <!-- AppDbContext Seeding -->
+    <a class="btn btn-primary" asp-controller="Seed" asp-action="SeedGenres">Seed Genres</a>
+    <a class="btn btn-primary" asp-controller="Seed" asp-action="SeedBooks">Seed Books</a>
+    <a class="btn btn-primary" asp-controller="Seed" asp-action="SeedCards">Seed Cards</a>
+    <a class="btn btn-primary" asp-controller="Seed" asp-action="SeedReviews">Seed Reviews</a>
+    <a class="btn btn-primary" asp-controller="Seed" asp-action="SeedOrders">Seed Orders</a>
+
+</div>
+
+<hr />
+
+<p style="margin-top:20px; font-size:0.9rem; color:#777;">
+    <strong>Recommended Seeding Order:</strong><br />
+    Roles → Users → Genres → Books → Cards → Reviews → Orders
+</p>

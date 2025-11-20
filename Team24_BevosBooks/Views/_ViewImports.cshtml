@@ -1,6 +1,13 @@
-﻿@*
-    For more information on enabling MVC for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
-*@
-@{
-}
+﻿<!--This line will make the tag helpers in your views work -->
+@addTagHelper *, Microsoft.AspNetCore.Mvc.TagHelpers
 
+<!--This line puts all of your views in the Views namespace -->
+<!--TODO: Update this line to match your project name -->
+<!--      Be sure to remove the [] -->
+@namespace Team24_BevosBooks.Views
+
+
+<!--This line is needed for every assignment EXCEPT HW1 -->
+<!--This line gives your views access to your model classes -->
+<!--Remove this line for HW1 ONLY -->
+@using Team24_BevosBooks.Models

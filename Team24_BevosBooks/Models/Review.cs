@@ -1,47 +1,43 @@
 ﻿using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Team24_BevosBooks.Models
 {
     public class Review
     {
         [Key]
-        [Display(Name = "Review ID")]
         public int ReviewID { get; set; }
 
-        // foreign keys
+        // FK → Reviewer (AppUser)
         [Required]
-        [Display(Name = "Reviewer ID")]
-        public int ReviewerID { get; set; }
+        public string ReviewerID { get; set; }
 
+        [ForeignKey("ReviewerID")]
+        public AppUser Reviewer { get; set; }
+
+
+        // FK → Book
         [Required]
-        [Display(Name = "Book ID")]
         public int BookID { get; set; }
 
+        [ForeignKey("BookID")]
+        public Book Book { get; set; }
+
+
+        // FK → Approver (AppUser)
+        public string? ApproverID { get; set; }
+
+        [ForeignKey("ApproverID")]
+        public AppUser? Approver { get; set; }
+
+
         [Required]
-        [Display(Name = "Approver ID")]
-        public int? ApproverID { get; set; }
-
-        // Review-specific scalar properties
-        [Required(ErrorMessage = "A rating is required.")]
         [Range(1, 5)]
-        public int Rating { get; set; } // we can change this to be decimal if it says to in project specs
+        public int Rating { get; set; }
 
+        public string? ReviewText { get; set; }
 
-        [Display(Name = "Review Text")] // could change to just say "Review", depending on how it looks in view
-        public string? ReviewText { get; set; } // leaving it optional unless otherwise specified in project specs
-
-
-        [Display(Name = "DisputeStatus")]
-        public string DisputeStatus { get; set; } // don't really know what this is. might be boolean type
-
-        // Navigational properties
-
-        // note, AppUser is the User class in the ERD. AppUser inherits from Identity template
-        // further note, "Reviewer" is "ReviewerID". ID is automatically added to foreign key names by EF Core
-        public AppUser Reviewer { get; set; }
-        public Books Book { get; set; }
-        public AppUser Approver { get; set; }
-
+        [Required]
+        public string DisputeStatus { get; set; }
     }
-
 }
