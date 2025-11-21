@@ -1,0 +1,37 @@
+@model IEnumerable<Team24_BevosBooks.Models.AppUser>
+
+@{
+    ViewData["Title"] = "Users";
+}
+
+<div class="alert alert-info mt-3 mb-4" role="alert" style="font-size:0.95rem;">
+    For viewing seeding data and milestone #1 only. Will be adjusted later.
+</div>
+
+<table class="table table-bordered table-striped table-hover">
+    <thead class="table-dark">
+        <tr>
+            <th>User ID</th>
+            <th>First Name</th>
+            <th>Last Name</th>
+            <th>Email</th>
+            <th>Phone Number</th>
+            <th>Address</th>
+            <th>Status</th>
+        </tr>
+    </thead>
+    <tbody>
+    @foreach (var user in Model)
+    {
+        <tr>
+            <td>@user.Id</td>
+            <td>@user.FirstName</td>
+            <td>@user.LastName</td>
+            <td>@user.Email</td>
+            <td>@user.PhoneNumber</td>
+            <td>@user.Address</td>
+            <td>@user.Status</td>
+        </tr>
+    }
+    </tbody>
+</table>

@@ -1,0 +1,49 @@
+@model IEnumerable<Team24_BevosBooks.Models.OrderDetail>
+
+@{
+    ViewData["Title"] = "Order Details";
+}
+
+<div class="alert alert-info mt-3 mb-4" role="alert" style="font-size:0.95rem;">
+    For viewing seeding data and milestone #1 only. Will be adjusted later.
+</div>
+
+<table class="table table-bordered table-striped table-hover">
+    <thead class="table-dark">
+        <tr>
+            <th>OrderDetail ID</th>
+            <th>Order ID</th>
+            <th>Order Date</th>
+            <th>Customer ID</th>
+            <th>Book ID</th>
+            <th>Book Title</th>
+            <th>Card ID</th>
+            <th>Card Number</th>
+            <th>Coupon Code</th>
+            <th>Quantity</th>
+            <th>Price</th>
+            <th>Cost</th>
+        </tr>
+    </thead>
+    <tbody>
+    @foreach (var detail in Model)
+    {
+        <tr>
+            <td>@detail.OrderDetailID</td>
+            <td>@detail.OrderID</td>
+            <td>@(detail.Order != null ? detail.Order.OrderDate.ToShortDateString() : "-")</td>
+            <td>@(detail.Order?.UserID ?? "-")</td>
+            <td>@detail.BookID</td>
+            <td>@(detail.Book?.Title ?? "-")</td>
+            <td>@(detail.Card != null ? detail.Card.CardID.ToString() : "-")</td>
+            <td>@(detail.Card != null ? detail.Card.CardNumber : "-")</td>
+            <td>@(detail.Coupon != null ? detail.Coupon.CouponCode : "-")</td>
+            <td>@detail.Quantity</td>
+            <td>@detail.Price.ToString("C")</td>
+            <td>@detail.Cost.ToString("C")</td>
+        </tr>
+    }
+    </tbody>
+</table>
+
+<a asp-controller="OrderDetails" asp-action="Index" class="btn btn-secondary mt-3">Refresh</a>
