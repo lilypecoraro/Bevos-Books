@@ -1,0 +1,36 @@
+﻿@model Team24_BevosBooks.Models.ViewModels.CardViewModel
+
+@{
+    ViewData["Title"] = "Add Credit Card";
+}
+
+<h2 class="mt-4 mb-3">Add a Credit Card</h2>
+
+<div class="row">
+    <div class="col-md-6">
+        <form asp-action="AddCard" method="post">
+
+            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+
+            <div class="form-group mb-3">
+                <label asp-for="CardType"></label>
+                <select asp-for="CardType" class="form-control">
+                    <option value="">-- Select Card Type --</option>
+                    <option>Visa</option>
+                    <option>MasterCard</option>
+                    <option>Discover</option>
+                    <option>American Express</option>
+                </select>
+                <span asp-validation-for="CardType" class="text-danger"></span>
+            </div>
+
+            <div class="form-group mb-3">
+                <label asp-for="CardNumber"></label>
+                <input asp-for="CardNumber" class="form-control" />
+                <span asp-validation-for="CardNumber" class="text-danger"></span>
+            </div>
+
+            <button type="submit" class="btn btn-primary w-100">Add Card</button>
+        </form>
+    </div>
+</div>

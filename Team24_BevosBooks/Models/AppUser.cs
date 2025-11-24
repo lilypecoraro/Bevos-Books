@@ -5,29 +5,33 @@ namespace Team24_BevosBooks.Models
 {
     public class AppUser : IdentityUser
     {
-        // Inherits Id, UserName, PasswordHash, Email, PhoneNumber
-        [Display(Name = "First Name")]
-        [Required(ErrorMessage = "First name is required.")]
+        [Required, StringLength(40)]
         public string FirstName { get; set; }
 
-        [Display(Name = "Last Name")]
-        [Required(ErrorMessage = "Last name is required")]
+        [Required, StringLength(40)]
         public string LastName { get; set; }
 
-        [Required(ErrorMessage = "Address is required.")]
+        [Required]
         public string Address { get; set; }
 
+        [Required]
+        public string City { get; set; }
 
-        public UserStatus Status { get; set; }
+        [Required, StringLength(2)]
+        public string State { get; set; }
 
-        // enum for user status
+        [Required]
+        public string ZipCode { get; set; }
+
+        [Required]
+        public UserStatus Status { get; set; } = UserStatus.Customer;
+
         public enum UserStatus
         {
             Customer,
             Employee,
-            Admin
+            Admin,
+            Disabled   // ⭐ add this so disabling works
         }
-
-        
     }
 }

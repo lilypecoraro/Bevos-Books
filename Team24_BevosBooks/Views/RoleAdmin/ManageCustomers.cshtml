@@ -1,0 +1,40 @@
+﻿@model IEnumerable<Team24_BevosBooks.Models.AppUser>
+
+@{
+    ViewData["Title"] = "Manage Customers";
+}
+
+<h2 class="mt-4 mb-3">Customer Accounts</h2>
+
+<table class="table table-striped">
+    <thead class="table-dark">
+        <tr>
+            <th>Name</th>
+            <th>Email</th>
+            <th>Status</th>
+            <th></th>
+        </tr>
+    </thead>
+
+    <tbody>
+        @foreach (var cust in Model)
+        {
+            <tr>
+                <td>@cust.FirstName @cust.LastName</td>
+                <td>@cust.Email</td>
+                <td>@cust.Status</td>
+                <td>
+                    @if (cust.Status != AppUser.UserStatus.Disabled)
+
+                    {
+                        <a asp-action="Disable" asp-route-id="@cust.Id" class="btn btn-sm btn-danger">Disable</a>
+                    }
+                    else
+                    {
+                        <a asp-action="Enable" asp-route-id="@cust.Id" class="btn btn-sm btn-success">Enable</a>
+                    }
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>

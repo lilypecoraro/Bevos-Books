@@ -1,0 +1,38 @@
+﻿@model IEnumerable<Team24_BevosBooks.Models.AppUser>
+
+@{
+    ViewData["Title"] = "Manage Employees";
+}
+
+<h2 class="mt-4 mb-3">Employees & Admins</h2>
+
+<a asp-action="CreateEmployee" class="btn btn-primary mb-3">Create New Employee</a>
+
+<table class="table table-striped">
+    <thead class="table-dark">
+        <tr>
+            <th>Name</th>
+            <th>Email</th>
+            <th>Roles</th>
+            <th></th>
+        </tr>
+    </thead>
+
+    <tbody>
+        @foreach (var emp in Model)
+        {
+            <tr>
+                <td>@emp.FirstName @emp.LastName</td>
+                <td>@emp.Email</td>
+                <td>
+                    @(User.IsInRole("Admin") ? "Admin" :
+                                    (User.IsInRole("Employee") ? "Employee" : ""))
+                </td>
+                <td>
+                    <a asp-action="EditEmployee" asp-route-id="@emp.Id" class="btn btn-sm btn-warning">Edit</a>
+                    <a asp-action="Promote" asp-route-id="@emp.Id" class="btn btn-sm btn-info">Promote to Admin</a>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
