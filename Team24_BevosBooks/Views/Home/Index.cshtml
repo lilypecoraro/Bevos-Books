@@ -1,13 +1,63 @@
+﻿@model IEnumerable<Team24_BevosBooks.Models.Book>
+
 @{
     ViewData["Title"] = "Home";
 }
 
-<div class="container py-5">
-    <div class="row justify-content-center">
-        <div class="col-md-8 text-center">
-            <h1 class="display-4">Welcome to Bevo's Books!</h1>
-            <p class="lead mt-3">Welcome � use the seeding tool to populate sample data (coming next).</p>
-            <a href="/Seed" class="btn btn-primary btn-lg mt-4" role="button">Open Seeding View</a>
-        </div>
-    </div>
+<!-- Promotion Banner -->
+<div class="alert alert-warning text-center mt-3">
+    🎉 <strong>Promo:</strong> Use code <strong>BEVO10</strong> for 10% off your entire order!
 </div>
+
+<!-- Welcome Section -->
+<div class="text-center mt-4 mb-4">
+    <h1 class="display-5">Welcome to Bevo’s Books</h1>
+    <p class="lead">Your online bookstore for all your favorite titles.</p>
+</div>
+
+<!-- Search Bar -->
+<form asp-action="Index" method="get" class="d-flex justify-content-center mb-4">
+    <input type="text"
+           name="searchString"
+           value="@Context.Request.Query["searchString"]"
+           class="form-control w-50 me-2"
+           placeholder="Search books by title or author..." />
+    <button type="submit" class="btn btn-primary">Search</button>
+</form>
+
+<!-- Featured Books -->
+@if (Model.Any())
+{
+    <h3 class="mb-3">Featured Books</h3>
+
+    <div class="row row-cols-1 row-cols-md-3 g-4">
+        @foreach (var book in Model)
+        {
+            <div class="col">
+                <div class="card h-100 shadow-sm">
+                    <div class="card-body">
+                        <h5 class="card-title">@book.Title</h5>
+                        <p class="text-muted">@book.Author</p>
+                        <p>
+                            <strong>Price:</strong> @book.Price.ToString("c")
+                        </p>
+                    </div>
+                    <div class="card-footer bg-transparent border-top-0">
+                        <a asp-controller="Books"
+                           asp-action="Details"
+                           asp-route-id="@book.BookID"
+                           class="btn btn-outline-primary btn-sm w-100">
+                            View Details
+                        </a>
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+}
+else
+{
+    <div class="alert alert-info text-center mt-4">
+        No books found. Try searching for another title.
+    </div>
+}
