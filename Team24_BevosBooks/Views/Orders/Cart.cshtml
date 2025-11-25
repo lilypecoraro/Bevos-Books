@@ -1,0 +1,95 @@
+﻿@model Team24_BevosBooks.Models.Order
+
+@{
+    ViewData["Title"] = "Shopping Cart";
+    var messages = ViewBag.Messages as List<string> ?? new List<string>();
+    decimal subtotal = ViewBag.Subtotal ?? 0m;
+    decimal shipping = ViewBag.Shipping ?? 0m;
+    decimal total = ViewBag.Total ?? 0m;
+
+    // Build checkout button class safely (NO inline C# in tag helper area)
+    string checkoutClass = "btn btn-primary";
+    if (!Model.OrderDetails.Any())
+    {
+        checkoutClass += " disabled";
+    }
+}
+
+<h2 class="mt-3 mb-3">Shopping Cart</h2>
+
+@if (TempData["CartMessage"] != null)
+{
+    <div class="alert alert-info">@TempData["CartMessage"]</div>
+}
+
+@if (messages.Any())
+{
+    <div class="alert alert-warning">
+        <ul class="mb-0">
+            @foreach (var msg in messages)
+            {
+                <li>@msg</li>
+            }
+        </ul>
+    </div>
+}
+
+@if (!Model.OrderDetails.Any())
+{
+    <div class="alert alert-info">
+        Your cart is empty. Browse <a asp-controller="Books" asp-action="Index">books</a> to get started.
+    </div>
+}
+else
+{
+    <table class="table table-striped table-hover">
+        <thead class="table-dark">
+            <tr>
+                <th>Title</th>
+                <th>Price</th>
+                <th style="width:150px;">Quantity</th>
+                <th>Line Total</th>
+                <th></th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var detail in Model.OrderDetails)
+            {
+                <tr>
+                    <td>@detail.Book.Title</td>
+                    <td>@detail.Price.ToString("c")</td>
+                    <td>
+                        <form asp-action="UpdateQuantity" method="post" class="d-flex">
+                            <input type="hidden" name="orderDetailId" value="@detail.OrderDetailID" />
+                            <input type="number" name="quantity" value="@detail.Quantity"
+                                   class="form-control form-control-sm me-2" min="0" />
+                            <button type="submit" class="btn btn-sm btn-outline-primary">Update</button>
+                        </form>
+                    </td>
+                    <td>@(detail.Quantity* detail.Price).ToString("c")</td>
+                    <td>
+                        <form asp-action="RemoveItem" method="post">
+                            <input type="hidden" name="orderDetailId" value="@detail.OrderDetailID" />
+                            <button type="submit" class="btn btn-sm btn-outline-danger">Remove</button>
+                        </form>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+
+    <div class="row">
+        <div class="col-md-6">
+            <a asp-controller="Books" asp-action="Index" class="btn btn-secondary">Continue Shopping</a>
+        </div>
+        <div class="col-md-6 text-end">
+            <p><strong>Subtotal:</strong> @subtotal.ToString("c")</p>
+            <p><strong>Shipping:</strong> @shipping.ToString("c")</p>
+            <p class="fs-5"><strong>Total:</strong> @total.ToString("c")</p>
+
+            <a asp-action="Checkout" class="@checkoutClass">
+                Proceed to Checkout
+            </a>
+        </div>
+    </div>
+}

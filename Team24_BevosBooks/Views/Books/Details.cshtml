@@ -7,6 +7,7 @@
 <h2 class="mt-3 mb-3">Book Details</h2>
 
 <div class="row">
+    <!-- LEFT SIDE: BOOK INFORMATION -->
     <div class="col-md-8">
         <dl class="row">
             <dt class="col-sm-3">Title</dt>
@@ -37,19 +38,21 @@
             <dd class="col-sm-9">@Model.BookStatus</dd>
         </dl>
 
-        <!-- Reviews placeholder (can hook up to a Reviews controller later) -->
         <hr />
         <h4>Reviews</h4>
         <p class="text-muted">Customer reviews will appear here.</p>
     </div>
 
+    <!-- RIGHT SIDE: PURCHASE BOX -->
     <div class="col-md-4">
         <div class="card shadow-sm">
             <div class="card-body">
                 <h5 class="card-title">@Model.Title</h5>
-                <p class="card-text">
+
+                <p class="card-text mb-3">
                     <strong>Price:</strong> @Model.Price.ToString("c") <br />
                     <strong>Availability:</strong>
+
                     @if (Model.BookStatus == "Discontinued")
                     {
                         <span class="text-danger">Not Available (Discontinued)</span>
@@ -64,24 +67,38 @@
                     }
                 </p>
 
-                @* Add to Cart button only if NOT discontinued and in stock *@
-                @if (Model.BookStatus != "Discontinued" && Model.InventoryQuantity > 0 && User.IsInRole("Customer"))
+                <!-- ADD TO CART BUTTON BEHAVIOR -->
+                @if (Model.BookStatus != "Discontinued" && Model.InventoryQuantity > 0)
                 {
-                    <a asp-controller="Orders"
-                       asp-action="AddToCart"
-                       asp-route-id="@Model.BookID"
-                       class="btn btn-primary w-100">
-                        Add to Cart
-                    </a>
+                    <!-- If USER is logged in AND a Customer -->
+                    @if (User.Identity.IsAuthenticated && User.IsInRole("Customer"))
+                    {
+                        <a asp-controller="Orders"
+                           asp-action="AddToCart"
+                           asp-route-id="@Model.BookID"
+                           class="btn btn-primary w-100 mb-2">
+                            Add to Cart
+                        </a>
+                    }
+                    else
+                    {
+                        <!-- If NOT logged in → redirect to Login -->
+                        <a asp-controller="Account"
+                           asp-action="Login"
+                           asp-route-returnUrl="@Url.Action("Details", "Books", new { id = Model.BookID })"
+                           class="btn btn-primary w-100 mb-2">
+                            Log in to Add to Cart
+                        </a>
+                    }
                 }
                 else
                 {
-                    <button class="btn btn-secondary w-100" disabled>
+                    <button class="btn btn-secondary w-100 mb-2" disabled>
                         Not Available
                     </button>
                 }
 
-                <a asp-action="Index" class="btn btn-link w-100 mt-2">Back to List</a>
+                <a asp-action="Index" class="btn btn-link w-100 mt-1">Back to List</a>
             </div>
         </div>
     </div>

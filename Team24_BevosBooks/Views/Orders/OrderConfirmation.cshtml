@@ -1,0 +1,70 @@
+﻿@model Team24_BevosBooks.Models.Order
+@using Team24_BevosBooks.Models
+
+@{
+    ViewData["Title"] = "Order Confirmation";
+    decimal subtotal = ViewBag.Subtotal ?? 0m;
+    decimal shipping = ViewBag.Shipping ?? 0m;
+    decimal total = ViewBag.Total ?? 0m;
+    var recommendations = ViewBag.Recommendations as List<Book> ?? new List<Book>();
+}
+
+<h2 class="mt-3 mb-3">Thank You!</h2>
+
+<p>Your order has been placed and will be shipped automatically.</p>
+
+<h4>Order Summary</h4>
+<table class="table table-striped table-hover">
+    <thead class="table-dark">
+        <tr>
+            <th>Title</th>
+            <th>Quantity</th>
+            <th>Price</th>
+            <th>Line Total</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var detail in Model.OrderDetails)
+        {
+            <tr>
+                <td>@detail.Book.Title</td>
+                <td>@detail.Quantity</td>
+                <td>@detail.Price.ToString("c")</td>
+                <td>@(detail.Quantity* detail.Price).ToString("c")</td>
+            </tr>
+        }
+    </tbody>
+</table>
+
+<div class="text-end mb-4">
+    <p><strong>Subtotal:</strong> @subtotal.ToString("c")</p>
+    <p><strong>Shipping:</strong> @shipping.ToString("c")</p>
+    <p class="fs-5"><strong>Total:</strong> @total.ToString("c")</p>
+</div>
+
+@if (recommendations.Any())
+{
+    <h4>You may also like</h4>
+    <div class="row row-cols-1 row-cols-md-3 g-4">
+        @foreach (var book in recommendations)
+        {
+            <div class="col">
+                <div class="card h-100 shadow-sm">
+                    <div class="card-body">
+                        <h5 class="card-title">@book.Title</h5>
+                        <p class="card-text text-muted">@book.Authors</p>
+                        <p><strong>Price:</strong> @book.Price.ToString("c")</p>
+                    </div>
+                    <div class="card-footer bg-transparent border-top-0">
+                        <a asp-controller="Books" asp-action="Details" asp-route-id="@book.BookID"
+                           class="btn btn-outline-primary btn-sm w-100">
+                            View Book
+                        </a>
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+}
+
+<a asp-controller="Books" asp-action="Index" class="btn btn-primary mt-4">Continue Shopping</a>
