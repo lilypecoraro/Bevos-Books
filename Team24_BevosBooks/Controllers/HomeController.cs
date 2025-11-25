@@ -26,7 +26,7 @@ namespace Team24_BevosBooks.Controllers
             {
                 query = query.Where(b =>
                     b.Title.Contains(searchString) ||
-                    b.Author.Contains(searchString));
+                    b.Authors.Contains(searchString));
             }
 
             // Home page shows 6 books max (not required, but clean)

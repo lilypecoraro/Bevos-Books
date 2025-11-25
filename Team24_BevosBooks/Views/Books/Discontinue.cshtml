@@ -1,0 +1,32 @@
+﻿@model Team24_BevosBooks.Models.Book
+
+@{
+    ViewData["Title"] = "Discontinue Book";
+}
+
+<h2 class="mt-3 mb-3 text-danger">Discontinue Book</h2>
+
+<div class="alert alert-warning">
+    Are you sure you want to mark <strong>@Model.Title</strong> as <strong>Discontinued</strong>?
+    The book will still appear in the catalog but will not be available for purchase.
+</div>
+
+<dl class="row">
+    <dt class="col-sm-3">Title</dt>
+    <dd class="col-sm-9">@Model.Title</dd>
+
+    <dt class="col-sm-3">Authors</dt>
+    <dd class="col-sm-9">@Model.Authors</dd>
+
+    <dt class="col-sm-3">Book #</dt>
+    <dd class="col-sm-9">@Model.BookNumber</dd>
+
+    <dt class="col-sm-3">Current Status</dt>
+    <dd class="col-sm-9">@Model.BookStatus</dd>
+</dl>
+
+<form asp-action="Discontinue" method="post">
+    <input type="hidden" asp-for="BookID" />
+    <button type="submit" class="btn btn-danger">Yes, Discontinue</button>
+    <a asp-action="Index" class="btn btn-secondary ms-2">Cancel</a>
+</form>

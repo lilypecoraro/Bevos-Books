@@ -1,9 +1,4 @@
-// WORK-IN-PROGESS -- 11/18/2025 @ 1:47p
-
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
@@ -21,134 +16,211 @@ namespace Team24_BevosBooks.Controllers
             _context = context;
         }
 
-        // GET: Books
-        // Optional search by title and optional genre filter
-        public async Task<IActionResult> Index(string? searchString, int? genreId)
+        // -------------------------------------------------
+        // INDEX: Search, filter, sort
+        // -------------------------------------------------
+        public async Task<IActionResult> Index(
+            string? searchString,
+            int? genreId,
+            bool inStockOnly = false,
+            string sortOrder = "title")
         {
-            var booksQuery = _context.Books.Include(b => b.Genre).AsQueryable();
+            // Base query with Genre
+            IQueryable<Book> query = _context.Books
+                                             .Include(b => b.Genre);
 
-            if (!string.IsNullOrWhiteSpace(searchString))
+            // Search: title, author(s), genre name, book number
+            if (!string.IsNullOrEmpty(searchString))
             {
-                booksQuery = booksQuery.Where(b => b.Title.Contains(searchString));
+                query = query.Where(b =>
+                    b.Title.Contains(searchString) ||
+                    b.Authors.Contains(searchString) ||
+                    b.Genre.GenreName.Contains(searchString) ||
+                    b.BookNumber.ToString().Contains(searchString));
             }
 
-            if (genreId.HasValue && genreId.Value > 0)
+            // Filter by genre (optional)
+            if (genreId.HasValue && genreId.Value != 0)
             {
-                booksQuery = booksQuery.Where(b => b.GenreID == genreId.Value);
+                query = query.Where(b => b.GenreID == genreId.Value);
             }
 
-            ViewData["CurrentFilter"] = searchString;
-            ViewData["CurrentGenre"] = genreId;
-            ViewData["Genres"] = new SelectList(await _context.Genres.OrderBy(g => g.GenreName).ToListAsync(), "GenreID", "GenreName");
+            // Filter by in-stock only
+            if (inStockOnly)
+            {
+                query = query.Where(b => b.InventoryQuantity > 0);
+            }
 
-            var books = await booksQuery.OrderBy(b => b.Title).ToListAsync();
+            // Sorting
+            // Note: “popularity” / “highest rated” would use review data.
+            // For now, they map to reasonable existing fields.
+            query = sortOrder switch
+            {
+                "author" => query.OrderBy(b => b.Authors),
+                "newest" => query.OrderByDescending(b => b.PublishDate),
+                "oldest" => query.OrderBy(b => b.PublishDate),
+                "priceAsc" => query.OrderBy(b => b.Price),
+                "priceDesc" => query.OrderByDescending(b => b.Price),
+                "popularity" => query.OrderBy(b => b.Title),        // placeholder
+                "highestRated" => query.OrderBy(b => b.Title),       // placeholder
+                _ => query.OrderBy(b => b.Title),
+            };
+
+            // Pass genres for dropdown
+            ViewBag.GenreID = new SelectList(await _context.Genres
+                                                           .OrderBy(g => g.GenreName)
+                                                           .ToListAsync(),
+                                             "GenreID",
+                                             "GenreName");
+            ViewBag.SelectedGenreId = genreId ?? 0;
+            ViewBag.SearchString = searchString;
+            ViewBag.InStockOnly = inStockOnly;
+            ViewBag.SortOrder = sortOrder;
+
+            var books = await query.ToListAsync();
             return View(books);
         }
 
-        // GET: Books/Details/5
+        // -------------------------------------------------
+        // DETAILS: Book info + reviews + add-to-cart link
+        // -------------------------------------------------
         public async Task<IActionResult> Details(int? id)
         {
             if (id == null) return NotFound();
 
             var book = await _context.Books
-                .Include(b => b.Genre)
-                .FirstOrDefaultAsync(m => m.BookID == id.Value);
+                                     .Include(b => b.Genre)
+                                     .FirstOrDefaultAsync(b => b.BookID == id);
 
             if (book == null) return NotFound();
 
             return View(book);
         }
 
-        // GET: Books/Create
+        // -------------------------------------------------
+        // CREATE (ADMIN ONLY)
+        // -------------------------------------------------
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> Create()
         {
-            ViewData["GenreID"] = new SelectList(await _context.Genres.OrderBy(g => g.GenreName).ToListAsync(), "GenreID", "GenreName");
+            await PopulateGenresDropDownList();
             return View();
         }
 
-        // POST: Books/Create
+        [Authorize(Roles = "Admin")]
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("GenreID,BookNumber,Title,Description,Price,Cost,PublishDate,InventoryQuantity,ReorderPoint,Authors,BookStatus")] Book book)
+        public async Task<IActionResult> Create(Book book)
         {
-            if (ModelState.IsValid)
+            if (!ModelState.IsValid)
             {
-                _context.Add(book);
-                await _context.SaveChangesAsync();
-                return RedirectToAction(nameof(Index));
+                await PopulateGenresDropDownList(book.GenreID);
+                return View(book);
             }
-            ViewData["GenreID"] = new SelectList(await _context.Genres.OrderBy(g => g.GenreName).ToListAsync(), "GenreID", "GenreName", book.GenreID);
-            return View(book);
+
+            // New books start as Active by default
+            if (string.IsNullOrEmpty(book.BookStatus))
+            {
+                book.BookStatus = "Active";
+            }
+
+            _context.Add(book);
+            await _context.SaveChangesAsync();
+            return RedirectToAction(nameof(Index));
         }
 
-        // GET: Books/Edit/5
+        // -------------------------------------------------
+        // EDIT (ADMIN ONLY)
+        // -------------------------------------------------
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> Edit(int? id)
         {
             if (id == null) return NotFound();
 
-            var book = await _context.Books.FindAsync(id.Value);
+            var book = await _context.Books.FindAsync(id);
             if (book == null) return NotFound();
 
-            ViewData["GenreID"] = new SelectList(await _context.Genres.OrderBy(g => g.GenreName).ToListAsync(), "GenreID", "GenreName", book.GenreID);
+            await PopulateGenresDropDownList(book.GenreID);
             return View(book);
         }
 
-        // POST: Books/Edit/5
+        [Authorize(Roles = "Admin")]
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("BookID,GenreID,BookNumber,Title,Description,Price,Cost,PublishDate,InventoryQuantity,ReorderPoint,Authors,BookStatus")] Book book)
+        public async Task<IActionResult> Edit(int id, Book book)
         {
-            if (id != book.BookID) return BadRequest();
+            if (id != book.BookID) return NotFound();
 
-            if (ModelState.IsValid)
+            if (!ModelState.IsValid)
             {
-                try
-                {
-                    _context.Update(book);
-                    await _context.SaveChangesAsync();
-                }
-                catch (DbUpdateConcurrencyException)
-                {
-                    if (!BookExists(book.BookID)) return NotFound();
-                    else throw;
-                }
-                return RedirectToAction(nameof(Index));
+                await PopulateGenresDropDownList(book.GenreID);
+                return View(book);
             }
-            ViewData["GenreID"] = new SelectList(await _context.Genres.OrderBy(g => g.GenreName).ToListAsync(), "GenreID", "GenreName", book.GenreID);
-            return View(book);
+
+            try
+            {
+                _context.Update(book);
+                await _context.SaveChangesAsync();
+            }
+            catch (DbUpdateConcurrencyException)
+            {
+                if (!BookExists(book.BookID))
+                    return NotFound();
+                else
+                    throw;
+            }
+
+            return RedirectToAction(nameof(Index));
         }
 
-        // GET: Books/Delete/5
-        public async Task<IActionResult> Delete(int? id)
+        // -------------------------------------------------
+        // DISCONTINUE (ADMIN ONLY) – mark inactive
+        // -------------------------------------------------
+        [Authorize(Roles = "Admin")]
+        public async Task<IActionResult> Discontinue(int? id)
         {
             if (id == null) return NotFound();
 
             var book = await _context.Books
-                .Include(b => b.Genre)
-                .FirstOrDefaultAsync(m => m.BookID == id.Value);
+                                     .Include(b => b.Genre)
+                                     .FirstOrDefaultAsync(b => b.BookID == id);
 
             if (book == null) return NotFound();
 
             return View(book);
         }
 
-        // POST: Books/Delete/5
-        [HttpPost, ActionName("Delete")]
+        [Authorize(Roles = "Admin")]
+        [HttpPost, ActionName("Discontinue")]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> DeleteConfirmed(int id)
+        public async Task<IActionResult> DiscontinueConfirmed(int id)
         {
             var book = await _context.Books.FindAsync(id);
-            if (book != null)
-            {
-                _context.Books.Remove(book);
-                await _context.SaveChangesAsync();
-            }
+            if (book == null) return NotFound();
+
+            book.BookStatus = "Discontinued";
+            await _context.SaveChangesAsync();
+
             return RedirectToAction(nameof(Index));
         }
 
+        // -------------------------------------------------
+        // Helpers
+        // -------------------------------------------------
         private bool BookExists(int id)
         {
             return _context.Books.Any(e => e.BookID == id);
+        }
+
+        private async Task PopulateGenresDropDownList(object? selectedGenre = null)
+        {
+            var genresQuery = _context.Genres
+                                      .OrderBy(g => g.GenreName);
+
+            ViewBag.GenreID = new SelectList(await genresQuery.ToListAsync(),
+                                             "GenreID",
+                                             "GenreName",
+                                             selectedGenre);
         }
     }
 }
