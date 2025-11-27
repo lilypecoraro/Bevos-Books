@@ -1,0 +1,26 @@
+﻿@model Team24_BevosBooks.Models.Genre
+
+@{
+    ViewData["Title"] = "Edit Genre";
+}
+
+<h2>Edit Genre</h2>
+
+<form asp-action="Edit" method="post">
+
+    <input type="hidden" asp-for="GenreID" />
+
+    <div asp-validation-summary="All" class="text-danger"></div>
+
+    <div class="form-group">
+        <label asp-for="GenreName" class="control-label"></label>
+        <input asp-for="GenreName" class="form-control" />
+        <span asp-validation-for="GenreName" class="text-danger"></span>
+    </div>
+
+    <br />
+
+    <button type="submit" class="btn btn-primary">Save Changes</button>
+    <a asp-action="Index" class="btn btn-secondary">Back to List</a>
+
+</form>
