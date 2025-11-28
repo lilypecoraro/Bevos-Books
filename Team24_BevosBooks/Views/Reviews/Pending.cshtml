@@ -1,0 +1,31 @@
+﻿@model IEnumerable<Team24_BevosBooks.Models.Review>
+
+<h2>Pending Reviews</h2>
+
+<table class="table table-striped">
+    <thead>
+        <tr>
+            <th>Book</th>
+            <th>User</th>
+            <th>Rating</th>
+            <th>Text</th>
+            <th>Date</th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var r in Model)
+        {
+            <tr>
+                <td>@r.Book.Title</td>
+                <td>@r.Reviewer.Email</td>
+                <td>@r.Rating</td>
+                <td>@r.ReviewText</td>
+                <td>
+                    <a asp-action="Approve" asp-route-id="@r.ReviewID" class="btn btn-success btn-sm">Approve</a>
+                    <a asp-action="Reject" asp-route-id="@r.ReviewID" class="btn btn-danger btn-sm">Reject</a>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>

@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Team24_BevosBooks.DAL;
 
@@ -11,9 +12,11 @@ using Team24_BevosBooks.DAL;
 namespace Team24_BevosBooks.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20251127033451_AddAverageRatingToBooks")]
+    partial class AddAverageRatingToBooks
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -267,6 +270,9 @@ namespace Team24_BevosBooks.Migrations
                         .HasMaxLength(200)
                         .HasColumnType("nvarchar(200)");
 
+                    b.Property<decimal>("AverageRating")
+                        .HasColumnType("decimal(3,1)");
+
                     b.Property<int>("BookNumber")
                         .HasColumnType("int");
 
@@ -500,11 +506,18 @@ namespace Team24_BevosBooks.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("ReviewID"));
 
+                    b.Property<string>("ApprovedText")
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<string>("ApproverID")
                         .HasColumnType("nvarchar(450)");
 
                     b.Property<int>("BookID")
                         .HasColumnType("int");
+
+                    b.Property<string>("DisputeStatus")
+                        .HasMaxLength(20)
+                        .HasColumnType("nvarchar(20)");
 
                     b.Property<int>("Rating")
                         .HasColumnType("int");
@@ -518,13 +531,16 @@ namespace Team24_BevosBooks.Migrations
                         .HasColumnType("nvarchar(100)");
 
                     b.Property<string>("ReviewerID")
-                        .IsRequired()
                         .HasColumnType("nvarchar(450)");
 
                     b.Property<string>("Status")
                         .IsRequired()
                         .HasMaxLength(20)
                         .HasColumnType("nvarchar(20)");
+
+                    b.Property<string>("UserID")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(450)");
 
                     b.HasKey("ReviewID");
 
@@ -533,6 +549,8 @@ namespace Team24_BevosBooks.Migrations
                     b.HasIndex("BookID");
 
                     b.HasIndex("ReviewerID");
+
+                    b.HasIndex("UserID");
 
                     b.ToTable("Reviews");
                 });
@@ -670,14 +688,18 @@ namespace Team24_BevosBooks.Migrations
                         .HasForeignKey("ApproverID");
 
                     b.HasOne("Team24_BevosBooks.Models.Book", "Book")
-                        .WithMany("Reviews")
+                        .WithMany()
                         .HasForeignKey("BookID")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.HasOne("Team24_BevosBooks.Models.AppUser", "Reviewer")
                         .WithMany()
-                        .HasForeignKey("ReviewerID")
+                        .HasForeignKey("ReviewerID");
+
+                    b.HasOne("Team24_BevosBooks.Models.AppUser", "User")
+                        .WithMany()
+                        .HasForeignKey("UserID")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
@@ -686,11 +708,8 @@ namespace Team24_BevosBooks.Migrations
                     b.Navigation("Book");
 
                     b.Navigation("Reviewer");
-                });
 
-            modelBuilder.Entity("Team24_BevosBooks.Models.Book", b =>
-                {
-                    b.Navigation("Reviews");
+                    b.Navigation("User");
                 });
 
             modelBuilder.Entity("Team24_BevosBooks.Models.Coupon", b =>

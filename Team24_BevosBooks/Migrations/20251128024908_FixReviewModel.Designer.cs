@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Team24_BevosBooks.DAL;
 
@@ -11,9 +12,11 @@ using Team24_BevosBooks.DAL;
 namespace Team24_BevosBooks.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20251128024908_FixReviewModel")]
+    partial class FixReviewModel
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -670,7 +673,7 @@ namespace Team24_BevosBooks.Migrations
                         .HasForeignKey("ApproverID");
 
                     b.HasOne("Team24_BevosBooks.Models.Book", "Book")
-                        .WithMany("Reviews")
+                        .WithMany()
                         .HasForeignKey("BookID")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
@@ -686,11 +689,6 @@ namespace Team24_BevosBooks.Migrations
                     b.Navigation("Book");
 
                     b.Navigation("Reviewer");
-                });
-
-            modelBuilder.Entity("Team24_BevosBooks.Models.Book", b =>
-                {
-                    b.Navigation("Reviews");
                 });
 
             modelBuilder.Entity("Team24_BevosBooks.Models.Coupon", b =>

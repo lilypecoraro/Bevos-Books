@@ -13,155 +13,138 @@ namespace Team24_BevosBooks.Seeding
             int reviewsAdded = 0;
             string current = "NONE";
 
-            // Prevent duplicate seeding
+            // Prevent double seed
             if (db.Reviews.Any()) return;
 
-            // ===============================
-            // Helper: Get AppUserID by name
-            // ===============================
-            string GetUserId(string fullName)
-            {
-                var parts = fullName.Split(' ');
-                string first = parts[0].Trim();
-                string last = parts[1].Trim();
-
-                var user = db.Users.FirstOrDefault(u =>
-                    u.FirstName.ToLower() == first.ToLower() &&
-                    u.LastName.ToLower() == last.ToLower());
-
-                if (user == null)
-                    throw new Exception($"❌ No AppUser found for name: {fullName}");
-
-                return user.Id;
-            }
-
-            // ===============================
-            // Helper: Get AppUserID by email
-            // ===============================
+            // Helper – get user by email
             string GetUserIdByEmail(string email)
             {
-                var user = db.Users.FirstOrDefault(u =>
-                    u.Email.ToLower() == email.ToLower());
-
+                var user = db.Users.FirstOrDefault(u => u.Email.ToLower() == email.ToLower());
                 if (user == null)
-                    throw new Exception($"❌ No AppUser found for email: {email}");
-
+                    throw new Exception($"❌ USER NOT FOUND: {email}");
                 return user.Id;
             }
 
-            // ===============================
-            // Helper: Get BookID by Title
-            // ===============================
+            // Helper – get book ID by title
             int GetBookId(string title)
             {
-                var book = db.Books.FirstOrDefault(b =>
-                    b.Title.ToLower() == title.ToLower());
-
+                var book = db.Books.FirstOrDefault(b => b.Title.ToLower() == title.ToLower());
                 if (book == null)
-                    throw new Exception($"❌ No Book found with title: {title}");
-
+                    throw new Exception($"❌ BOOK NOT FOUND: {title}");
                 return book.BookID;
             }
 
-            // ===============================
-            // Build the list of reviews
-            // ===============================
+            // REVIEWER EMAILS (From your list)
+            string CBaker = GetUserIdByEmail("cbaker@example.com");
+            string WChang = GetUserIdByEmail("wchang@example.com");
+            string LChou = GetUserIdByEmail("limchou@gogle.com");
+            string JHampton = GetUserIdByEmail("jeffh@sonic.com");
+            string CMiller = GetUserIdByEmail("cmiller@bob.com");
+            string ELowe = GetUserIdByEmail("elowe@netscare.net");
+
+            // APPROVER EMAILS (from original examples)
+            string SBarnes = GetUserIdByEmail("s.barnes@bevosbooks.com");
+            string JMason = GetUserIdByEmail("j.mason@bevosbooks.com");
+            string CSilva = GetUserIdByEmail("c.silva@bevosbooks.com");
+            string EStuart = GetUserIdByEmail("e.stuart@bevosbooks.com");
+            string ARogers = GetUserIdByEmail("a.rogers@bevosbooks.com");
+            string HGarcia = GetUserIdByEmail("h.garcia@bevosbooks.com");
+
+            // ALL REVIEWS
             List<Review> reviews = new List<Review>
             {
                 new Review {
-                    ReviewerID = GetUserId("Christopher Baker"),
-                    BookID = GetBookId("Say Goodbye"),
-                    ApproverID = GetUserIdByEmail("s.barnes@bevosbooks.com"),
-                    Rating = 5,
+                    ReviewerID = CBaker,
+                    BookID     = GetBookId("Say Goodbye"),
+                    ApproverID = SBarnes,
+                    Rating     = 5,
                     ReviewText = "Incredible pacing and tension throughout—couldn’t stop reading.",
-                    DisputeStatus = "Approve"
+                    DisputeStatus     = "Approved"
                 },
 
                 new Review {
-                    ReviewerID = GetUserId("Christopher Baker"),
-                    BookID = GetBookId("Chasing Darkness"),
-                    ApproverID = GetUserIdByEmail("j.mason@bevosbooks.com"),
-                    Rating = 4,
+                    ReviewerID = CBaker,
+                    BookID     = GetBookId("Chasing Darkness"),
+                    ApproverID = JMason,
+                    Rating     = 4,
                     ReviewText = "Tight mystery with solid twists; a bit slow in the middle.",
-                    DisputeStatus = "Reject"
+                    DisputeStatus     = "Rejected"
                 },
 
                 new Review {
-                    ReviewerID = GetUserId("Wendy Chang"),
-                    BookID = GetBookId("The Professional"),
-                    ApproverID = GetUserIdByEmail("c.silva@bevosbooks.com"),
-                    Rating = 4,
+                    ReviewerID = WChang,
+                    BookID     = GetBookId("The Professional"),
+                    ApproverID = CSilva,
+                    Rating     = 4,
                     ReviewText = "Classic Spenser. Sharp dialogue and old-school charm.",
-                    DisputeStatus = "Approve"
+                    DisputeStatus     = "Approved"
                 },
 
                 new Review {
-                    ReviewerID = GetUserId("Lim Chou"),
-                    BookID = GetBookId("The Other Queen"),
-                    ApproverID = GetUserIdByEmail("e.stuart@bevosbooks.com"),
-                    Rating = 3,
+                    ReviewerID = LChou,
+                    BookID     = GetBookId("The Other Queen"),
+                    ApproverID = EStuart,
+                    Rating     = 3,
                     ReviewText = "Rich historical detail, but pacing drags at times.",
-                    DisputeStatus = "Approve"
+                    DisputeStatus     = "Approved"
                 },
 
                 new Review {
-                    ReviewerID = GetUserId("Lim Chou"),
-                    BookID = GetBookId("Wrecked"),
-                    ApproverID = GetUserIdByEmail("a.rogers@bevosbooks.com"),
-                    Rating = 5,
+                    ReviewerID = LChou,
+                    BookID     = GetBookId("Wrecked"),
+                    ApproverID = ARogers,
+                    Rating     = 5,
                     ReviewText = "Fast-moving and witty. Loved the Cape Cod setting.",
-                    DisputeStatus = "Approve"
+                    DisputeStatus     = "Approved"
                 },
 
                 new Review {
-                    ReviewerID = GetUserId("Lim Chou"),
-                    BookID = GetBookId("Reckless"),
-                    ApproverID = GetUserIdByEmail("h.garcia@bevosbooks.com"),
-                    Rating = 4,
+                    ReviewerID = LChou,
+                    BookID     = GetBookId("Reckless"),
+                    ApproverID = HGarcia,
+                    Rating     = 4,
                     ReviewText = "Emotional and thrilling. Hauck’s motives feel real.",
-                    DisputeStatus = "Approve"
+                    DisputeStatus     = "Approved"
                 },
 
                 new Review {
-                    ReviewerID = GetUserId("Jeffrey Hampton"),
-                    BookID = GetBookId("The Professional"),
-                    ApproverID = GetUserIdByEmail("c.silva@bevosbooks.com"),
-                    Rating = 5,
+                    ReviewerID = JHampton,
+                    BookID     = GetBookId("The Professional"),
+                    ApproverID = CSilva,
+                    Rating     = 5,
                     ReviewText = "Lean, witty Spenser case—couldn’t put it down.",
-                    DisputeStatus = "Approve"
+                    DisputeStatus     = "Approved"
                 },
 
                 new Review {
-                    ReviewerID = GetUserId("Charles Miller"),
-                    BookID = GetBookId("Say Goodbye"),
-                    ApproverID = GetUserIdByEmail("a.rogers@bevosbooks.com"),
-                    Rating = 4,
+                    ReviewerID = CMiller,
+                    BookID     = GetBookId("Say Goodbye"),
+                    ApproverID = ARogers,
+                    Rating     = 4,
                     ReviewText = "Creepy, clever, and tightly plotted.",
-                    DisputeStatus = "Reject"
+                    DisputeStatus     = "Rejected"
                 },
 
                 new Review {
-                    ReviewerID = GetUserId("Ernest Lowe"),
-                    BookID = GetBookId("Wrecked"),
-                    ApproverID = GetUserIdByEmail("e.stuart@bevosbooks.com"),
-                    Rating = 4,
+                    ReviewerID = ELowe,
+                    BookID     = GetBookId("Wrecked"),
+                    ApproverID = EStuart,
+                    Rating     = 4,
                     ReviewText = "Light, fun mystery with brisk pacing.",
-                    DisputeStatus = "Approve"
+                    DisputeStatus     = "Approved"
                 },
 
                 new Review {
-                    ReviewerID = GetUserId("Ernest Lowe"),
-                    BookID = GetBookId("Reckless"),
-                    ApproverID = GetUserIdByEmail("e.stuart@bevosbooks.com"),
-                    Rating = 3,
+                    ReviewerID = ELowe,
+                    BookID     = GetBookId("Reckless"),
+                    ApproverID = EStuart,
+                    Rating     = 3,
                     ReviewText = "Gritty and tense, but a bit uneven.",
-                    DisputeStatus = "Approve"
+                    DisputeStatus     = "Approved"
                 }
             };
 
-            // ===============================
-            // Save to DB
-            // ===============================
+            // SAVE
             try
             {
                 foreach (Review r in reviews)
@@ -174,13 +157,8 @@ namespace Team24_BevosBooks.Seeding
             }
             catch (Exception ex)
             {
-                string inner1 = ex.InnerException?.Message ?? "NONE";
-                string inner2 = ex.InnerException?.InnerException?.Message ?? "NONE";
-
-                throw new Exception(
-                    $"❌ ERROR Seeding Reviews | Current Review: {current} | Added: {reviewsAdded}\n" +
-                    $"EX: {ex.Message}\nINNER1: {inner1}\nINNER2: {inner2}"
-                );
+                string inner = ex.InnerException?.Message ?? "NONE";
+                throw new Exception($"❌ ERROR Seeding Reviews\nCurrent: {current}\nAdded: {reviewsAdded}\n{inner}");
             }
         }
     }

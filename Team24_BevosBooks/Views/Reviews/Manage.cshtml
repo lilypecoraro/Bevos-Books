@@ -1,0 +1,28 @@
+﻿@model IEnumerable<Team24_BevosBooks.Models.Review>
+
+<h2>All Reviews</h2>
+
+<table class="table table-bordered">
+    <thead>
+        <tr>
+            <th>Book</th>
+            <th>User</th>
+            <th>Rating</th>
+            <th>Text</th>
+            <th>Status</th>
+            <th>Approver</th>
+            <th>Date</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var r in Model)
+        {
+            <tr>
+                <td>@r.Book.Title</td>
+                <td>@r.Reviewer.Email</td>
+                <td>@r.Rating</td>
+                <td>@r.ReviewText</td>
+            </tr>
+        }
+    </tbody>
+</table>

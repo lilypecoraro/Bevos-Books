@@ -44,5 +44,8 @@ namespace Team24_BevosBooks.Models
 
         // Navigation property
         public Genre Genre { get; set; }
+
+        public List<Review> Reviews { get; set; } = new List<Review>();
+
     }
 }

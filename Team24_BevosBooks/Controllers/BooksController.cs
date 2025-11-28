@@ -68,16 +68,27 @@ namespace Team24_BevosBooks.Controllers
         // =========================================================
         public async Task<IActionResult> Details(int? id)
         {
-            if (id == null) return NotFound();
+            if (id == null)
+                return NotFound();
 
-            Book? book = await _context.Books
+            var book = await _context.Books
                 .Include(b => b.Genre)
+                .Include(b => b.Reviews)
+                    .ThenInclude(r => r.Reviewer)
                 .FirstOrDefaultAsync(b => b.BookID == id);
 
-            if (book == null) return NotFound();
+            if (book == null)
+                return NotFound();
+
+            // Show only APPROVED reviews
+            book.Reviews = book.Reviews
+                .Where(r => r.DisputeStatus == "Approved")
+                .ToList();
 
             return View(book);
         }
+
+
 
         // =========================================================
         // CREATE (ADMIN)
