@@ -19,5 +19,17 @@ namespace Team24_BevosBooks.Controllers
             var reviews = await _context.Reviews.ToListAsync();
             return View(reviews);
         }
+
+        public IActionResult Pending()
+        {
+            var pendingReviews = _context.Reviews
+                .Include(r => r.Book)
+                .Include(r => r.Reviewer)
+                .Where(r => r.DisputeStatus == "Pending")
+                .ToList();
+
+            return View(pendingReviews);
+        }
+
     }
 }

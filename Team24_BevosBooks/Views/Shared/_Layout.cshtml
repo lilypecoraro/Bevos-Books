@@ -65,17 +65,28 @@
                     {
                         <li class="nav-item dropdown">
                             <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
-                                Orders
+                                Admin Panel
                             </a>
                             <ul class="dropdown-menu">
+
+                                <!-- REVIEW QUEUE -->
                                 <li>
                                     <a class="dropdown-item" asp-controller="Reviews" asp-action="Pending">
                                         Review Queue
                                     </a>
                                 </li>
+
+                                <!-- ORDER LIST -->
+                                <li>
+                                    <a class="dropdown-item" asp-controller="Orders" asp-action="AllOrders">
+                                        All Orders
+                                    </a>
+                                </li>
+
                             </ul>
                         </li>
                     }
+
 
                     <!-- ADMIN ONLY: EMPLOYEES + CUSTOMERS -->
                     @if (User.IsInRole("Admin"))

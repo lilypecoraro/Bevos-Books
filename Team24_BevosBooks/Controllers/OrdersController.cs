@@ -8,16 +8,16 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Team24_BevosBooks.DAL;
 using Team24_BevosBooks.Models;
+using Team24_BevosBooks.Models.ViewModels;
 
 namespace Team24_BevosBooks.Controllers
 {
-    [Authorize(Roles = "Customer")]
+    [Authorize]  // Controller requires login — specific roles added per action
     public class OrdersController : Controller
     {
         private readonly AppDbContext _context;
         private readonly UserManager<AppUser> _userManager;
 
-        // Shipping constants (can be changed later without editing logic)
         private const decimal FIRST_BOOK_SHIPPING = 3.50m;
         private const decimal ADDITIONAL_BOOK_SHIPPING = 1.50m;
 
@@ -27,18 +27,16 @@ namespace Team24_BevosBooks.Controllers
             _userManager = userManager;
         }
 
-        // ======================================
-        // Helpers
-        // ======================================
-
-        // Get or create current user's "InCart" order
+        // ========================================================
+        // GET OR CREATE CART
+        // ========================================================
         private async Task<Order> GetOrCreateCart(string userId)
         {
             var order = await _context.Orders
-                                      .Include(o => o.OrderDetails)
-                                      .ThenInclude(od => od.Book)
-                                      .FirstOrDefaultAsync(o => o.UserID == userId &&
-                                                                o.OrderStatus == "InCart");
+                .Include(o => o.OrderDetails)
+                    .ThenInclude(od => od.Book)
+                .FirstOrDefaultAsync(o => o.UserID == userId &&
+                                          o.OrderStatus == "InCart");
 
             if (order == null)
             {
@@ -46,8 +44,8 @@ namespace Team24_BevosBooks.Controllers
                 {
                     UserID = userId,
                     OrderDate = DateTime.Now,
-                    ShippingFee = 0m,
                     OrderStatus = "InCart",
+                    ShippingFee = 0,
                     OrderDetails = new List<OrderDetail>()
                 };
 
@@ -58,88 +56,62 @@ namespace Team24_BevosBooks.Controllers
             return order;
         }
 
-        // Make sure cart reflects current world:
-        // - remove discontinued, out-of-stock
-        // - adjust quantities down to inventory
-        // - update prices and costs to current Book values
         private async Task<List<string>> UpdateCartForChanges(Order cart)
         {
-            var messages = new List<string>();
+            List<string> messages = new();
 
-            var details = cart.OrderDetails.ToList();
-            foreach (var detail in details)
+            var items = cart.OrderDetails.ToList();
+            foreach (var item in items)
             {
-                var book = await _context.Books.FirstOrDefaultAsync(b => b.BookID == detail.BookID);
-                if (book == null)
-                {
-                    messages.Add($"'{detail.Book?.Title}' is no longer available and was removed from your cart.");
-                    _context.OrderDetails.Remove(detail);
-                    continue;
-                }
+                var book = await _context.Books.FindAsync(item.BookID);
 
-                if (book.BookStatus == "Discontinued")
+                if (book == null || book.BookStatus == "Discontinued")
                 {
-                    messages.Add($"'{book.Title}' has been discontinued and was removed from your cart.");
-                    _context.OrderDetails.Remove(detail);
+                    messages.Add($"'{item.Book?.Title}' is no longer available and was removed.");
+                    _context.OrderDetails.Remove(item);
                     continue;
                 }
 
                 if (book.InventoryQuantity == 0)
                 {
-                    messages.Add($"'{book.Title}' is now out of stock and was removed from your cart.");
-                    _context.OrderDetails.Remove(detail);
+                    messages.Add($"'{book.Title}' is out of stock and was removed.");
+                    _context.OrderDetails.Remove(item);
                     continue;
                 }
 
-                if (detail.Quantity > book.InventoryQuantity)
+                if (item.Quantity > book.InventoryQuantity)
                 {
-                    detail.Quantity = book.InventoryQuantity;
-                    messages.Add($"Quantity for '{book.Title}' was reduced to {book.InventoryQuantity} due to stock limits.");
+                    item.Quantity = book.InventoryQuantity;
+                    messages.Add($"Quantity for '{book.Title}' reduced to {book.InventoryQuantity}.");
                 }
 
-                // Always reflect current price/cost
-                detail.Price = book.Price;
-                detail.Cost = book.Cost;
+                item.Price = book.Price;
+                item.Cost = book.Cost;
             }
 
             await _context.SaveChangesAsync();
             return messages;
         }
 
-        // Totals for an IN-CART order (before it's placed)
         private (decimal subtotal, decimal shipping, decimal total)
             ComputeCartTotals(Order cart, bool freeShipping = false)
         {
-            decimal subtotal = cart.OrderDetails.Sum(od => od.Quantity * od.Price);
-            int totalQty = cart.OrderDetails.Sum(od => od.Quantity);
+            decimal subtotal = cart.OrderDetails.Sum(od => od.Price * od.Quantity);
+            int qty = cart.OrderDetails.Sum(od => od.Quantity);
 
-            decimal shipping = 0m;
-            if (!freeShipping && totalQty > 0)
+            decimal shipping = 0;
+            if (!freeShipping && qty > 0)
             {
-                shipping = FIRST_BOOK_SHIPPING +
-                           (totalQty - 1) * ADDITIONAL_BOOK_SHIPPING;
+                shipping = FIRST_BOOK_SHIPPING + (qty - 1) * ADDITIONAL_BOOK_SHIPPING;
             }
 
-            cart.ShippingFee = shipping;
-            decimal total = subtotal + shipping;
-            return (subtotal, shipping, total);
+            return (subtotal, shipping, subtotal + shipping);
         }
 
-        // Totals for a COMPLETED order (use stored shipping fee)
-        private (decimal subtotal, decimal shipping, decimal total)
-            ComputeStoredOrderTotals(Order order)
-        {
-            decimal subtotal = order.OrderDetails.Sum(od => od.Quantity * od.Price);
-            decimal shipping = order.ShippingFee;
-            decimal total = subtotal + shipping;
-            return (subtotal, shipping, total);
-        }
-
-        // ======================================
-        // CART
-        // ======================================
-
-        // GET: /Orders/Cart
+        // ========================================================
+        // CART PAGE (CUSTOMER)
+        // ========================================================
+        [Authorize(Roles = "Customer")]
         public async Task<IActionResult> Cart()
         {
             var user = await _userManager.GetUserAsync(User);
@@ -147,16 +119,13 @@ namespace Team24_BevosBooks.Controllers
 
             var cart = await GetOrCreateCart(user.Id);
 
-            // Reload with navigation props
             cart = await _context.Orders
-                                 .Include(o => o.OrderDetails)
-                                 .ThenInclude(od => od.Book)
-                                 .FirstAsync(o => o.OrderID == cart.OrderID);
+                .Include(o => o.OrderDetails)
+                    .ThenInclude(od => od.Book)
+                .FirstAsync(o => o.OrderID == cart.OrderID);
 
             var messages = await UpdateCartForChanges(cart);
             var totals = ComputeCartTotals(cart);
-
-            await _context.SaveChangesAsync();
 
             ViewBag.Messages = messages;
             ViewBag.Subtotal = totals.subtotal;
@@ -166,110 +135,63 @@ namespace Team24_BevosBooks.Controllers
             return View(cart);
         }
 
-        // GET: /Orders/AddToCart/5 (called from Book Details)
+        // ========================================================
+        // ADD TO CART (CUSTOMER)
+        // ========================================================
+        [Authorize(Roles = "Customer")]
         public async Task<IActionResult> AddToCart(int id)
         {
             var user = await _userManager.GetUserAsync(User);
             if (user == null) return RedirectToAction("Login", "Account");
 
-            var book = await _context.Books.FirstOrDefaultAsync(b => b.BookID == id);
+            var book = await _context.Books.FindAsync(id);
             if (book == null) return NotFound();
 
             if (book.InventoryQuantity <= 0 || book.BookStatus == "Discontinued")
             {
-                TempData["CartMessage"] = "This book is not available to add to the cart.";
-                return RedirectToAction("Details", "Books", new { id = book.BookID });
+                TempData["CartMessage"] = "This book is not available.";
+                return RedirectToAction("Details", "Books", new { id });
             }
 
             var cart = await GetOrCreateCart(user.Id);
 
-            var existingDetail = await _context.OrderDetails
-                                               .Include(od => od.Book)
-                                               .FirstOrDefaultAsync(od => od.OrderID == cart.OrderID &&
-                                                                          od.BookID == book.BookID);
+            var existing = await _context.OrderDetails
+                .FirstOrDefaultAsync(od => od.OrderID == cart.OrderID &&
+                                           od.BookID == id);
 
-            if (existingDetail == null)
+            if (existing == null)
             {
-                existingDetail = new OrderDetail
+                existing = new OrderDetail
                 {
                     OrderID = cart.OrderID,
-                    BookID = book.BookID,
+                    BookID = id,
                     Quantity = 1,
                     Price = book.Price,
                     Cost = book.Cost
                 };
-                _context.OrderDetails.Add(existingDetail);
+
+                _context.OrderDetails.Add(existing);
             }
             else
             {
-                if (existingDetail.Quantity < book.InventoryQuantity)
-                {
-                    existingDetail.Quantity += 1;
-                }
+                if (existing.Quantity < book.InventoryQuantity)
+                    existing.Quantity++;
                 else
-                {
-                    TempData["CartMessage"] = "You cannot add more of this book than are in stock.";
-                }
+                    TempData["CartMessage"] = "Cannot exceed stock quantity.";
             }
 
             await _context.SaveChangesAsync();
             return RedirectToAction("Cart");
         }
 
-        // POST: /Orders/UpdateQuantity
+        // ========================================================
+        // REMOVE ITEM (CUSTOMER)
+        // ========================================================
+        [Authorize(Roles = "Customer")]
         [HttpPost]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> UpdateQuantity(int orderDetailId, int quantity)
-        {
-            var user = await _userManager.GetUserAsync(User);
-            if (user == null) return RedirectToAction("Login", "Account");
-
-            var detail = await _context.OrderDetails
-                                       .Include(od => od.Order)
-                                       .Include(od => od.Book)
-                                       .FirstOrDefaultAsync(od => od.OrderDetailID == orderDetailId &&
-                                                                  od.Order.UserID == user.Id &&
-                                                                  od.Order.OrderStatus == "InCart");
-
-            if (detail == null) return NotFound();
-
-            if (quantity <= 0)
-            {
-                _context.OrderDetails.Remove(detail);
-            }
-            else
-            {
-                var book = detail.Book;
-                if (book.InventoryQuantity == 0)
-                {
-                    _context.OrderDetails.Remove(detail);
-                }
-                else
-                {
-                    detail.Quantity = Math.Min(quantity, book.InventoryQuantity);
-                    detail.Price = book.Price;
-                    detail.Cost = book.Cost;
-                }
-            }
-
-            await _context.SaveChangesAsync();
-            return RedirectToAction("Cart");
-        }
-
-        // POST: /Orders/RemoveItem
-        [HttpPost]
-        [ValidateAntiForgeryToken]
         public async Task<IActionResult> RemoveItem(int orderDetailId)
         {
-            var user = await _userManager.GetUserAsync(User);
-            if (user == null) return RedirectToAction("Login", "Account");
-
-            var detail = await _context.OrderDetails
-                                       .Include(od => od.Order)
-                                       .FirstOrDefaultAsync(od => od.OrderDetailID == orderDetailId &&
-                                                                  od.Order.UserID == user.Id &&
-                                                                  od.Order.OrderStatus == "InCart");
-
+            var detail = await _context.OrderDetails.FindAsync(orderDetailId);
             if (detail != null)
             {
                 _context.OrderDetails.Remove(detail);
@@ -279,230 +201,230 @@ namespace Team24_BevosBooks.Controllers
             return RedirectToAction("Cart");
         }
 
-        // ======================================
-        // CHECKOUT
-        // ======================================
+        // ========================================================
+        // UPDATE QUANTITY (CUSTOMER)
+        // ========================================================
+        [Authorize(Roles = "Customer")]
+        [HttpPost]
+        public async Task<IActionResult> UpdateQuantity(int orderDetailId, int quantity)
+        {
+            var detail = await _context.OrderDetails
+                .Include(od => od.Book)
+                .Include(od => od.Order)
+                .FirstOrDefaultAsync(od => od.OrderDetailID == orderDetailId);
 
-        // GET: /Orders/Checkout
+            if (detail == null) return NotFound();
+
+            if (quantity <= 0)
+                _context.OrderDetails.Remove(detail);
+            else
+                detail.Quantity = Math.Min(quantity, detail.Book.InventoryQuantity);
+
+            await _context.SaveChangesAsync();
+            return RedirectToAction("Cart");
+        }
+
+        // ========================================================
+        // CHECKOUT (GET)
+        // ========================================================
+        [Authorize(Roles = "Customer")]
         public async Task<IActionResult> Checkout()
         {
             var user = await _userManager.GetUserAsync(User);
             if (user == null) return RedirectToAction("Login", "Account");
 
             var cart = await GetOrCreateCart(user.Id);
+
             cart = await _context.Orders
-                                 .Include(o => o.OrderDetails)
-                                 .ThenInclude(od => od.Book)
-                                 .FirstAsync(o => o.OrderID == cart.OrderID);
+                .Include(o => o.OrderDetails)
+                    .ThenInclude(od => od.Book)
+                .FirstAsync(o => o.OrderID == cart.OrderID);
 
             if (!cart.OrderDetails.Any())
             {
-                TempData["CartMessage"] = "You cannot check out with an empty cart.";
+                TempData["CheckoutMessage"] = "Your cart is empty.";
                 return RedirectToAction("Cart");
             }
 
+            await UpdateCartForChanges(cart);
             var totals = ComputeCartTotals(cart);
-            await _context.SaveChangesAsync();
 
-            ViewBag.Subtotal = totals.subtotal;
-            ViewBag.Shipping = totals.shipping;
-            ViewBag.Total = totals.total;
+            var vm = new CheckoutViewModel
+            {
+                Order = cart,
+                Cards = await _context.Cards.Where(c => c.UserID == user.Id).ToListAsync(),
+                SelectedCardID = null,
+                CouponCode = "",
+                Subtotal = totals.subtotal,
+                Shipping = totals.shipping,
+                Total = totals.total
+            };
 
-            var cards = await _context.Cards
-                                      .Where(c => c.UserID == user.Id)
-                                      .ToListAsync();
-            ViewBag.Cards = cards;
-
-            return View(cart);
+            return View(vm);
         }
 
-        // POST: /Orders/Checkout
+        // ========================================================
+        // CHECKOUT (POST)
+        // ========================================================
+        [Authorize(Roles = "Customer")]
         [HttpPost]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Checkout(int orderId, int selectedCardId, string? couponCode)
+        public async Task<IActionResult> Checkout(int orderId, int? selectedCardId, string? couponCode)
         {
             var user = await _userManager.GetUserAsync(User);
             if (user == null) return RedirectToAction("Login", "Account");
 
             var cart = await _context.Orders
-                                     .Include(o => o.OrderDetails)
-                                     .ThenInclude(od => od.Book)
-                                     .FirstOrDefaultAsync(o => o.OrderID == orderId &&
-                                                               o.UserID == user.Id &&
-                                                               o.OrderStatus == "InCart");
+                .Include(o => o.OrderDetails)
+                    .ThenInclude(od => od.Book)
+                .FirstOrDefaultAsync(o => o.OrderID == orderId &&
+                                          o.UserID == user.Id &&
+                                          o.OrderStatus == "InCart");
 
             if (cart == null) return NotFound();
 
             if (!cart.OrderDetails.Any())
-            {
-                TempData["CartMessage"] = "You cannot check out with an empty cart.";
                 return RedirectToAction("Cart");
+
+            if (selectedCardId == null)
+            {
+                TempData["CheckoutMessage"] = "Please select a card.";
+                return RedirectToAction("Checkout");
             }
 
-            // Validate card ownership
             var card = await _context.Cards
-                                     .FirstOrDefaultAsync(c => c.CardID == selectedCardId &&
-                                                               c.UserID == user.Id);
+                .FirstOrDefaultAsync(c => c.CardID == selectedCardId &&
+                                          c.UserID == user.Id);
+
             if (card == null)
             {
-                ModelState.AddModelError("", "You must select a valid payment card.");
+                TempData["CheckoutMessage"] = "Invalid card.";
+                return RedirectToAction("Checkout");
             }
 
-            // Subtotal BEFORE any coupon discount (used for free-shipping threshold)
-            decimal subtotalBeforeCoupon = cart.OrderDetails.Sum(od => od.Quantity * od.Price);
             bool freeShipping = false;
-            Coupon? coupon = null;
 
-            //--------------------------------------------------------------
-            // COUPON VALIDATION + APPLICATION
-            //--------------------------------------------------------------
+            // ============= APPLY COUPON =========================
             if (!string.IsNullOrWhiteSpace(couponCode))
             {
-                coupon = await _context.Coupons
-                                       .FirstOrDefaultAsync(c => c.CouponCode == couponCode &&
-                                                                 c.Status == "Enabled");
+                var coupon = await _context.Coupons
+                    .FirstOrDefaultAsync(c => c.CouponCode == couponCode &&
+                                              c.Status == "Enabled");
 
-                if (coupon == null)
+                if (coupon != null)
                 {
-                    ModelState.AddModelError("", "The coupon code is not valid or enabled.");
+                    decimal before = cart.OrderDetails.Sum(od => od.Price * od.Quantity);
+
+                    if (coupon.CouponType == "PercentOff")
+                    {
+                        foreach (var d in cart.OrderDetails)
+                        {
+                            decimal discount = d.Price * (coupon.DiscountPercent.Value / 100m);
+                            d.Price -= discount;
+                        }
+                    }
+                    else if (coupon.CouponType == "FreeShipping")
+                    {
+                        if (before >= coupon.FreeThreshold)
+                            freeShipping = true;
+                        else
+                            TempData["CheckoutMessage"] = $"This coupon requires {coupon.FreeThreshold:c}.";
+                    }
                 }
                 else
                 {
-                    // PERCENT OFF
-                    if (coupon.CouponType == "PercentOff")
-                    {
-                        if (coupon.DiscountPercent == null || coupon.DiscountPercent <= 0)
-                        {
-                            ModelState.AddModelError("", "Invalid percent-off coupon.");
-                        }
-                        else
-                        {
-                            foreach (var detail in cart.OrderDetails)
-                            {
-                                decimal discount = detail.Price * (coupon.DiscountPercent.Value / 100m);
-                                detail.Price -= discount;
-                                detail.CouponID = coupon.CouponID;
-                            }
-                        }
-                    }
-                    // FREE SHIPPING
-                    else if (coupon.CouponType == "FreeShipping")
-                    {
-                        decimal threshold = coupon.FreeThreshold ?? 0m;
-
-                        if (subtotalBeforeCoupon >= threshold)
-                        {
-                            freeShipping = true;
-                            // Tag coupon on each detail (optional, but lets you track usage)
-                            foreach (var detail in cart.OrderDetails)
-                            {
-                                detail.CouponID = coupon.CouponID;
-                            }
-                        }
-                        else
-                        {
-                            ModelState.AddModelError("",
-                                $"This coupon requires a minimum order of {threshold:c} to qualify for free shipping.");
-                        }
-                    }
-                    else
-                    {
-                        ModelState.AddModelError("", "Unknown coupon type.");
-                    }
+                    TempData["CheckoutMessage"] = "Invalid coupon.";
                 }
             }
 
-            // If there are any validation errors, recalc and redisplay
-            if (!ModelState.IsValid)
-            {
-                var totalsError = ComputeCartTotals(cart, freeShipping);
-                await _context.SaveChangesAsync();
-
-                ViewBag.Subtotal = totalsError.subtotal;
-                ViewBag.Shipping = totalsError.shipping;
-                ViewBag.Total = totalsError.total;
-
-                var cards = await _context.Cards
-                                          .Where(c => c.UserID == user.Id)
-                                          .ToListAsync();
-                ViewBag.Cards = cards;
-
-                return View(cart);
-            }
-
-            // Final totals (after coupon)
             var totals = ComputeCartTotals(cart, freeShipping);
 
-            // Attach card to each order detail
-            foreach (var detail in cart.OrderDetails)
+            // DECREASE INVENTORY
+            foreach (var item in cart.OrderDetails)
             {
-                detail.CardID = card.CardID;
-            }
-
-            // Decrease inventory for each book
-            foreach (var detail in cart.OrderDetails)
-            {
-                var book = await _context.Books.FindAsync(detail.BookID);
+                var book = await _context.Books.FindAsync(item.BookID);
                 if (book != null)
-                {
-                    book.InventoryQuantity -= detail.Quantity;
-                    if (book.InventoryQuantity < 0) book.InventoryQuantity = 0;
-                }
+                    book.InventoryQuantity -= item.Quantity;
             }
 
-            cart.OrderDate = DateTime.Now;
+            // FINALIZE ORDER
             cart.OrderStatus = "Completed";
+            cart.OrderDate = DateTime.Now;
+            cart.ShippingFee = totals.shipping;
+
+            foreach (var d in cart.OrderDetails)
+                d.CardID = selectedCardId.Value;
 
             await _context.SaveChangesAsync();
 
             return RedirectToAction("OrderConfirmation", new { id = cart.OrderID });
         }
 
-        // ======================================
+        // ========================================================
         // ORDER CONFIRMATION
-        // ======================================
-
-        // GET: /Orders/OrderConfirmation/5
+        // ========================================================
+        [Authorize]
         public async Task<IActionResult> OrderConfirmation(int id)
         {
             var user = await _userManager.GetUserAsync(User);
-            if (user == null) return RedirectToAction("Login", "Account");
 
             var order = await _context.Orders
-                                      .Include(o => o.OrderDetails)
-                                      .ThenInclude(od => od.Book)
-                                      .ThenInclude(b => b.Genre)
-                                      .FirstOrDefaultAsync(o => o.OrderID == id &&
-                                                                o.UserID == user.Id);
+                .Include(o => o.OrderDetails)
+                    .ThenInclude(od => od.Book)
+                    .ThenInclude(b => b.Genre)
+                .Include(o => o.OrderDetails)
+                    .ThenInclude(od => od.Card)
+                .FirstOrDefaultAsync(o => o.OrderID == id &&
+                                          o.UserID == user.Id);
 
             if (order == null) return NotFound();
 
-            var totals = ComputeStoredOrderTotals(order);
-            ViewBag.Subtotal = totals.subtotal;
-            ViewBag.Shipping = totals.shipping;
-            ViewBag.Total = totals.total;
+            var firstBook = order.OrderDetails.First().Book;
 
-            // Simple recommendations:
-            // three other active books in the same genre as the first purchased book
-            var firstBook = order.OrderDetails.FirstOrDefault()?.Book;
-            List<Book> recommendations = new();
+            var recs = await _context.Books
+                .Where(b => b.GenreID == firstBook.GenreID &&
+                            b.BookStatus == "Active" &&
+                            !order.OrderDetails.Select(od => od.BookID).Contains(b.BookID))
+                .Take(3)
+                .ToListAsync();
 
-            if (firstBook != null)
-            {
-                var purchasedIds = order.OrderDetails.Select(od => od.BookID).ToList();
-
-                recommendations = await _context.Books
-                    .Where(b => b.GenreID == firstBook.GenreID &&
-                                b.BookStatus == "Active" &&
-                                !purchasedIds.Contains(b.BookID))
-                    .OrderBy(b => b.Title)
-                    .Take(3)
-                    .ToListAsync();
-            }
-
-            ViewBag.Recommendations = recommendations;
+            ViewBag.Recommendations = recs;
 
             return View(order);
+        }
+
+        // ========================================================
+        // ORDER HISTORY (CUSTOMER)
+        // ========================================================
+        [Authorize(Roles = "Customer")]
+        public async Task<IActionResult> History()
+        {
+            var user = await _userManager.GetUserAsync(User);
+
+            var orders = await _context.Orders
+                .Include(o => o.OrderDetails)
+                    .ThenInclude(od => od.Card)
+                .Where(o => o.UserID == user.Id &&
+                            o.OrderStatus == "Completed")
+                .OrderByDescending(o => o.OrderDate)
+                .ToListAsync();
+
+            return View(orders);
+        }
+
+        // ========================================================
+        // ALL ORDERS (ADMIN + EMPLOYEE)
+        // ========================================================
+        [Authorize(Roles = "Admin,Employee")]
+        public async Task<IActionResult> AllOrders()
+        {
+            var orders = await _context.Orders
+                .Include(o => o.User)
+                .Include(o => o.OrderDetails)
+                    .ThenInclude(od => od.Book)
+                .OrderByDescending(o => o.OrderDate)
+                .ToListAsync();
+
+            return View(orders);
         }
     }
 }

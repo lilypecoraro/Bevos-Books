@@ -2,18 +2,9 @@
 
 @{
     ViewData["Title"] = "Checkout";
-
-    decimal subtotal = Model.Subtotal;
-    decimal shipping = Model.Shipping;
-    decimal total = Model.Total;
 }
 
 <h2 class="mt-3 mb-3">Checkout</h2>
-
-@if (TempData["CheckoutMessage"] != null)
-{
-    <div class="alert alert-info">@TempData["CheckoutMessage"]</div>
-}
 
 @if (!Model.Order.OrderDetails.Any())
 {
@@ -21,106 +12,113 @@
         Your shopping cart is empty. You cannot check out until items are added.
     </div>
     <a asp-controller="Books" asp-action="Index" class="btn btn-primary">Browse Books</a>
-    return;
 }
+else
+{
+    <div class="row">
 
-<div class="row">
-    <div class="col-md-7">
+        <!-- LEFT COLUMN -->
+        <div class="col-md-7">
 
-        <!-- PAYMENT METHOD -->
-        <div class="card mb-4">
-            <div class="card-header">
-                <h5 class="mb-0">Payment Method</h5>
+            <!-- PAYMENT METHOD -->
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5>Select Payment Method</h5>
+                </div>
+                <div class="card-body">
+
+                    @if (!Model.Cards.Any())
+                    {
+                        <p>You have no saved credit cards.</p>
+                        <a asp-controller="Account" asp-action="AddCard"
+                           class="btn btn-primary btn-sm">Add a Credit Card</a>
+                    }
+                    else
+                    {
+                        <form asp-action="Checkout" method="post">
+                            <input type="hidden" name="orderId" value="@Model.Order.OrderID" />
+
+                            <div class="mb-3">
+                                <label class="form-label"><strong>Choose a credit card:</strong></label>
+                                <select asp-for="SelectedCardID" class="form-select" required>
+                                    <option value="">-- Select Card --</option>
+
+                                    @foreach (var c in Model.Cards)
+                                    {
+                                        string last4 = c.CardNumber[^4..];
+                                        <option value="@c.CardID">@c.CardType •••• @last4</option>
+                                    }
+                                </select>
+                                <span asp-validation-for="SelectedCardID" class="text-danger"></span>
+                            </div>
+
+                            <a asp-controller="Account" asp-action="AddCard"
+                               class="btn btn-outline-secondary btn-sm mb-2">
+                                Add another card
+                            </a>
+                        </form>
+                    }
+                </div>
             </div>
-            <div class="card-body">
 
-                @if (!Model.Cards.Any())
-                {
-                    <p>You do not have any saved credit cards.</p>
-                    <a asp-controller="Account" asp-action="AddCard" class="btn btn-sm btn-primary">
-                        Add a Credit Card
-                    </a>
-                }
-                else
-                {
-                    <form asp-action="ApplyCoupon" method="post">
+            <!-- COUPON -->
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5>Coupon Code</h5>
+                </div>
+                <div class="card-body">
+                    <form asp-action="Checkout" method="post">
                         <input type="hidden" name="orderId" value="@Model.Order.OrderID" />
 
-                        <div class="mb-3">
-                            <label class="form-label"><strong>Select a Credit Card:</strong></label>
-                            <select asp-for="SelectedCardID" class="form-select" required>
-                                <option value="">-- Select Card --</option>
-                                @foreach (var card in Model.Cards)
-                                {
-                                    var last4 = card.CardNumber[^4..];
-                                    <option value="@card.CardID">
-                                        @card.CardType •••• @last4
-                                    </option>
-                                }
-                            </select>
-                            <span asp-validation-for="SelectedCardID" class="text-danger"></span>
+                        <div class="input-group">
+                            <input asp-for="CouponCode" class="form-control"
+                                   placeholder="Enter coupon code" />
+                            <button type="submit" class="btn btn-primary">Apply</button>
                         </div>
+
+                        <span asp-validation-for="CouponCode" class="text-danger"></span>
+
+                        @if (TempData["CouponMessage"] != null)
+                        {
+                            <div class="alert alert-info mt-2">@TempData["CouponMessage"]</div>
+                        }
+                    </form>
+                </div>
+            </div>
+
+        </div>
+
+        <!-- RIGHT COLUMN: SUMMARY -->
+        <div class="col-md-5">
+
+            <div class="card">
+                <div class="card-header">
+                    <h5>Order Summary</h5>
+                </div>
+
+                <div class="card-body">
+
+                    <p><strong>Subtotal:</strong> @Model.Subtotal.ToString("c")</p>
+                    <p><strong>Shipping:</strong> @Model.Shipping.ToString("c")</p>
+                    <p class="fs-4"><strong>Total:</strong> @Model.Total.ToString("c")</p>
+
+                    <form asp-action="Checkout" method="post">
+                        <input type="hidden" name="orderId" value="@Model.Order.OrderID" />
+                        <input type="hidden" name="selectedCardId" value="@Model.SelectedCardID" />
+                        <input type="hidden" name="couponCode" value="@Model.CouponCode" />
+
+                        <button type="submit" class="btn btn-success w-100"
+                                @(Model.Cards.Any() ? "" : "disabled")>
+                            Place Order
+                        </button>
                     </form>
 
-                    <a asp-controller="Account" asp-action="AddCard" class="btn btn-outline-secondary btn-sm">
-                        Add New Credit Card
-                    </a>
-                }
+                </div>
             </div>
-        </div>
 
-        <!-- COUPON ENTRY -->
-        <div class="card mb-4">
-            <div class="card-header">
-                <h5 class="mb-0">Coupon Code</h5>
-            </div>
-            <div class="card-body">
-                <form asp-action="ApplyCoupon" method="post">
-                    <input type="hidden" name="orderId" value="@Model.Order.OrderID" />
-
-                    <div class="input-group">
-                        <input asp-for="CouponCode" class="form-control" placeholder="Enter coupon code" />
-                        <button type="submit" class="btn btn-primary">Apply</button>
-                    </div>
-
-                    <span asp-validation-for="CouponCode" class="text-danger"></span>
-
-                    @if (ViewBag.CouponMessage != null)
-                    {
-                        <div class="alert alert-info mt-2">@ViewBag.CouponMessage</div>
-                    }
-                </form>
-            </div>
-        </div>
-
-    </div>
-
-    <!-- SUMMARY -->
-    <div class="col-md-5">
-        <div class="card">
-            <div class="card-header">
-                <h5 class="mb-0">Order Summary</h5>
-            </div>
-            <div class="card-body">
-
-                <p><strong>Subtotal:</strong> @subtotal.ToString("c")</p>
-                <p><strong>Shipping:</strong> @shipping.ToString("c")</p>
-                <p class="fs-4"><strong>Total:</strong> @total.ToString("c")</p>
-
-                <form asp-action="PlaceOrder" method="post">
-                    <input type="hidden" name="orderId" value="@Model.Order.OrderID" />
-                    <input type="hidden" name="cardId" value="@Model.SelectedCardID" />
-
-                    <button type="submit" class="btn btn-success w-100"
-                            @(Model.Cards.Any() ? "" : "disabled")>
-                        Place Order
-                    </button>
-                </form>
-
-            </div>
         </div>
     </div>
-</div>
+}
 
 @section Scripts {
     <partial name="_ValidationScriptsPartial" />
