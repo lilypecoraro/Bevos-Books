@@ -4,24 +4,29 @@
     ViewData["Title"] = "Genres";
 }
 
-<div class="alert alert-info mt-3 mb-4" role="alert" style="font-size:0.95rem;">
-    For viewing seeding data and milestone #1 only. Will be adjusted later.
-</div>
+<h2>Genres</h2>
 
-<table class="table table-bordered table-striped table-hover">
-    <thead class="table-dark">
+<p>
+    <a asp-action="Create" class="btn btn-primary">Add New Genre</a>
+</p>
+
+<table class="table table-striped">
+    <thead>
         <tr>
-            <th>Genre ID</th>
             <th>Genre Name</th>
+            <th></th>
         </tr>
     </thead>
     <tbody>
-    @foreach (var genre in Model)
-    {
-        <tr>
-            <td>@genre.GenreID</td>
-            <td>@genre.GenreName</td>
-        </tr>
-    }
+        @foreach (var item in Model)
+        {
+            <tr>
+                <td>@item.GenreName</td>
+                <td>
+                    <a asp-action="Edit" asp-route-id="@item.GenreID"
+                       class="btn btn-sm btn-warning">Edit</a>
+                </td>
+            </tr>
+        }
     </tbody>
 </table>

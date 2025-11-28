@@ -3,9 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Team24_BevosBooks.DAL;
 using Team24_BevosBooks.Models;
-using Team24_BevosBooks.Utilities;
 using Team24_BevosBooks.Models.ViewModels;
-
 
 namespace Team24_BevosBooks.Controllers
 {
@@ -24,21 +22,41 @@ namespace Team24_BevosBooks.Controllers
             _signInManager = signInManager;
         }
 
-        // ------------------------------
-        // REGISTER (CUSTOMER)
-        // ------------------------------
+        // ================================
+        // STATE LIST (U.S. Abbreviations)
+        // ================================
+        private List<string> GetStates()
+        {
+            return new List<string>
+            {
+                "AL","AK","AZ","AR","CA","CO","CT","DE","FL","GA",
+                "HI","ID","IL","IN","IA","KS","KY","LA","ME","MD",
+                "MA","MI","MN","MS","MO","MT","NE","NV","NH","NJ",
+                "NM","NY","NC","ND","OH","OK","OR","PA","RI","SC",
+                "SD","TN","TX","UT","VT","VA","WA","WV","WI","WY"
+            };
+        }
+
+        // ================================
+        // REGISTER (GET)
+        // ================================
         public IActionResult Register()
         {
+            ViewBag.States = GetStates();
             return View();
         }
 
+        // ================================
+        // REGISTER (POST)
+        // ================================
         [HttpPost]
+        [ValidateAntiForgeryToken]
         public async Task<IActionResult> Register(RegisterViewModel rvm)
         {
+            ViewBag.States = GetStates();
+
             if (!ModelState.IsValid)
-            {
                 return View(rvm);
-            }
 
             AppUser newUser = new AppUser
             {
@@ -52,36 +70,42 @@ namespace Team24_BevosBooks.Controllers
                 ZipCode = rvm.ZipCode,
                 PhoneNumber = rvm.PhoneNumber,
                 Status = AppUser.UserStatus.Customer
-
             };
 
             IdentityResult result = await _userManager.CreateAsync(newUser, rvm.Password);
 
-            if (result.Succeeded == false)
+            if (!result.Succeeded)
             {
                 foreach (IdentityError error in result.Errors)
+                {
                     ModelState.AddModelError("", error.Description);
+                }
 
                 return View(rvm);
             }
 
             await _userManager.AddToRoleAsync(newUser, "Customer");
-
             await _signInManager.SignInAsync(newUser, isPersistent: false);
 
+            TempData["Message"] = "Account created successfully!";
             return RedirectToAction("Index", "Home");
         }
 
-        // ------------------------------
-        // LOGIN
-        // ------------------------------
-        public IActionResult Login()
+        // ================================
+        // LOGIN (GET)
+        // ================================
+        public IActionResult Login(string? returnUrl = null)
         {
+            ViewBag.ReturnURL = returnUrl;
             return View();
         }
 
+        // ================================
+        // LOGIN (POST)
+        // ================================
         [HttpPost]
-        public async Task<IActionResult> Login(LoginViewModel lvm)
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Login(LoginViewModel lvm, string? returnUrl)
         {
             if (!ModelState.IsValid)
                 return View(lvm);
@@ -99,35 +123,46 @@ namespace Team24_BevosBooks.Controllers
 
             if (user.Status == AppUser.UserStatus.Disabled)
             {
+                await _signInManager.SignOutAsync();
                 ModelState.AddModelError("", "Your account has been disabled.");
                 return View(lvm);
             }
 
+            if (!String.IsNullOrEmpty(returnUrl))
+                return Redirect(returnUrl);
 
             return RedirectToAction("Index", "Home");
         }
 
-        // ------------------------------
+        // ================================
         // LOGOUT
-        // ------------------------------
+        // ================================
         public async Task<IActionResult> Logout()
         {
             await _signInManager.SignOutAsync();
+            TempData["Message"] = "You have been logged out.";
             return RedirectToAction("Index", "Home");
         }
 
-        // ------------------------------
-        // MANAGE PROFILE
-        // ------------------------------
+        // ================================
+        // MANAGE PROFILE (GET)
+        // ================================
         public async Task<IActionResult> Manage()
         {
             AppUser user = await _userManager.GetUserAsync(User);
+            ViewBag.States = GetStates();
             return View(user);
         }
 
+        // ================================
+        // MANAGE PROFILE (POST)
+        // ================================
         [HttpPost]
+        [ValidateAntiForgeryToken]
         public async Task<IActionResult> Manage(AppUser updatedUser)
         {
+            ViewBag.States = GetStates();
+
             AppUser user = await _userManager.GetUserAsync(User);
 
             user.FirstName = updatedUser.FirstName;
@@ -140,18 +175,20 @@ namespace Team24_BevosBooks.Controllers
 
             await _userManager.UpdateAsync(user);
 
+            TempData["Message"] = "Profile updated successfully.";
             return RedirectToAction("Manage");
         }
 
-        // ------------------------------
+        // ================================
         // CHANGE PASSWORD
-        // ------------------------------
+        // ================================
         public IActionResult ChangePassword()
         {
             return View();
         }
 
         [HttpPost]
+        [ValidateAntiForgeryToken]
         public async Task<IActionResult> ChangePassword(ChangePasswordViewModel cpvm)
         {
             if (!ModelState.IsValid)
@@ -170,27 +207,29 @@ namespace Team24_BevosBooks.Controllers
                 return View(cpvm);
             }
 
+            await _signInManager.RefreshSignInAsync(user);
+
+            TempData["Message"] = "Password changed successfully.";
             return RedirectToAction("Manage");
         }
 
-        // ------------------------------
+        // ================================
         // ADD CREDIT CARD
-        // ------------------------------
+        // ================================
         public IActionResult AddCard()
         {
             return View();
         }
 
         [HttpPost]
+        [ValidateAntiForgeryToken]
         public async Task<IActionResult> AddCard(CardViewModel cvm)
         {
             if (!ModelState.IsValid)
                 return View(cvm);
 
-            // Get currently logged-in user
             AppUser user = await _userManager.GetUserAsync(User);
 
-            // Count how many cards this user already has
             int cardCount = _context.Cards
                                     .Where(c => c.UserID == user.Id)
                                     .Count();
@@ -201,10 +240,8 @@ namespace Team24_BevosBooks.Controllers
                 return View(cvm);
             }
 
-            // Convert string "Visa" → enum CardTypes.Visa
             Card.CardTypes parsedType = Enum.Parse<Card.CardTypes>(cvm.CardType);
 
-            // Create new card
             Card card = new Card
             {
                 UserID = user.Id,
@@ -216,8 +253,8 @@ namespace Team24_BevosBooks.Controllers
             _context.Cards.Add(card);
             await _context.SaveChangesAsync();
 
+            TempData["Message"] = "Card added successfully.";
             return RedirectToAction("Manage");
         }
-
     }
 }

@@ -31,7 +31,10 @@ namespace Team24_BevosBooks.Models
             Customer,
             Employee,
             Admin,
-            Disabled   // ⭐ add this so disabling works
+            Disabled   
         }
+        // Not stored in the database – used only for viewing roles in ManageEmployees
+        [System.ComponentModel.DataAnnotations.Schema.NotMapped]
+        public IList<string> RoleNames { get; set; } = new List<string>();
     }
 }

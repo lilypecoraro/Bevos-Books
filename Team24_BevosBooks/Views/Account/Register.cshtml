@@ -7,64 +7,128 @@
 
 <div class="row">
     <div class="col-md-6">
-        <form asp-action="Register" method="post">
-            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
 
+        <form asp-action="Register" method="post">
+
+            <!-- MODEL-LEVEL ERRORS (Password requirements, duplicates, etc.) -->
+            <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+
+            <!-- EMAIL -->
             <div class="form-group mb-2">
                 <label asp-for="Email"></label>
                 <input asp-for="Email" class="form-control" />
                 <span asp-validation-for="Email" class="text-danger"></span>
             </div>
 
+            <!-- PASSWORD -->
             <div class="form-group mb-2">
                 <label asp-for="Password"></label>
                 <input asp-for="Password" class="form-control" type="password" />
-                <span asp-validation-for="Password" class="text-danger"></span>
             </div>
 
+            <!-- CONFIRM PASSWORD -->
+            <div class="form-group mb-2">
+                <label asp-for="ConfirmPassword"></label>
+                <input asp-for="ConfirmPassword" class="form-control" type="password" />
+                <span asp-validation-for="ConfirmPassword" class="text-danger"></span>
+            </div>
+
+            <hr />
+
+            <!-- FIRST NAME -->
             <div class="form-group mb-2">
                 <label asp-for="FirstName"></label>
                 <input asp-for="FirstName" class="form-control" />
                 <span asp-validation-for="FirstName" class="text-danger"></span>
             </div>
 
+            <!-- LAST NAME -->
             <div class="form-group mb-2">
                 <label asp-for="LastName"></label>
                 <input asp-for="LastName" class="form-control" />
                 <span asp-validation-for="LastName" class="text-danger"></span>
             </div>
 
+            <!-- ADDRESS -->
             <div class="form-group mb-2">
                 <label asp-for="Address"></label>
                 <input asp-for="Address" class="form-control" />
                 <span asp-validation-for="Address" class="text-danger"></span>
             </div>
 
+            <!-- CITY -->
             <div class="form-group mb-2">
                 <label asp-for="City"></label>
                 <input asp-for="City" class="form-control" />
                 <span asp-validation-for="City" class="text-danger"></span>
             </div>
 
+            <!-- STATE DROPDOWN -->
             <div class="form-group mb-2">
                 <label asp-for="State"></label>
-                <input asp-for="State" class="form-control" />
+                <select asp-for="State" class="form-control"
+                        asp-items="@(new SelectList(ViewBag.States))">
+                    <option value="">-- Select State --</option>
+                </select>
                 <span asp-validation-for="State" class="text-danger"></span>
             </div>
 
+            <!-- ZIP -->
             <div class="form-group mb-2">
                 <label asp-for="ZipCode"></label>
                 <input asp-for="ZipCode" class="form-control" />
                 <span asp-validation-for="ZipCode" class="text-danger"></span>
             </div>
 
+            <!-- PHONE NUMBER WITH AUTO FORMAT -->
             <div class="form-group mb-3">
                 <label asp-for="PhoneNumber"></label>
-                <input asp-for="PhoneNumber" class="form-control" />
+                <input asp-for="PhoneNumber" id="PhoneInput" class="form-control" maxlength="12" />
                 <span asp-validation-for="PhoneNumber" class="text-danger"></span>
             </div>
 
             <button type="submit" class="btn btn-primary w-100">Create Account</button>
+
         </form>
     </div>
 </div>
+
+@section Scripts {
+    <script>const phoneBox = document.getElementById("PhoneInput");
+
+        phoneBox.addEventListener("input", function (e) {
+            // Save cursor position
+            const cursorPos = phoneBox.selectionStart;
+
+            // Get only digits
+            let digits = phoneBox.value.replace(/\D/g, "");
+
+            if (digits.length > 10)
+                digits = digits.substring(0, 10);
+
+            // Build formatted number
+            let formatted = "";
+            if (digits.length > 0) {
+                formatted += digits.substring(0, 3);
+            }
+            if (digits.length >= 4) {
+                formatted += "-" + digits.substring(3, 6);
+            }
+            if (digits.length >= 7) {
+                formatted += "-" + digits.substring(6, 10);
+            }
+
+            // Update value WITHOUT blocking deletion
+            phoneBox.value = formatted;
+
+            // Try to restore cursor position safely
+            let newCursorPos = cursorPos;
+
+            // Adjust for automatically inserted dashes
+            if (cursorPos === 4 || cursorPos === 8) {
+                newCursorPos = cursorPos + 1;
+            }
+
+            phoneBox.setSelectionRange(newCursorPos, newCursorPos);
+        });</script>
+}

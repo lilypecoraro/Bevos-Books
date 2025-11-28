@@ -1,4 +1,7 @@
 ﻿@model IEnumerable<Team24_BevosBooks.Models.AppUser>
+@using Microsoft.AspNetCore.Identity
+@using Team24_BevosBooks.Models
+@inject UserManager<AppUser> UserManager
 
 @{
     ViewData["Title"] = "Manage Employees";
@@ -21,16 +24,56 @@
     <tbody>
         @foreach (var emp in Model)
         {
+            bool isAdmin = emp.RoleNames.Contains("Admin");
+            bool isEmployee = emp.RoleNames.Contains("Employee");
+            bool isCurrentUser = emp.Id == UserManager.GetUserId(User);
+
             <tr>
                 <td>@emp.FirstName @emp.LastName</td>
                 <td>@emp.Email</td>
+
                 <td>
-                    @(User.IsInRole("Admin") ? "Admin" :
-                                    (User.IsInRole("Employee") ? "Employee" : ""))
+                    @if (isAdmin)
+                    {
+                        <span>Admin</span>
+                    }
+                    else if (isEmployee)
+                    {
+                        <span>Employee</span>
+                    }
                 </td>
-                <td>
-                    <a asp-action="EditEmployee" asp-route-id="@emp.Id" class="btn btn-sm btn-warning">Edit</a>
-                    <a asp-action="Promote" asp-route-id="@emp.Id" class="btn btn-sm btn-info">Promote to Admin</a>
+
+                <td class="text-nowrap">
+
+                    <!-- EDIT BUTTON -->
+                    <a asp-action="EditEmployee"
+                       asp-route-id="@emp.Id"
+                       class="btn btn-sm btn-warning me-2">
+                        Edit
+                    </a>
+
+                    <!-- PROMOTE (Employee → Admin) -->
+                    @if (isEmployee)
+                    {
+                        <a asp-action="Promote"
+                           asp-route-id="@emp.Id"
+                           class="btn btn-sm btn-info me-2"
+                           onclick="return confirm('Promote this employee to ADMIN? They will gain full system access.');">
+                            Promote to Admin
+                        </a>
+                    }
+
+                    <!-- DEMOTE (Admin → Employee) -->
+                    @if (isAdmin && !isCurrentUser)
+                    {
+                        <a asp-action="Demote"
+                           asp-route-id="@emp.Id"
+                           class="btn btn-sm btn-secondary"
+                           onclick="return confirm('Demote this ADMIN back to Employee? They will lose admin privileges.');">
+                            Demote to Employee
+                        </a>
+                    }
+
                 </td>
             </tr>
         }
