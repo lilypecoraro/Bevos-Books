@@ -7,7 +7,7 @@
     decimal shipping = ViewBag.Shipping ?? 0m;
     decimal total = ViewBag.Total ?? 0m;
 
-    // Build checkout button class safely (NO inline C# in tag helper area)
+    // Build checkout button class safely
     string checkoutClass = "btn btn-primary";
     if (!Model.OrderDetails.Any())
     {
@@ -48,7 +48,7 @@ else
                 <th>Title</th>
                 <th>Price</th>
                 <th style="width:150px;">Quantity</th>
-                <th>Line Total</th>
+                <th>Item Total</th>
                 <th></th>
             </tr>
         </thead>
@@ -66,7 +66,9 @@ else
                             <button type="submit" class="btn btn-sm btn-outline-primary">Update</button>
                         </form>
                     </td>
-                    <td>@(detail.Quantity* detail.Price).ToString("c")</td>
+
+                    <td>@((detail.Quantity * detail.Price).ToString("c"))</td>
+
                     <td>
                         <form asp-action="RemoveItem" method="post">
                             <input type="hidden" name="orderDetailId" value="@detail.OrderDetailID" />
