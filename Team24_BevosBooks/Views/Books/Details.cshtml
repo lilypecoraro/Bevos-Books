@@ -3,7 +3,6 @@
 @{
     ViewData["Title"] = "Book Details";
 
-    // Reviews loaded from controller:
     var reviews = Model.Reviews ?? new List<Review>();
 }
 
@@ -43,12 +42,24 @@
             <dd class="col-sm-9">@Model.BookStatus</dd>
         </dl>
 
+
+        <!-- =============================== -->
+        <!-- OTHER CARTS FEATURE -->
+        <!-- =============================== -->
+        @if (ViewBag.CartsContaining > 0)
+        {
+            <div class="alert alert-warning mt-3">
+                <strong>@ViewBag.CartsContaining</strong>
+                @(ViewBag.CartsContaining == 1 ? "other customer has" : "other customers have")
+                this book in their cart right now.
+            </div>
+        }
+
         <hr />
 
         <!-- =============================== -->
         <!-- REVIEWS SECTION -->
         <!-- =============================== -->
-        <hr />
         <h4>Reviews</h4>
 
         @if (Model.Reviews == null || !Model.Reviews.Any())

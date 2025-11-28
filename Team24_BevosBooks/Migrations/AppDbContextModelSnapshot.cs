@@ -506,11 +506,13 @@ namespace Team24_BevosBooks.Migrations
                     b.Property<int>("BookID")
                         .HasColumnType("int");
 
+                    b.Property<string>("DisputeStatus")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("nvarchar(20)");
+
                     b.Property<int>("Rating")
                         .HasColumnType("int");
-
-                    b.Property<DateTime>("ReviewDate")
-                        .HasColumnType("datetime2");
 
                     b.Property<string>("ReviewText")
                         .IsRequired()
@@ -520,11 +522,6 @@ namespace Team24_BevosBooks.Migrations
                     b.Property<string>("ReviewerID")
                         .IsRequired()
                         .HasColumnType("nvarchar(450)");
-
-                    b.Property<string>("Status")
-                        .IsRequired()
-                        .HasMaxLength(20)
-                        .HasColumnType("nvarchar(20)");
 
                     b.HasKey("ReviewID");
 

@@ -10,9 +10,8 @@ namespace Team24_BevosBooks.Models
         [Key]
         public int OrderID { get; set; }
 
-        // FK to AppUser (the customer placing the order)
         [ForeignKey("User")]
-        public string UserID { get; set; }   // AppUser.Id is a string
+        public string UserID { get; set; }   // AppUser Id
 
         public AppUser User { get; set; }
 
@@ -24,7 +23,6 @@ namespace Team24_BevosBooks.Models
         [Required]
         public string OrderStatus { get; set; }
 
-        // Navigation to details
         public ICollection<OrderDetail> OrderDetails { get; set; }
     }
 }

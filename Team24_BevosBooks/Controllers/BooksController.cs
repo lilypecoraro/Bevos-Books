@@ -1,19 +1,23 @@
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using Team24_BevosBooks.DAL;
 using Team24_BevosBooks.Models;
+using static Team24_BevosBooks.Models.Order;
 
 namespace Team24_BevosBooks.Controllers
 {
     public class BooksController : Controller
     {
         private readonly AppDbContext _context;
+        private readonly UserManager<AppUser> _userManager;
 
-        public BooksController(AppDbContext context)
+        public BooksController(AppDbContext context, UserManager<AppUser> userManager)
         {
             _context = context;
+            _userManager = userManager;
         }
 
         // =========================================================
@@ -80,15 +84,26 @@ namespace Team24_BevosBooks.Controllers
             if (book == null)
                 return NotFound();
 
-            // Show only APPROVED reviews
+            // Filter approved reviews only
             book.Reviews = book.Reviews
                 .Where(r => r.DisputeStatus == "Approved")
                 .ToList();
 
+            // Current user
+            var userId = _userManager.GetUserId(User);
+
+            // ⭐ Count OTHER carts containing this book
+            int cartsContainingBook = await _context.OrderDetails
+                .Where(od => od.BookID == id)
+                .Where(od => od.Order.OrderStatus == "InCart")       // FIXED
+                .Where(od => od.Order.User.Id != userId)           // exclude current user's cart
+                .CountAsync();
+
+            // ⭐ Make it accessible to the view
+            ViewBag.CartsContaining = cartsContainingBook;
+
             return View(book);
         }
-
-
 
         // =========================================================
         // CREATE (ADMIN)
@@ -105,7 +120,6 @@ namespace Team24_BevosBooks.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create(Book book)
         {
-            // Server-side business rules
             book.BookStatus = "Active";
 
             if (_context.Books.Any(b => b.BookNumber == book.BookNumber))
@@ -152,7 +166,6 @@ namespace Team24_BevosBooks.Controllers
         {
             if (id != editedBook.BookID) return NotFound();
 
-            // Retrieve original record so restricted fields cannot be changed
             Book? originalBook = await _context.Books.AsNoTracking()
                 .FirstOrDefaultAsync(b => b.BookID == id);
 
@@ -170,7 +183,7 @@ namespace Team24_BevosBooks.Controllers
                 return View(editedBook);
             }
 
-            // Preserve fields Admin cannot edit
+            // Protect fields admins cannot change
             editedBook.BookNumber = originalBook.BookNumber;
             editedBook.Cost = originalBook.Cost;
 
