@@ -1,0 +1,105 @@
+﻿@using Team24_BevosBooks.Models
+@{
+    ViewData["Title"] = "Discover Books";
+
+    var bestsellers = ViewBag.Bestsellers as List<Book> ?? new List<Book>();
+    var sections = ViewBag.GenreSections as Dictionary<string, List<Book>> 
+                   ?? new Dictionary<string, List<Book>>();
+}
+
+<h1 class="mb-4">Discover Your Next Read</h1>
+
+
+<!-- ⭐ BESTSELLERS -->
+<section class="mb-5">
+    <h3 class="mb-3">🔥 Bestsellers</h3>
+
+    @if (!bestsellers.Any())
+    {
+        <p class="text-muted">No bestseller data available.</p>
+    }
+    else
+    {
+        <div class="row">
+            @foreach (var b in bestsellers)
+            {
+                <div class="col-md-4 col-lg-3 mb-3">
+                    <div class="card shadow-sm">
+                        <div class="card-body">
+                            <h5>@b.Title</h5>
+                            <p class="text-muted">@b.Authors</p>
+
+                            @if (b.Genre != null)
+                            {
+                                <span class="badge bg-primary">@b.Genre.GenreName</span>
+                            }
+
+                            <p class="mt-2 fw-bold">@b.Price.ToString("c")</p>
+
+                            <a asp-controller="Books"
+                               asp-action="Details"
+                               asp-route-id="@b.BookID"
+                               class="btn btn-outline-primary w-100">
+                                View Book
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+    }
+</section>
+
+
+<!-- ⭐ GENRE SPOTLIGHT SECTIONS -->
+@foreach (var pair in sections)
+{
+    var genreName = pair.Key;
+    var books = pair.Value ?? new List<Book>();
+
+    <section class="mb-5">
+
+        <div class="d-flex justify-content-between align-items-center mb-2">
+            <h3>@genreName Spotlight</h3>
+
+            @if (books.Any())
+            {
+                <a asp-controller="Books"
+                   asp-action="Index"
+                   asp-route-genreId="@books.First().GenreID"
+                   class="btn btn-sm btn-outline-secondary">
+                    Explore all @genreName →
+                </a>
+            }
+        </div>
+
+        @if (!books.Any())
+        {
+            <p class="text-muted">No books available in this genre.</p>
+        }
+        else
+        {
+            <div class="row">
+                @foreach (var b in books)
+                {
+                    <div class="col-md-4 col-lg-3 mb-3">
+                        <div class="card shadow-sm">
+                            <div class="card-body">
+                                <h5>@b.Title</h5>
+                                <p class="text-muted">@b.Authors</p>
+                                <p class="fw-bold mt-2">@b.Price.ToString("c")</p>
+
+                                <a asp-controller="Books"
+                                   asp-action="Details"
+                                   asp-route-id="@b.BookID"
+                                   class="btn btn-outline-primary w-100">
+                                    View Book
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                }
+            </div>
+        }
+    </section>
+}

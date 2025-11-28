@@ -5,7 +5,6 @@ using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using Team24_BevosBooks.DAL;
 using Team24_BevosBooks.Models;
-using static Team24_BevosBooks.Models.Order;
 
 namespace Team24_BevosBooks.Controllers
 {
@@ -84,22 +83,19 @@ namespace Team24_BevosBooks.Controllers
             if (book == null)
                 return NotFound();
 
-            // Filter approved reviews only
+            // show only approved reviews
             book.Reviews = book.Reviews
                 .Where(r => r.DisputeStatus == "Approved")
                 .ToList();
 
-            // Current user
             var userId = _userManager.GetUserId(User);
 
-            // ⭐ Count OTHER carts containing this book
             int cartsContainingBook = await _context.OrderDetails
                 .Where(od => od.BookID == id)
-                .Where(od => od.Order.OrderStatus == "InCart")       // FIXED
-                .Where(od => od.Order.User.Id != userId)           // exclude current user's cart
+                .Where(od => od.Order.OrderStatus == "InCart")
+                .Where(od => od.Order.UserID != userId)
                 .CountAsync();
 
-            // ⭐ Make it accessible to the view
             ViewBag.CartsContaining = cartsContainingBook;
 
             return View(book);
@@ -183,7 +179,6 @@ namespace Team24_BevosBooks.Controllers
                 return View(editedBook);
             }
 
-            // Protect fields admins cannot change
             editedBook.BookNumber = originalBook.BookNumber;
             editedBook.Cost = originalBook.Cost;
 
@@ -227,15 +222,55 @@ namespace Team24_BevosBooks.Controllers
         }
 
         // =========================================================
-        // HELPERS
+        // HELPER: GENRES DROPDOWN
         // =========================================================
-        private bool BookExists(int id) =>
-            _context.Books.Any(e => e.BookID == id);
-
         private async Task PopulateGenresDropDownList(object? selectedGenre = null)
         {
             var genres = await _context.Genres.OrderBy(g => g.GenreName).ToListAsync();
             ViewBag.GenreID = new SelectList(genres, "GenreID", "GenreName", selectedGenre);
+        }
+
+        // =========================================================
+        // DISCOVER / HOMECATALOG
+        // =========================================================
+        public async Task<IActionResult> HomeCatalog()
+        {
+            // ⭐ Bestsellers (safe even if no orders exist)
+            var bestsellers = await _context.Books
+                .Include(b => b.Genre)
+                .Where(b => b.BookStatus == "Active")
+                .OrderByDescending(b =>
+                    _context.OrderDetails
+                        .Where(od => od.BookID == b.BookID
+                                     && od.Order.OrderStatus == "Completed")
+                        .Sum(od => (int?)od.Quantity) ?? 0)
+                .Take(6)
+                .ToListAsync();
+
+            // ⭐ Spotlight genres — pick first 3 genres alphabetically (safe)
+            var spotlightGenres = await _context.Genres
+                .OrderBy(g => g.GenreName)
+                .Take(3)
+                .ToListAsync();
+
+            var genreSections = new Dictionary<string, List<Book>>();
+
+            foreach (var genre in spotlightGenres)
+            {
+                var books = await _context.Books
+                    .Where(b => b.GenreID == genre.GenreID &&
+                                b.BookStatus == "Active")
+                    .OrderBy(b => b.Title)
+                    .Take(4)
+                    .ToListAsync();
+
+                genreSections.Add(genre.GenreName, books);
+            }
+
+            ViewBag.Bestsellers = bestsellers;
+            ViewBag.GenreSections = genreSections;
+
+            return View();
         }
     }
 }

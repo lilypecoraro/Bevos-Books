@@ -29,11 +29,18 @@
             </button>
 
             <div class="collapse navbar-collapse" id="navMenu">
+
+                <!-- LEFT SIDE NAVIGATION -->
                 <ul class="navbar-nav me-auto mb-2 mb-lg-0">
 
                     <!-- HOME -->
                     <li class="nav-item">
                         <a class="nav-link" asp-controller="Home" asp-action="Index">Home</a>
+                    </li>
+
+                    <!-- DISCOVER BOOKS (your new homepage catalog) -->
+                    <li class="nav-item">
+                        <a class="nav-link" asp-controller="Books" asp-action="HomeCatalog">Discover</a>
                     </li>
 
                     <!-- BOOKS DROPDOWN -->
@@ -42,17 +49,25 @@
                             Books
                         </a>
                         <ul class="dropdown-menu">
-                            <li><a class="dropdown-item" asp-controller="Books" asp-action="Index">Browse Books</a></li>
+                            <li>
+                                <a class="dropdown-item" asp-controller="Books" asp-action="Index">
+                                    Browse Books
+                                </a>
+                            </li>
 
                             @if (User.IsInRole("Admin"))
                             {
-                                <li><a class="dropdown-item" asp-controller="Books" asp-action="Create">Add Book</a></li>
-                                <li><a class="dropdown-item" asp-controller="Genres" asp-action="Index">Manage Genres</a></li>
+                                <li>
+                                    <a class="dropdown-item" asp-controller="Books" asp-action="Create">Add Book</a>
+                                </li>
+                                <li>
+                                    <a class="dropdown-item" asp-controller="Genres" asp-action="Index">Manage Genres</a>
+                                </li>
                             }
                         </ul>
                     </li>
 
-                    <!-- CART (CUSTOMER ONLY) -->
+                    <!-- CART (CUSTOMERS ONLY) -->
                     @if (User.IsInRole("Customer"))
                     {
                         <li class="nav-item">
@@ -60,8 +75,8 @@
                         </li>
                     }
 
-                    <!-- EMPLOYEE / ADMIN: REVIEW QUEUE -->
-                    @if (User.IsInRole("Employee") || User.IsInRole("Admin"))
+                    <!-- ADMIN / EMPLOYEE -->
+                    @if (User.IsInRole("Admin") || User.IsInRole("Employee"))
                     {
                         <li class="nav-item dropdown">
                             <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
@@ -69,14 +84,12 @@
                             </a>
                             <ul class="dropdown-menu">
 
-                                <!-- REVIEW QUEUE -->
                                 <li>
                                     <a class="dropdown-item" asp-controller="Reviews" asp-action="Pending">
                                         Review Queue
                                     </a>
                                 </li>
 
-                                <!-- ORDER LIST -->
                                 <li>
                                     <a class="dropdown-item" asp-controller="Orders" asp-action="AllOrders">
                                         All Orders
@@ -87,8 +100,7 @@
                         </li>
                     }
 
-
-                    <!-- ADMIN ONLY: EMPLOYEES + CUSTOMERS -->
+                    <!-- ADMIN ONLY -->
                     @if (User.IsInRole("Admin"))
                     {
                         <li class="nav-item">
@@ -102,7 +114,7 @@
 
                 </ul>
 
-                <!-- LOGIN PARTIAL -->
+                <!-- RIGHT SIDE -->
                 @await Html.PartialAsync("_LoginPartial")
             </div>
         </div>
