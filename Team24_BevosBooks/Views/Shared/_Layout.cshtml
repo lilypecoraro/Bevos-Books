@@ -15,73 +15,87 @@
 </head>
 
 <body>
-    <header>
-        <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
-            <div class="container-fluid">
 
-                <a class="navbar-brand" asp-controller="Home" asp-action="Index">
-                    Bevo's Books
-                </a>
+    <!-- NAVBAR -->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
+        <div class="container-fluid">
 
-                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navMenu">
-                    <span class="navbar-toggler-icon"></span>
-                </button>
+            <a class="navbar-brand" asp-controller="Home" asp-action="Index">
+                Bevo's Books
+            </a>
 
-                <div class="collapse navbar-collapse" id="navMenu">
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navMenu">
+                <span class="navbar-toggler-icon"></span>
+            </button>
 
-                    <!-- LEFT SIDE NAVIGATION -->
-                    <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+            <div class="collapse navbar-collapse" id="navMenu">
+                <ul class="navbar-nav me-auto mb-2 mb-lg-0">
 
-                        <!-- HOME -->
+                    <!-- HOME -->
+                    <li class="nav-item">
+                        <a class="nav-link" asp-controller="Home" asp-action="Index">Home</a>
+                    </li>
+
+                    <!-- BOOKS DROPDOWN -->
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
+                            Books
+                        </a>
+                        <ul class="dropdown-menu">
+                            <li><a class="dropdown-item" asp-controller="Books" asp-action="Index">Browse Books</a></li>
+
+                            @if (User.IsInRole("Admin"))
+                            {
+                                <li><a class="dropdown-item" asp-controller="Books" asp-action="Create">Add Book</a></li>
+                                <li><a class="dropdown-item" asp-controller="Genres" asp-action="Index">Manage Genres</a></li>
+                            }
+                        </ul>
+                    </li>
+
+                    <!-- CART (CUSTOMER ONLY) -->
+                    @if (User.IsInRole("Customer"))
+                    {
                         <li class="nav-item">
-                            <a class="nav-link" asp-controller="Home" asp-action="Index">Home</a>
+                            <a class="nav-link" asp-controller="Orders" asp-action="Cart">Cart</a>
+                        </li>
+                    }
+
+                    <!-- EMPLOYEE / ADMIN: REVIEW QUEUE -->
+                    @if (User.IsInRole("Employee") || User.IsInRole("Admin"))
+                    {
+                        <li class="nav-item dropdown">
+                            <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
+                                Orders
+                            </a>
+                            <ul class="dropdown-menu">
+                                <li>
+                                    <a class="dropdown-item" asp-controller="Reviews" asp-action="Pending">
+                                        Review Queue
+                                    </a>
+                                </li>
+                            </ul>
+                        </li>
+                    }
+
+                    <!-- ADMIN ONLY: EMPLOYEES + CUSTOMERS -->
+                    @if (User.IsInRole("Admin"))
+                    {
+                        <li class="nav-item">
+                            <a class="nav-link" asp-controller="RoleAdmin" asp-action="ManageEmployees">Employees</a>
                         </li>
 
-                        <!-- BOOKS -->
                         <li class="nav-item">
-                            <a class="nav-link" asp-controller="Books" asp-action="Index">Books</a>
+                            <a class="nav-link" asp-controller="RoleAdmin" asp-action="ManageCustomers">Customers</a>
                         </li>
+                    }
 
-                        <!-- GENRES -->
-                        <li class="nav-item">
-                            <a class="nav-link" asp-controller="Genres" asp-action="Index">Genres</a>
-                        </li>
+                </ul>
 
-                        <!-- CART (CUSTOMER ONLY) -->
-                        @if (User.IsInRole("Customer"))
-                        {
-                            <li class="nav-item">
-                                <a class="nav-link" asp-controller="Orders" asp-action="Cart">Cart</a>
-                            </li>
-                        }
-
-                        <!-- EMPLOYEE LINKS -->
-                        @if (User.IsInRole("Employee") || User.IsInRole("Admin"))
-                        {
-                            <li class="nav-item">
-                                <a class="nav-link" asp-controller="Reviews" asp-action="Pending">Review Queue</a>
-                            </li>
-                        }
-
-                        <!-- ADMIN LINKS -->
-                        @if (User.IsInRole("Admin"))
-                        {
-                            <li class="nav-item">
-                                <a class="nav-link" asp-controller="RoleAdmin" asp-action="ManageEmployees">Employees</a>
-                            </li>
-
-                            <li class="nav-item">
-                                <a class="nav-link" asp-controller="RoleAdmin" asp-action="ManageCustomers">Customers</a>
-                            </li>
-                        }
-                    </ul>
-
-                    <!-- RIGHT SIDE LOGIN PARTIAL -->
-                    @await Html.PartialAsync("_LoginPartial")
-                </div>
+                <!-- LOGIN PARTIAL -->
+                @await Html.PartialAsync("_LoginPartial")
             </div>
-        </nav>
-    </header>
+        </div>
+    </nav>
 
     <!-- PAGE CONTENT -->
     <div class="container mt-4">
