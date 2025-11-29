@@ -1,0 +1,262 @@
+﻿body {
+    background-image: linear-gradient(rgba(0, 0, 0, 0.45), rgba(0, 0, 0, 0.45)), url('/bookhome.jpg');
+    background-size: cover;
+    background-position: center top;
+    background-repeat: no-repeat; /* THIS fixes the repeating */
+    background-attachment: fixed;
+    margin: 0;
+    padding: 0;
+}
+
+/* ============================
+   GLOBAL FONTS
+============================= */
+
+body, p, li, input, button, a, span, div {
+    font-family: "JetBrains Mono", monospace !important;
+    font-weight: 400;
+}
+
+/* Base headings */
+h1, h2, h3, h4, h5, h6 {
+    font-family: "JetBrains Mono", monospace !important;
+    font-weight: 600;
+    color: #111111;
+}
+
+/* Hero heading ONLY uses VT323 */
+.hero-title {
+    font-family: "VT323", monospace !important;
+    font-size: clamp(3.5rem, 7vw, 6rem);
+    letter-spacing: 2px;
+    color: #ffffff;
+    margin-bottom: 1rem;
+}
+
+/* ============================
+   COLOR PALETTE
+============================= */
+
+:root {
+    --bevo-gold: #f5b338;
+    --bevo-gold-hover: #e3a021;
+    --bevo-brown: #693330;
+    --bevo-black: #111111;
+    --bevo-gray: #a7a7a7;
+}
+
+/* ============================
+   FULL-PAGE BACKGROUND
+============================= */
+
+body {
+    background-image: url('/books.jpeg');
+    background-size: cover;
+    background-position: center;
+    background-attachment: fixed;
+    margin: 0;
+    padding: 0;
+}
+
+    /* All content sits above the body background */
+    body > * {
+        position: relative;
+        z-index: 2;
+    }
+
+/* ============================
+   HERO SECTION + OVERLAY
+============================= */
+
+.hero-container {
+    position: relative; /* REQUIRED */
+    width: 100%;
+    min-height: 60vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    padding: 4rem 1.5rem;
+    z-index: 2; /* hero content sits above overlay */
+}
+
+.hero-bg {
+    position: absolute;
+    inset: 0;
+    background-image: url('/books.jpeg');
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    z-index: 0;
+}
+
+
+.hero-content {
+    max-width: 700px;
+    color: white;
+    position: relative;
+    z-index: 3; /* above overlay */
+}
+
+.hero-subtitle {
+    font-size: 1.15rem;
+    opacity: 0.9;
+    margin-bottom: 1.5rem;
+}
+
+/* ============================
+   SEARCH BAR
+============================= */
+
+.hero-search-input {
+    max-width: 380px;
+    border-radius: 4px;
+}
+
+    .hero-search-input:focus {
+        box-shadow: 0 0 0 0.20rem rgba(245, 179, 56, 0.40);
+        border-color: var(--bevo-gold);
+    }
+
+.hero-btn-solid {
+    background-color: var(--bevo-gold);
+    color: #201300;
+    border: none;
+    border-radius: 4px;
+    padding: 0.5rem 1.25rem;
+}
+
+    .hero-btn-solid:hover {
+        background-color: var(--bevo-gold-hover);
+    }
+
+/* ============================
+   PROMOTION CARDS
+============================= */
+
+.section-heading {
+    font-size: 2.6rem;
+    color: var(--bevo-brown);
+}
+
+.promo-card {
+    background: white;
+    border: 1px solid #e0e0e0;
+    border-radius: 12px;
+    transition: 0.25s;
+}
+
+    .promo-card:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 6px 16px rgba(0,0,0,0.15);
+    }
+
+.promo-title {
+    font-family: "VT323", monospace;
+    font-size: 2rem;
+    color: var(--bevo-brown);
+}
+
+/* ============================
+   FIX BOOK TITLES (no VT323)
+============================= */
+
+.card-title,
+.book-title {
+    font-family: "JetBrains Mono", monospace !important;
+    font-weight: 600;
+    font-size: 1.1rem;
+    color: #111111;
+}
+
+/* ============================
+   NAVBAR
+============================= */
+
+.bevo-navbar {
+    background-color: var(--bevo-brown) !important;
+}
+
+    .bevo-navbar .nav-link,
+    .bevo-navbar .navbar-brand {
+        color: white !important;
+    }
+
+        .bevo-navbar .nav-link:hover {
+            color: var(--bevo-gold) !important;
+        }
+
+.navbar-toggler-icon {
+    filter: invert(100%);
+}
+
+/* ============================
+   FOOTER
+============================= */
+
+.hero-footer-info {
+    width: 100%;
+    background-color: var(--bevo-black);
+    color: white;
+    display: flex;
+    justify-content: space-between;
+    padding: 1.25rem 3rem;
+}
+
+.footer-label {
+    font-size: .75rem;
+    color: var(--bevo-gray);
+    letter-spacing: 0.18em;
+}
+
+.footer-text {
+    margin: 0;
+}
+
+/* ============================
+   CURVY PROMO MARQUEE (CSS)
+============================= */
+
+.promo-wave-marquee {
+    width: 100%;
+    overflow: hidden;
+    margin: 20px 0;
+    padding: 0;
+    position: relative;
+    z-index: 5;
+}
+
+.promo-wave-track {
+    display: flex;
+    width: 200%; /* two SVGs side by side */
+    animation: promoScroll 22s linear infinite;
+    /*30s = slower; adjust for speed */
+}
+
+/* Slower/faster:
+   40s = very slow
+   20s = faster
+*/
+
+.promo-wave-marquee svg {
+    width: 50%; /* each one takes half of the track */
+    height: 120px;
+}
+
+.promo-wave-text {
+    fill: var(--bevo-gold);
+    font-size: 1.6rem; /* adjust if you want larger text */
+    font-weight: 600;
+    font-family: "JetBrains Mono", monospace;
+}
+
+/* move the whole track left, starting on-screen at the left */
+@keyframes promoScroll {
+    from {
+        transform: translateX(0);
+    }
+
+    to {
+        transform: translateX(-50%); /* slide one full SVG width */
+    }
+}

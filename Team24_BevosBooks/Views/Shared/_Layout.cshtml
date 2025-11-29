@@ -10,14 +10,25 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>@ViewData["Title"] - Bevo's Books</title>
 
+    <!-- FONTS -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;600&family=VT323&display=swap" rel="stylesheet">
+
+    <!-- BOOTSTRAP + SITE CSS -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" />
     <link rel="stylesheet" href="~/css/site.css" />
 </head>
 
 <body>
 
-    <!-- NAVBAR -->
-    <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
+    <!-- Dark overlay ABOVE background -->
+    <div class="page-dark-overlay"></div>
+
+    <!-- ===========================
+         NAVIGATION
+    ============================ -->
+    <nav class="navbar navbar-expand-lg navbar-dark bevo-navbar">
         <div class="container-fluid">
 
             <a class="navbar-brand" asp-controller="Home" asp-action="Index">
@@ -30,44 +41,32 @@
 
             <div class="collapse navbar-collapse" id="navMenu">
 
-                <!-- LEFT SIDE NAVIGATION -->
                 <ul class="navbar-nav me-auto mb-2 mb-lg-0">
 
-                    <!-- HOME -->
                     <li class="nav-item">
                         <a class="nav-link" asp-controller="Home" asp-action="Index">Home</a>
                     </li>
 
-                    <!-- DISCOVER BOOKS (your new homepage catalog) -->
                     <li class="nav-item">
                         <a class="nav-link" asp-controller="Books" asp-action="HomeCatalog">Discover</a>
                     </li>
 
-                    <!-- BOOKS DROPDOWN -->
                     <li class="nav-item dropdown">
-                        <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" data-bs-toggle="dropdown">
                             Books
                         </a>
+
                         <ul class="dropdown-menu">
-                            <li>
-                                <a class="dropdown-item" asp-controller="Books" asp-action="Index">
-                                    Browse Books
-                                </a>
-                            </li>
+                            <li><a class="dropdown-item" asp-controller="Books" asp-action="Index">Browse Books</a></li>
 
                             @if (User.IsInRole("Admin"))
                             {
-                                <li>
-                                    <a class="dropdown-item" asp-controller="Books" asp-action="Create">Add Book</a>
-                                </li>
-                                <li>
-                                    <a class="dropdown-item" asp-controller="Genres" asp-action="Index">Manage Genres</a>
-                                </li>
+                                <li><a class="dropdown-item" asp-controller="Books" asp-action="Create">Add Book</a></li>
+                                <li><a class="dropdown-item" asp-controller="Genres" asp-action="Index">Manage Genres</a></li>
                             }
                         </ul>
                     </li>
 
-                    <!-- CART (CUSTOMERS ONLY) -->
                     @if (User.IsInRole("Customer"))
                     {
                         <li class="nav-item">
@@ -75,67 +74,57 @@
                         </li>
                     }
 
-                    <!-- ADMIN / EMPLOYEE -->
                     @if (User.IsInRole("Admin") || User.IsInRole("Employee"))
                     {
                         <li class="nav-item dropdown">
-                            <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
-                                Admin Panel
-                            </a>
+                            <a class="nav-link dropdown-toggle" href="#" data-bs-toggle="dropdown">Admin Panel</a>
+
                             <ul class="dropdown-menu">
-
-                                <li>
-                                    <a class="dropdown-item" asp-controller="Reviews" asp-action="Pending">
-                                        Review Queue
-                                    </a>
-                                </li>
-
-                                <li>
-                                    <a class="dropdown-item" asp-controller="Orders" asp-action="AllOrders">
-                                        All Orders
-                                    </a>
-                                </li>
-
+                                <li><a class="dropdown-item" asp-controller="Reviews" asp-action="Pending">Review Queue</a></li>
+                                <li><a class="dropdown-item" asp-controller="Orders" asp-action="AllOrders">All Orders</a></li>
                             </ul>
-                        </li>
-                    }
-
-                    <!-- ADMIN ONLY -->
-                    @if (User.IsInRole("Admin"))
-                    {
-                        <li class="nav-item">
-                            <a class="nav-link" asp-controller="RoleAdmin" asp-action="ManageEmployees">Employees</a>
-                        </li>
-
-                        <li class="nav-item">
-                            <a class="nav-link" asp-controller="RoleAdmin" asp-action="ManageCustomers">Customers</a>
                         </li>
                     }
 
                 </ul>
 
-                <!-- RIGHT SIDE -->
                 @await Html.PartialAsync("_LoginPartial")
             </div>
         </div>
     </nav>
 
-    <!-- PAGE CONTENT -->
-    <div class="container mt-4">
-        <main role="main" class="pb-3">
-            @RenderBody()
-        </main>
-    </div>
 
-    <!-- FOOTER -->
+
+    <!-- ===========================
+         PAGE CONTENT
+         Supports Full Width Hero
+    ============================ -->
+    @if (ViewData["FullWidth"] is bool fw && fw)
+    {
+        @RenderBody() <!-- full width for hero + marquee -->
+    }
+    else
+    {
+        <div class="container mt-4">
+            @RenderBody() <!-- normal pages get container -->
+        </div>
+    }
+
+
+
+    <!-- ===========================
+         FOOTER
+    ============================ -->
     <footer class="border-top footer text-muted mt-4">
         <div class="container">
             &copy; @(DateTime.Now.Year) - Bevo's Books - Team 24
         </div>
     </footer>
 
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 
+    <!-- Scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
     @RenderSection("Scripts", required: false)
+
 </body>
 </html>

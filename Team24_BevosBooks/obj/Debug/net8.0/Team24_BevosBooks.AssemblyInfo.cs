@@ -14,7 +14,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("Team24_BevosBooks")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+ae7be8dfd22e7838c56ec3cccecdcbd14a46686b")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+67fa1a66ee2737e258a886ecdb42ad13b2604e21")]
 [assembly: System.Reflection.AssemblyProductAttribute("Team24_BevosBooks")]
 [assembly: System.Reflection.AssemblyTitleAttribute("Team24_BevosBooks")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]
