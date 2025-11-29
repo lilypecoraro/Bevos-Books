@@ -1,0 +1,41 @@
+﻿/* Force white labels globally */
+label {
+    color: #ffffff !important;
+}
+
+/* Force white input text */
+.form-control {
+    color: #ffffff !important;
+    background-color: rgba(255,255,255,0.12) !important;
+    border: 1px solid rgba(255,255,255,0.4) !important;
+}
+
+    .form-control::placeholder {
+        color: rgba(255,255,255,0.75) !important;
+    }
+
+/* Make primary buttons your Bevo gold */
+.btn-primary {
+    background-color: #f5b338 !important;
+    border-color: #f5b338 !important;
+    color: #201300 !important;
+}
+/* LOGIN PAGE OVERRIDES – EXTREME SPECIFICITY */
+body .container .row .col-md-5 label,
+body .container .row .col-md-5 .form-label {
+    color: #ffffff !important;
+}
+
+body .container .row .col-md-5 .form-control {
+    color: #ffffff !important;
+    background-color: rgba(255,255,255,0.12) !important;
+    border: 1px solid rgba(255,255,255,0.45) !important;
+}
+
+    body .container .row .col-md-5 .form-control::placeholder {
+        color: rgba(255,255,255,0.75) !important;
+    }
+
+body .container .row .col-md-5 .form-check-label {
+    color: #ffffff !important;
+}
