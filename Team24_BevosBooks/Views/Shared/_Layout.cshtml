@@ -8,55 +8,68 @@
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
     <title>@ViewData["Title"] - Bevo's Books</title>
 
-    <!-- FONTS -->
+    <!-- Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;600&family=VT323&display=swap" rel="stylesheet">
 
-    <!-- BOOTSTRAP + SITE CSS -->
+    <!-- Bootstrap + Site CSS -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" />
     <link rel="stylesheet" href="~/css/site.css" />
 </head>
 
 <body>
 
-    <!-- Dark overlay ABOVE background -->
+    <!-- DARK OVERLAY (NEVER BLOCKS CLICKS) -->
     <div class="page-dark-overlay"></div>
 
-    <!-- ===========================
-         NAVIGATION
-    ============================ -->
+    <!-- ==============================
+         NAVIGATION BAR
+    =============================== -->
     <nav class="navbar navbar-expand-lg navbar-dark bevo-navbar">
         <div class="container-fluid">
 
+            <!-- Brand -->
             <a class="navbar-brand" asp-controller="Home" asp-action="Index">
                 Bevo's Books
             </a>
 
-            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navMenu">
+            <!-- Mobile Toggler -->
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navMenu" aria-controls="navMenu" aria-expanded="false" aria-label="Toggle navigation">
                 <span class="navbar-toggler-icon"></span>
             </button>
 
+            <!-- Menu -->
             <div class="collapse navbar-collapse" id="navMenu">
 
                 <ul class="navbar-nav me-auto mb-2 mb-lg-0">
 
+                    <!-- Home -->
                     <li class="nav-item">
                         <a class="nav-link" asp-controller="Home" asp-action="Index">Home</a>
                     </li>
 
+                    <!-- Discover -->
                     <li class="nav-item">
                         <a class="nav-link" asp-controller="Books" asp-action="HomeCatalog">Discover</a>
                     </li>
 
+                    <!-- Books Dropdown -->
                     <li class="nav-item dropdown">
-                        <a class="nav-link dropdown-toggle" href="#" data-bs-toggle="dropdown">
+                        <a class="nav-link dropdown-toggle"
+                           href="#"
+                           id="booksDropdown"
+                           role="button"
+                           data-bs-toggle="dropdown"
+                           aria-expanded="false">
                             Books
                         </a>
 
-                        <ul class="dropdown-menu">
+                        <ul class="dropdown-menu" aria-labelledby="booksDropdown">
+
                             <li><a class="dropdown-item" asp-controller="Books" asp-action="Index">Browse Books</a></li>
 
                             @if (User.IsInRole("Admin"))
@@ -64,9 +77,11 @@
                                 <li><a class="dropdown-item" asp-controller="Books" asp-action="Create">Add Book</a></li>
                                 <li><a class="dropdown-item" asp-controller="Genres" asp-action="Index">Manage Genres</a></li>
                             }
+
                         </ul>
                     </li>
 
+                    <!-- Cart -->
                     @if (User.IsInRole("Customer"))
                     {
                         <li class="nav-item">
@@ -74,12 +89,20 @@
                         </li>
                     }
 
+                    <!-- Admin / Employee -->
                     @if (User.IsInRole("Admin") || User.IsInRole("Employee"))
                     {
                         <li class="nav-item dropdown">
-                            <a class="nav-link dropdown-toggle" href="#" data-bs-toggle="dropdown">Admin Panel</a>
+                            <a class="nav-link dropdown-toggle"
+                               href="#"
+                               id="adminDropdown"
+                               role="button"
+                               data-bs-toggle="dropdown"
+                               aria-expanded="false">
+                                Admin Panel
+                            </a>
 
-                            <ul class="dropdown-menu">
+                            <ul class="dropdown-menu" aria-labelledby="adminDropdown">
                                 <li><a class="dropdown-item" asp-controller="Reviews" asp-action="Pending">Review Queue</a></li>
                                 <li><a class="dropdown-item" asp-controller="Orders" asp-action="AllOrders">All Orders</a></li>
                             </ul>
@@ -88,42 +111,39 @@
 
                 </ul>
 
+                <!-- Login/logout -->
                 @await Html.PartialAsync("_LoginPartial")
             </div>
         </div>
     </nav>
 
-
-
-    <!-- ===========================
+    <!-- ==============================
          PAGE CONTENT
-         Supports Full Width Hero
-    ============================ -->
-    @if (ViewData["FullWidth"] is bool fw && fw)
+    =============================== -->
+
+    @if (ViewData["FullWidth"] is bool full && full)
     {
-        @RenderBody() <!-- full width for hero + marquee -->
+        @RenderBody()
     }
     else
     {
         <div class="container mt-4">
-            @RenderBody() <!-- normal pages get container -->
+            @RenderBody()
         </div>
     }
 
-
-
-    <!-- ===========================
+    <!-- ==============================
          FOOTER
-    ============================ -->
+    =============================== -->
     <footer class="border-top footer text-muted mt-4">
         <div class="container">
             &copy; @(DateTime.Now.Year) - Bevo's Books - Team 24
         </div>
     </footer>
 
-
-    <!-- Scripts -->
+    <!-- Bootstrap JS (must be AFTER HTML) -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+
     @RenderSection("Scripts", required: false)
 
 </body>

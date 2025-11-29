@@ -1,15 +1,41 @@
-﻿body {
-    background-image: linear-gradient(rgba(0, 0, 0, 0.45), rgba(0, 0, 0, 0.45)), url('/bookhome.jpg');
+﻿/* ============================
+   GLOBAL BACKGROUND + DARK OVERLAY
+============================= */
+
+body {
+    background-image: url('/books.jpeg');
     background-size: cover;
-    background-position: center top;
-    background-repeat: no-repeat; /* THIS fixes the repeating */
+    background-position: center;
     background-attachment: fixed;
     margin: 0;
     padding: 0;
 }
 
+/* DARK OVERLAY */
+.page-dark-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0,0,0,0.55);
+    z-index: -1 !important; /* BELOW ALL CONTENT */
+    pointer-events: none;
+}
+
+/* Ensure content stacks ABOVE overlay */
+nav, main, footer {
+    position: relative;
+    z-index: 5;
+}
+
+/* Dropdowns must be very high */
+.dropdown-menu {
+    z-index: 9999 !important;
+}
+
 /* ============================
-   GLOBAL FONTS
+   FONTS
 ============================= */
 
 body, p, li, input, button, a, span, div {
@@ -17,20 +43,18 @@ body, p, li, input, button, a, span, div {
     font-weight: 400;
 }
 
-/* Base headings */
 h1, h2, h3, h4, h5, h6 {
     font-family: "JetBrains Mono", monospace !important;
     font-weight: 600;
-    color: #111111;
+    color: #ffffff;
 }
 
-/* Hero heading ONLY uses VT323 */
+/* HERO TITLE (VT323) */
 .hero-title {
     font-family: "VT323", monospace !important;
     font-size: clamp(3.5rem, 7vw, 6rem);
     letter-spacing: 2px;
     color: #ffffff;
-    margin-bottom: 1rem;
 }
 
 /* ============================
@@ -46,30 +70,10 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 /* ============================
-   FULL-PAGE BACKGROUND
-============================= */
-
-body {
-    background-image: url('/books.jpeg');
-    background-size: cover;
-    background-position: center;
-    background-attachment: fixed;
-    margin: 0;
-    padding: 0;
-}
-
-    /* All content sits above the body background */
-    body > * {
-        position: relative;
-        z-index: 2;
-    }
-
-/* ============================
-   HERO SECTION + OVERLAY
+   HERO
 ============================= */
 
 .hero-container {
-    position: relative; /* REQUIRED */
     width: 100%;
     min-height: 60vh;
     display: flex;
@@ -77,31 +81,16 @@ body {
     align-items: center;
     text-align: center;
     padding: 4rem 1.5rem;
-    z-index: 2; /* hero content sits above overlay */
 }
-
-.hero-bg {
-    position: absolute;
-    inset: 0;
-    background-image: url('/books.jpeg');
-    background-size: cover;
-    background-position: center;
-    background-repeat: no-repeat;
-    z-index: 0;
-}
-
 
 .hero-content {
     max-width: 700px;
     color: white;
-    position: relative;
-    z-index: 3; /* above overlay */
 }
 
 .hero-subtitle {
     font-size: 1.15rem;
     opacity: 0.9;
-    margin-bottom: 1.5rem;
 }
 
 /* ============================
@@ -121,7 +110,6 @@ body {
 .hero-btn-solid {
     background-color: var(--bevo-gold);
     color: #201300;
-    border: none;
     border-radius: 4px;
     padding: 0.5rem 1.25rem;
 }
@@ -129,45 +117,6 @@ body {
     .hero-btn-solid:hover {
         background-color: var(--bevo-gold-hover);
     }
-
-/* ============================
-   PROMOTION CARDS
-============================= */
-
-.section-heading {
-    font-size: 2.6rem;
-    color: var(--bevo-brown);
-}
-
-.promo-card {
-    background: white;
-    border: 1px solid #e0e0e0;
-    border-radius: 12px;
-    transition: 0.25s;
-}
-
-    .promo-card:hover {
-        transform: translateY(-3px);
-        box-shadow: 0 6px 16px rgba(0,0,0,0.15);
-    }
-
-.promo-title {
-    font-family: "VT323", monospace;
-    font-size: 2rem;
-    color: var(--bevo-brown);
-}
-
-/* ============================
-   FIX BOOK TITLES (no VT323)
-============================= */
-
-.card-title,
-.book-title {
-    font-family: "JetBrains Mono", monospace !important;
-    font-weight: 600;
-    font-size: 1.1rem;
-    color: #111111;
-}
 
 /* ============================
    NAVBAR
@@ -190,6 +139,12 @@ body {
     filter: invert(100%);
 }
 
+/* dropdowns MUST appear above everything */
+.dropdown-menu {
+    z-index: 99999 !important;
+    position: absolute !important;
+}
+
 /* ============================
    FOOTER
 ============================= */
@@ -209,84 +164,66 @@ body {
     letter-spacing: 0.18em;
 }
 
-.footer-text {
-    margin: 0;
-}
-
 /* ============================
-   CURVY PROMO MARQUEE (CSS)
+   PROMO MARQUEE
 ============================= */
 
 .promo-wave-marquee {
     width: 100%;
     overflow: hidden;
-    margin: 20px 0;
-    padding: 0;
+    margin: 25px 0 10px;
     position: relative;
-    z-index: 5;
 }
 
 .promo-wave-track {
     display: flex;
-    width: 200%; /* two SVGs side by side */
+    width: 200%;
     animation: promoScroll 22s linear infinite;
-    /*30s = slower; adjust for speed */
 }
 
-/* Slower/faster:
-   40s = very slow
-   20s = faster
-*/
-
 .promo-wave-marquee svg {
-    width: 50%; /* each one takes half of the track */
+    width: 50%;
     height: 120px;
 }
 
 .promo-wave-text {
     fill: var(--bevo-gold);
-    font-size: 1.6rem; /* adjust if you want larger text */
+    font-size: 1.6rem;
     font-weight: 600;
-    font-family: "JetBrains Mono", monospace;
 }
 
-/* move the whole track left, starting on-screen at the left */
 @keyframes promoScroll {
     from {
         transform: translateX(0);
     }
 
     to {
-        transform: translateX(-50%); /* slide one full SVG width */
+        transform: translateX(-50%);
     }
 }
+
 /* ============================
-   DISCOVER PAGE STYLING
+   DISCOVER PAGE
 ============================= */
 
-/* Page title */
 .discover-title {
-    font-family: "VT323", monospace !important;
+    font-family: "VT323", monospace;
     font-size: clamp(3rem, 5vw, 4.5rem);
-    color: #ffffff;
+    color: white;
     text-shadow: 0 3px 8px rgba(0,0,0,0.8);
     margin-bottom: 2rem;
 }
 
-/* Section headings */
 .discover-section-title {
     font-size: 2rem;
-    color: #ffffff;
-    font-family: "JetBrains Mono", monospace;
+    color: white;
     text-shadow: 0 2px 6px rgba(0,0,0,0.7);
     margin-bottom: 1rem;
 }
 
-/* Book card */
 .discover-card {
-    background: rgba(255,255,255,0.92); /* slightly transparent so bg peeks through */
+    background: rgba(255,255,255,0.92);
     border-radius: 12px;
-    border: none;
     padding: 1rem;
     transition: transform .2s ease, box-shadow .2s ease;
 }
@@ -296,21 +233,18 @@ body {
         box-shadow: 0 10px 20px rgba(0,0,0,0.25);
     }
 
-/* Book title */
 .discover-book-title {
     font-weight: 600;
     font-size: 1.25rem;
     color: #111;
 }
 
-/* Genre badge */
 .discover-badge {
     font-size: .75rem;
     padding: .3rem .5rem;
     border-radius: 6px;
 }
 
-/* "View Book" button */
 .discover-btn {
     font-family: "JetBrains Mono", monospace;
 }
