@@ -1,0 +1,84 @@
+@model Team24_BevosBooks.Models.Coupon
+
+@{
+    ViewData["Title"] = "Create Coupon";
+}
+
+<h2>Create New Coupon</h2>
+<hr />
+
+<div class="row">
+    <div class="col-md-6">
+        <form asp-action="Create">
+            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+
+            <div class="form-group mb-3">
+                <label asp-for="CouponCode" class="control-label"></label>
+                <input asp-for="CouponCode" class="form-control" maxlength="20" style="text-transform: uppercase;" />
+                <span asp-validation-for="CouponCode" class="text-danger"></span>
+                <small class="form-text text-muted">1-20 characters, letters and numbers only.</small>
+            </div>
+
+            <div class="form-group mb-3">
+                <label asp-for="CouponType" class="control-label"></label>
+                <select asp-for="CouponType" class="form-control" id="couponTypeSelect">
+                    <option value="">-- Select Type --</option>
+                    <option value="PercentOff">Percent Off</option>
+                    <option value="FreeShipping">Free Shipping</option>
+                </select>
+                <span asp-validation-for="CouponType" class="text-danger"></span>
+            </div>
+
+            <div class="form-group mb-3" id="discountPercentGroup" style="display: none;">
+                <label asp-for="DiscountPercent" class="control-label"></label>
+                <input asp-for="DiscountPercent" class="form-control" type="number" step="0.01" min="0" max="100" />
+                <span asp-validation-for="DiscountPercent" class="text-danger"></span>
+                <small class="form-text text-muted">Enter percentage (e.g., 10 for 10% off).</small>
+            </div>
+
+            <div class="form-group mb-3" id="freeThresholdGroup" style="display: none;">
+                <label asp-for="FreeThreshold" class="control-label"></label>
+                <input asp-for="FreeThreshold" class="form-control" type="number" step="0.01" min="0" />
+                <span asp-validation-for="FreeThreshold" class="text-danger"></span>
+                <small class="form-text text-muted">Minimum order amount required for free shipping.</small>
+            </div>
+
+            <div class="alert alert-info mt-3">
+                <strong>Note:</strong> Once created, coupons cannot be edited. You can only enable or disable them.
+            </div>
+
+            <div class="form-group mt-4">
+                <input type="submit" value="Create Coupon" class="btn btn-primary" />
+                <a asp-action="Index" class="btn btn-secondary">Cancel</a>
+            </div>
+        </form>
+    </div>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+    
+    <script>
+        $(document).ready(function() {
+            $('#couponTypeSelect').on('change', function() {
+                var selectedType = $(this).val();
+                
+                if (selectedType === 'PercentOff') {
+                    $('#discountPercentGroup').show();
+                    $('#freeThresholdGroup').hide();
+                    $('#FreeThreshold').val('');
+                } else if (selectedType === 'FreeShipping') {
+                    $('#discountPercentGroup').hide();
+                    $('#freeThresholdGroup').show();
+                    $('#DiscountPercent').val('');
+                } else {
+                    $('#discountPercentGroup').hide();
+                    $('#freeThresholdGroup').hide();
+                }
+            });
+
+            // Trigger on page load if value is already selected
+            $('#couponTypeSelect').trigger('change');
+        });
+    </script>
+}
