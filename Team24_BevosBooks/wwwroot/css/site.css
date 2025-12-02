@@ -1,4 +1,4 @@
-﻿/* ============================================================
+/* ============================================================
    GLOBAL BACKGROUND + DARK OVERLAY
 =============================================================== */
 
@@ -297,3 +297,19 @@ label,
     font-size: 1.25rem;
     color: #111;
 }
+
+/* ============================================================
+   CHECKOUT PAGE FIXES
+=============================================================== */
+
+.checkout-page .form-label,
+.checkout-page .form-control,
+.checkout-page .form-select {
+    color: #000 !important; /* black text */
+    background-color: #fff !important; /* solid white background */
+    border: 1px solid #ccc !important; /* light gray border */
+}
+
+    .checkout-page .form-control::placeholder {
+        color: #666 !important; /* gray placeholder text */
+    }
