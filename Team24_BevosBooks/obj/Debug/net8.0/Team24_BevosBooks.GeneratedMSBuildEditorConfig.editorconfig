@@ -82,8 +82,16 @@ build_metadata.AdditionalFiles.CssScope =
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcQ2FyZHNcSW5kZXguY3NodG1s
 build_metadata.AdditionalFiles.CssScope = 
 
-[C:/Users/skyle/source/repos/Group-24/Team24_BevosBooks/Views/Coupons/Index.cshtml]
-build_metadata.AdditionalFiles.TargetPath = Vmlld3NcQ291cG9uc1xJbmRleC5jc2h0bWw=
+[/Users/lilypecoraro/Projects/Team24_BevosBooks/Team24_BevosBooks/Views/Coupons/Create.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3MvQ291cG9ucy9DcmVhdGUuY3NodG1s
+build_metadata.AdditionalFiles.CssScope = 
+
+[/Users/lilypecoraro/Projects/Team24_BevosBooks/Team24_BevosBooks/Views/Coupons/Details.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3MvQ291cG9ucy9EZXRhaWxzLmNzaHRtbA==
+build_metadata.AdditionalFiles.CssScope = 
+
+[/Users/lilypecoraro/Projects/Team24_BevosBooks/Team24_BevosBooks/Views/Coupons/Index.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3MvQ291cG9ucy9JbmRleC5jc2h0bWw=
 build_metadata.AdditionalFiles.CssScope = 
 
 [C:/Users/skyle/source/repos/Group-24/Team24_BevosBooks/Views/Genres/Create.cshtml]

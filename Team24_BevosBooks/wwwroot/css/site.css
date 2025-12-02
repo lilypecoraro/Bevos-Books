@@ -1,28 +1,17 @@
-﻿/* ============================================================
+/* ============================================================
    GLOBAL BACKGROUND + DARK OVERLAY
 =============================================================== */
 
 body {
-    background-image: url('/books.jpeg');
+    background-image: linear-gradient(rgba(0,0,0,0.55), rgba(0,0,0,0.55)), url('/books.jpeg');
     background-size: cover;
     background-position: center;
     background-attachment: fixed;
     margin: 0;
     padding: 0;
-    position: relative;
 }
 
-/* Darken entire background */
-.page-dark-overlay {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background: rgba(0,0,0,0.55);
-    z-index: 0;
-    pointer-events: none; /* never blocks clicks */
-}
+
 
 nav, main, footer {
     position: relative;
@@ -297,3 +286,27 @@ label,
     font-size: 1.25rem;
     color: #111;
 }
+
+/* ============================================================
+   CHECKOUT PAGE FIXES
+=============================================================== */
+
+.checkout-page .form-label,
+.checkout-page .form-control,
+.checkout-page .form-select {
+    color: #000 !important; /* black text */
+    background-color: #fff !important; /* solid white background */
+    border: 1px solid #ccc !important; /* light gray border */
+}
+
+    .checkout-page .form-control::placeholder {
+        color: #666 !important; /* gray placeholder text */
+    }
+
+.no-results-box {
+    background-color: #ffffff; /* same white as table rows */
+    color: #000000; /* black text */
+    padding: 1rem 1.25rem;
+    border-radius: 6px; /* soften edges like Bootstrap cards */
+    border: 1px solid #ddd; /* subtle border like table */
+    font-weight: 500;

@@ -1,0 +1,82 @@
+@model Team24_BevosBooks.Models.Coupon
+
+@{
+    ViewData["Title"] = "Coupon Details";
+}
+
+<h2>Coupon Details</h2>
+<hr />
+
+<div class="row">
+    <div class="col-md-6">
+        <dl class="row">
+            <dt class="col-sm-4">Coupon Code</dt>
+            <dd class="col-sm-8"><strong>@Model.CouponCode</strong></dd>
+
+            <dt class="col-sm-4">Type</dt>
+            <dd class="col-sm-8">@Model.CouponType</dd>
+
+            <dt class="col-sm-4">Discount Percent</dt>
+            <dd class="col-sm-8">
+                @if (Model.DiscountPercent.HasValue)
+                {
+                    <span class="badge bg-success">@Model.DiscountPercent.Value.ToString("F2")%</span>
+                }
+                else
+                {
+                    <span>-</span>
+                }
+            </dd>
+
+            <dt class="col-sm-4">Free Shipping Threshold</dt>
+            <dd class="col-sm-8">
+                @if (Model.FreeThreshold.HasValue)
+                {
+                    @Model.FreeThreshold.Value.ToString("C")
+                }
+                else
+                {
+                    <span>-</span>
+                }
+            </dd>
+
+            <dt class="col-sm-4">Status</dt>
+            <dd class="col-sm-8">
+                @if (Model.Status == "Enabled")
+                {
+                    <span class="badge bg-success">Enabled</span>
+                }
+                else
+                {
+                    <span class="badge bg-secondary">Disabled</span>
+                }
+            </dd>
+
+            <dt class="col-sm-4">Times Used</dt>
+            <dd class="col-sm-8">
+                <span class="badge bg-info">@ViewBag.UsageCount</span>
+            </dd>
+        </dl>
+
+        <div class="mt-4">
+            @if (User.IsInRole("Admin"))
+            {
+                @if (Model.Status == "Enabled")
+                {
+                    <a asp-action="Disable" asp-route-id="@Model.CouponID" 
+                       class="btn btn-warning"
+                       onclick="return confirm('Are you sure you want to disable this coupon?');">
+                        Disable Coupon
+                    </a>
+                }
+                else
+                {
+                    <a asp-action="Enable" asp-route-id="@Model.CouponID" class="btn btn-success">
+                        Enable Coupon
+                    </a>
+                }
+            }
+            <a asp-action="Index" class="btn btn-secondary">Back to List</a>
+        </div>
+    </div>
+</div>

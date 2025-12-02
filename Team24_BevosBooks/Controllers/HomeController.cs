@@ -19,18 +19,14 @@ namespace Team24_BevosBooks.Controllers
         // ----------------------------
         public async Task<IActionResult> Index(string? searchString)
         {
-            IQueryable<Book> query = _context.Books;
-
-            // optional search
-            if (!String.IsNullOrEmpty(searchString))
+            // CHANGE: If user searched from Home, send them to full catalog page
+            if (!string.IsNullOrWhiteSpace(searchString))
             {
-                query = query.Where(b =>
-                    b.Title.Contains(searchString) ||
-                    b.Authors.Contains(searchString));
+                return RedirectToAction("Index", "Books", new { searchString });
             }
 
-            // Home page shows 6 books max (not required, but clean)
-            var books = await query
+            // Optional: keep lightweight data for future home widgets
+            var books = await _context.Books
                 .OrderBy(b => b.Title)
                 .Take(6)
                 .ToListAsync();
