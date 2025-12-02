@@ -1,4 +1,4 @@
-﻿@model Team24_BevosBooks.Models.ViewModels.CheckoutViewModel
+@model Team24_BevosBooks.Models.ViewModels.CheckoutViewModel
 
 @{
     ViewData["Title"] = "Checkout";
@@ -15,7 +15,8 @@
 }
 else
 {
-    <div class="row">
+    <!-- CHANGE #1: Added "checkout-page" class to wrapper div -->
+    <div class="row checkout-page">
 
         <!-- LEFT COLUMN -->
         <div class="col-md-7">
@@ -98,6 +99,7 @@ else
 
                 <div class="card-body">
 
+                    <!-- CHANGE #2: These lines will now render black -->
                     <p><strong>Subtotal:</strong> @Model.Subtotal.ToString("c")</p>
                     <p><strong>Shipping:</strong> @Model.Shipping.ToString("c")</p>
                     <p class="fs-4"><strong>Total:</strong> @Model.Total.ToString("c")</p>
@@ -119,3 +121,33 @@ else
         </div>
     </div>
 }
+
+<!-- CHANGE #3: Scoped CSS overrides for ALL text inside checkout -->
+@section Styles {
+    <style>
+        /* Force black text inside checkout page */
+        .checkout-page,
+        .checkout-page h5,
+        .checkout-page p,
+        .checkout-page label,
+        .checkout-page strong,
+        .checkout-page .card-header,
+        .checkout-page .card-body {
+            color: #000 !important;
+        }
+
+            /* Inputs and selects */
+            .checkout-page .form-label,
+            .checkout-page .form-control,
+            .checkout-page .form-select {
+                color: #000 !important;
+                background-color: #fff !important;
+                border: 1px solid #ccc !important;
+            }
+
+                .checkout-page .form-control::placeholder {
+                    color: #666 !important;
+                }
+    </style>
+}
+
