@@ -150,6 +150,10 @@
                             <ul class="dropdown-menu" aria-labelledby="adminDropdown">
                                 <li><a class="dropdown-item" asp-controller="Reviews" asp-action="Pending">Review Queue</a></li>
                                 <li><a class="dropdown-item" asp-controller="Orders" asp-action="AllOrders">All Orders</a></li>
+                                @if (User.IsInRole("Admin"))
+                                {
+                                    <li><a class="dropdown-item" asp-controller="Coupons" asp-action="Index">Manage Coupons</a></li>
+                                }
                             </ul>
                         </li>
                     }
