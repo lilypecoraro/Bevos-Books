@@ -71,7 +71,7 @@ namespace Team24_BevosBooks.Seeding
                 status: "InCart",
                 new List<(string, int, decimal, decimal, int?)>
                 {
-                    ("The Art Of Racing In The Rain", 3, 23.95m, 10.30m, null),
+                    ("The Art Of Racing In The Rain", 2, 23.95m, 10.30m, null),
                     ("The Host", 1, 25.99m, 13.25m, null)
                 }
             );
@@ -94,7 +94,7 @@ namespace Team24_BevosBooks.Seeding
                 status: "InCart",
                 new List<(string, int, decimal, decimal, int?)>
                 {
-                    ("Altar of Eden", 2, 27.99m, 25.75m, null)
+                    ("Altar of Eden", 1, 27.99m, 25.75m, null)
                 }
             );
 
@@ -116,7 +116,7 @@ namespace Team24_BevosBooks.Seeding
                 status: "InCart",
                 new List<(string, int, decimal, decimal, int?)>
                 {
-                    ("Brooklyn", 4, 18.95m, 3.60m, null)
+                    ("Brooklyn", 1, 18.95m, 3.60m, null)
                 }
             );
 

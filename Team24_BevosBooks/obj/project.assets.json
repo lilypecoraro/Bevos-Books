@@ -8102,24 +8102,31 @@
     ]
   },
   "packageFolders": {
-    "/Users/lilypecoraro/.nuget/packages/": {}
+    "C:\\Users\\skyle\\.nuget\\packages\\": {},
+    "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages": {}
   },
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "/Users/lilypecoraro/Projects/Team24_BevosBooks/Team24_BevosBooks/Team24_BevosBooks.csproj",
+      "projectUniqueName": "C:\\Users\\skyle\\source\\repos\\Group-24\\Team24_BevosBooks\\Team24_BevosBooks.csproj",
       "projectName": "Team24_BevosBooks",
-      "projectPath": "/Users/lilypecoraro/Projects/Team24_BevosBooks/Team24_BevosBooks/Team24_BevosBooks.csproj",
-      "packagesPath": "/Users/lilypecoraro/.nuget/packages/",
-      "outputPath": "/Users/lilypecoraro/Projects/Team24_BevosBooks/Team24_BevosBooks/obj/",
+      "projectPath": "C:\\Users\\skyle\\source\\repos\\Group-24\\Team24_BevosBooks\\Team24_BevosBooks.csproj",
+      "packagesPath": "C:\\Users\\skyle\\.nuget\\packages\\",
+      "outputPath": "C:\\Users\\skyle\\source\\repos\\Group-24\\Team24_BevosBooks\\obj\\",
       "projectStyle": "PackageReference",
+      "fallbackFolders": [
+        "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
+      ],
       "configFilePaths": [
-        "/Users/lilypecoraro/.nuget/NuGet/NuGet.Config"
+        "C:\\Users\\skyle\\AppData\\Roaming\\NuGet\\NuGet.Config",
+        "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.FallbackLocation.config",
+        "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
       ],
       "originalTargetFrameworks": [
         "net8.0"
       ],
       "sources": {
+        "C:\\Program Files (x86)\\Microsoft SDKs\\NuGetPackages\\": {},
         "https://api.nuget.org/v3/index.json": {}
       },
       "frameworks": {
@@ -8137,7 +8144,8 @@
         "enableAudit": "true",
         "auditLevel": "low",
         "auditMode": "direct"
-      }
+      },
+      "SdkAnalysisLevel": "10.0.100"
     },
     "frameworks": {
       "net8.0": {
@@ -8195,7 +8203,7 @@
             "privateAssets": "all"
           }
         },
-        "runtimeIdentifierGraphPath": "/usr/local/share/dotnet/sdk/8.0.413/PortableRuntimeIdentifierGraph.json"
+        "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\10.0.100-rc.2.25502.107/PortableRuntimeIdentifierGraph.json"
       }
     }
   }
