@@ -107,11 +107,13 @@
 
 @if (!Model.Any())
 {
-    <div class="alert alert-info">
-        No coupons available.
-        @if (isAdmin)
-        {
-            <a asp-action="Create">Create your first coupon</a>
-        }
-    </div>
+<div class="no-results-box">
+    No coupons available.
+    @if (isAdmin)
+    {
+        <a asp-action="Create" class="fw-bold" style="color: var(--bevo-gold);">
+            Create your first coupon
+        </a>
+    }
+</div>
 }

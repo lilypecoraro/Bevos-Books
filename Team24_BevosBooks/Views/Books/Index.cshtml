@@ -1,4 +1,42 @@
-﻿@model IEnumerable<Team24_BevosBooks.Models.Book>
+﻿<style>
+    /* ================================================
+       ADMIN BUTTON TEXT FIX (Catalog Only)
+       Make outline-warning, outline-danger, and outline-primary readable
+    ================================================= */
+
+    /* EDIT + DISCONTINUE (warning + danger) */
+    .catalog-dark .btn-outline-warning,
+    .catalog-dark .btn-outline-danger {
+        color: #000 !important;
+        font-weight: 600 !important;
+        border-width: 2px !important;
+        background-color: rgba(255,255,255,0.85) !important;
+    }
+
+        .catalog-dark .btn-outline-warning:hover,
+        .catalog-dark .btn-outline-danger:hover {
+            background-color: #fff !important;
+            color: #000 !important;
+            border-color: var(--bevo-gold) !important;
+        }
+
+    /* DETAILS BUTTON (outline-primary) */
+    .catalog-dark .btn-outline-primary {
+        color: #000 !important;
+        background-color: rgba(255,255,255,0.85) !important;
+        border-color: var(--bevo-gold) !important;
+        font-weight: 600 !important;
+        border-width: 2px !important;
+    }
+
+        .catalog-dark .btn-outline-primary:hover {
+            background-color: #fff !important;
+            color: #000 !important;
+            border-color: var(--bevo-gold-hover) !important;
+        }
+</style>
+ 
+@model IEnumerable<Team24_BevosBooks.Models.Book>
 @using Team24_BevosBooks.Models
 
 <div class="catalog-dark">
