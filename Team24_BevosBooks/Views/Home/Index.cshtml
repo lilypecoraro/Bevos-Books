@@ -13,7 +13,10 @@
         <h1 class="hero-title">Bevo’s Books</h1>
         <p class="hero-subtitle">Your online bookstore for all your favorite titles.</p>
 
-        <form asp-action="Index" method="get"
+        <!-- CHANGE: send searches to Books catalog instead of reloading Home -->
+        <form asp-controller="Books"
+              asp-action="Index"
+              method="get"
               class="hero-searchbar d-flex justify-content-center mt-4">
 
             <input type="text"
