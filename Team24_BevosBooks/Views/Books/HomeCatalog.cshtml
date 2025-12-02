@@ -1,4 +1,19 @@
-﻿@using Team24_BevosBooks.Models
+﻿<style>
+    /* Make all book card text black (except buttons + badges) */
+    .discover-card,
+    .discover-card h5,
+    .discover-card p,
+    .discover-card .fw-bold {
+        color: #111 !important;
+    }
+
+        /* Authors slightly lighter */
+        .discover-card .text-muted {
+            color: #333 !important;
+        }
+</style>
+
+@using Team24_BevosBooks.Models
 @{
     ViewData["Title"] = "Discover Books";
 
