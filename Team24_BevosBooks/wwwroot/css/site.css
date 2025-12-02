@@ -11,8 +11,6 @@ body {
     padding: 0;
 }
 
-
-
 nav, main, footer {
     position: relative;
     z-index: 2;
@@ -34,12 +32,19 @@ nav, main, footer {
     --bs-primary-rgb: var(--bevo-gold-rgb) !important;
 }
 
-/* BUTTONS — Solid Primary (Gold) */
+/* ============================================================
+   BUTTONS — GLOBAL POLISHED BUTTON SYSTEM
+=============================================================== */
+
+/* SOLID GOLD BUTTON */
 .btn-primary,
 .btn.btn-primary {
     background-color: var(--bevo-gold) !important;
     border-color: var(--bevo-gold) !important;
     color: #201300 !important;
+    font-weight: 600 !important;
+    border-width: 2px !important;
+    border-radius: 10px !important;
 }
 
     .btn-primary:hover,
@@ -49,16 +54,59 @@ nav, main, footer {
         color: #201300 !important;
     }
 
-/* Outline Primary */
+/* OUTLINE GOLD (Primary) — readable on dark backgrounds */
 .btn-outline-primary {
+    color: #000 !important;
+    background-color: rgba(255,255,255,0.85) !important;
     border-color: var(--bevo-gold) !important;
-    color: var(--bevo-gold) !important;
+    font-weight: 600 !important;
+    border-width: 2px !important;
+    border-radius: 10px !important;
 }
 
     .btn-outline-primary:hover {
-        background-color: var(--bevo-gold) !important;
-        color: #201300 !important;
+        background-color: #fff !important;
+        color: #000 !important;
+        border-color: var(--bevo-gold-hover) !important;
     }
+
+/* OUTLINE WARNING — for Edit buttons */
+.btn-outline-warning {
+    color: #000 !important;
+    background-color: rgba(255,255,255,0.85) !important;
+    border-color: #ffcc00 !important;
+    font-weight: 600 !important;
+    border-width: 2px !important;
+    border-radius: 10px !important;
+}
+
+    .btn-outline-warning:hover {
+        background-color: #fff !important;
+        color: #000 !important;
+        border-color: var(--bevo-gold) !important;
+    }
+
+/* OUTLINE DANGER — for Discontinue buttons */
+.btn-outline-danger {
+    color: #000 !important;
+    background-color: rgba(255,255,255,0.85) !important;
+    border-color: #d9534f !important;
+    font-weight: 600 !important;
+    border-width: 2px !important;
+    border-radius: 10px !important;
+}
+
+    .btn-outline-danger:hover {
+        background-color: #fff !important;
+        color: #000 !important;
+        border-color: #b52b27 !important;
+    }
+
+/* SUCCESS BUTTON (Add to Cart) */
+.btn-success {
+    border-radius: 10px !important;
+    font-weight: 600 !important;
+}
 
 /* ============================================================
    GLOBAL FONT SETTINGS
@@ -67,7 +115,7 @@ nav, main, footer {
 body, p, li, input, button, a, span, div {
     font-family: "JetBrains Mono", monospace !important;
     font-weight: 400;
-    color: #ffffff !important; /* Global white text */
+    color: #ffffff !important;
 }
 
 h1, h2, h3, h4, h5, h6 {
@@ -110,7 +158,7 @@ label,
 }
 
     .form-select option {
-        color: #000 !important; /* readable popup menu */
+        color: #000 !important;
         background: #fff !important;
     }
 
@@ -140,7 +188,7 @@ label,
         color: var(--bevo-gold) !important;
     }
 
-/* Dropdown fix (overlay was covering it) */
+/* Dropdown fix */
 .dropdown-menu {
     z-index: 99999 !important;
     background-color: var(--bevo-brown) !important;
@@ -294,19 +342,20 @@ label,
 .checkout-page .form-label,
 .checkout-page .form-control,
 .checkout-page .form-select {
-    color: #000 !important; /* black text */
-    background-color: #fff !important; /* solid white background */
-    border: 1px solid #ccc !important; /* light gray border */
+    color: #000 !important;
+    background-color: #fff !important;
+    border: 1px solid #ccc !important;
 }
 
     .checkout-page .form-control::placeholder {
-        color: #666 !important; /* gray placeholder text */
+        color: #666 !important;
     }
 
 .no-results-box {
-    background-color: #ffffff; /* same white as table rows */
-    color: #000000; /* black text */
+    background-color: #ffffff;
+    color: #000000;
     padding: 1rem 1.25rem;
-    border-radius: 6px; /* soften edges like Bootstrap cards */
-    border: 1px solid #ddd; /* subtle border like table */
+    border-radius: 6px;
+    border: 1px solid #ddd;
     font-weight: 500;
+}
