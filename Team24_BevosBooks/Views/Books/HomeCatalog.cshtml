@@ -1,4 +1,16 @@
-﻿<style>
+﻿
+@using Team24_BevosBooks.Models
+@{
+    ViewData["Title"] = "Discover Books";
+
+    var bestsellers = ViewBag.Bestsellers as List<Book> ?? new List<Book>();
+    var sections = ViewBag.GenreSections as Dictionary<string, List<Book>>
+                   ?? new Dictionary<string, List<Book>>();
+}
+
+<h1 class="discover-title text-center">Discover Your Next Read</h1>
+
+<style>
     /* Make all book card text black (except buttons + badges) */
     .discover-card,
     .discover-card h5,
@@ -12,17 +24,6 @@
             color: #333 !important;
         }
 </style>
-
-@using Team24_BevosBooks.Models
-@{
-    ViewData["Title"] = "Discover Books";
-
-    var bestsellers = ViewBag.Bestsellers as List<Book> ?? new List<Book>();
-    var sections = ViewBag.GenreSections as Dictionary<string, List<Book>>
-                   ?? new Dictionary<string, List<Book>>();
-}
-
-<h1 class="discover-title text-center">Discover Your Next Read</h1>
 
 <!-- ⭐ BESTSELLERS -->
 <section class="mb-5">

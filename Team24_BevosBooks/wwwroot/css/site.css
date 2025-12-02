@@ -302,3 +302,11 @@ label,
     .checkout-page .form-control::placeholder {
         color: #666 !important; /* gray placeholder text */
     }
+
+.no-results-box {
+    background-color: #ffffff; /* same white as table rows */
+    color: #000000; /* black text */
+    padding: 1rem 1.25rem;
+    border-radius: 6px; /* soften edges like Bootstrap cards */
+    border: 1px solid #ddd; /* subtle border like table */
+    font-weight: 500;

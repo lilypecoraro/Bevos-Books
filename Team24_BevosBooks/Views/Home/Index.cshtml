@@ -5,15 +5,51 @@
     ViewData["FullWidth"] = true;
 }
 
+<style>
+    /* Force logo to stay small */
+    .hero-logo {
+        width: 130px !important;
+        max-width: 130px !important;
+        height: auto !important;
+        object-fit: contain !important;
+        flex: 0 0 auto !important;
+        display: block !important;
+        margin: 0 auto 1.5rem auto !important;
+        z-index: 10 !important;
+    }
+
+    /* Make sure the background element does NOT affect layout */
+    .hero-bg {
+        position: absolute !important;
+        inset: 0;
+        width: 100%;
+        height: 100%;
+        z-index: 1;
+        pointer-events: none;
+    }
+
+    /* Ensure hero content is above background */
+    .hero-content {
+        position: relative;
+        z-index: 5;
+    }
+</style>
+
 <!-- HERO SECTION -->
 <section class="hero-container">
     <div class="hero-bg"></div>
 
     <div class="hero-content text-center">
+
+        <!-- LOGO -->
+        <img src="~/BevoBookLogo.png"
+             alt="Bevo Books Logo"
+             class="hero-logo" />
+
         <h1 class="hero-title">Bevo’s Books</h1>
         <p class="hero-subtitle">Your online bookstore for all your favorite titles.</p>
 
-        <!-- CHANGE: send searches to Books catalog instead of reloading Home -->
+        <!-- Search bar -->
         <form asp-controller="Books"
               asp-action="Index"
               method="get"
