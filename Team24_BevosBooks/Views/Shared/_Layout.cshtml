@@ -132,6 +132,7 @@
                                 @if (User.IsInRole("Admin"))
                                 {
                                     <li><a class="dropdown-item" asp-controller="Coupons" asp-action="Index">Manage Coupons</a></li>
+                                    <li><a class="dropdown-item" asp-controller="RoleAdmin" asp-action="ManageEmployees">Manage Employees</a></li>
                                 }
                             </ul>
                         </li>
