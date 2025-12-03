@@ -56,7 +56,7 @@
     <!-- Recommendations -->
     @if (ViewBag.Recommendations != null)
     {
-        <h3>You may also like</h3>
+        <h3 class="recommendations-title">You may also like:</h3>
         <div class="row">
             @foreach (var book in (List<Team24_BevosBooks.Models.Book>)ViewBag.Recommendations)
             {
@@ -105,6 +105,11 @@
 
         /* Keep the main success title white */
         .confirm-title {
+            color: #ffffff !important;
+        }
+
+        /* Make recommendations title white on dark background */
+        .order-confirm-page .recommendations-title {
             color: #ffffff !important;
         }
     </style>

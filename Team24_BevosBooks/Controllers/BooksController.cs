@@ -98,6 +98,23 @@ namespace Team24_BevosBooks.Controllers
 
             ViewBag.CartsContaining = cartsContainingBook;
 
+            // --- NEW: determine if the signed-in customer can leave a review for this book
+            bool purchased = false;
+            bool hasReviewed = false;
+
+            if (!string.IsNullOrEmpty(userId) && User.IsInRole("Customer"))
+            {
+                purchased = await _context.Orders
+                    .Where(o => o.UserID == userId && o.OrderStatus == "Completed")
+                    .AnyAsync(o => o.OrderDetails.Any(od => od.BookID == id));
+
+                hasReviewed = await _context.Reviews
+                    .AnyAsync(r => r.BookID == id && r.ReviewerID == userId);
+            }
+
+            ViewBag.CanReview = purchased && !hasReviewed;
+            ViewBag.HasReviewed = hasReviewed;
+
             return View(book);
         }
 

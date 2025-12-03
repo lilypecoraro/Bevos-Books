@@ -1,13 +1,22 @@
 ﻿@model Team24_BevosBooks.Models.Review
 
+
 <h2>Write a Review</h2>
 
+<!-- Shows model-level errors (e.g., purchase requirement / duplicate review) -->
+<div class="mb-3">
+    <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+</div>
+
 <form asp-action="Submit" method="post">
+    @Html.AntiForgeryToken()
+
     <input type="hidden" asp-for="BookID" />
 
     <div class="mb-3">
         <label asp-for="Rating" class="form-label"></label>
         <select asp-for="Rating" class="form-select">
+            <option value="">Select rating</option>
             <option value="1">1</option>
             <option value="2">2</option>
             <option value="3">3</option>
@@ -18,10 +27,11 @@
     </div>
 
     <div class="mb-3">
-        <label asp-for="ReviewText" class="form-label"></label>
+        <label for="ReviewText" class="form-label">Review</label>
         <textarea asp-for="ReviewText" class="form-control" maxlength="100"></textarea>
         <span asp-validation-for="ReviewText" class="text-danger"></span>
     </div>
 
-    <button class="btn btn-primary">Submit Review</button>
+    <button type="submit" class="btn btn-primary">Submit Review</button>
 </form>
+

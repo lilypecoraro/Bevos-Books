@@ -15,6 +15,14 @@
             </span>
         </li>
 
+        @* Show Order History before Account for customers only *@
+        @if (User.IsInRole("Customer"))
+        {
+            <li class="nav-item">
+                <a class="nav-link" asp-controller="Orders" asp-action="History">Order History</a>
+            </li>
+        }
+
         <li class="nav-item">
             <a class="nav-link" asp-controller="Account" asp-action="Manage">Account</a>
         </li>

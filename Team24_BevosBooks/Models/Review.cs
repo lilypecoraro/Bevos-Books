@@ -26,11 +26,11 @@ namespace Team24_BevosBooks.Models
         // =========================
         // Review Data
         // =========================
-        [Required]
-        [Range(1, 5)]
-        public int Rating { get; set; }
+        [Required(ErrorMessage = "Please select a rating.")]
+        [Range(1, 5, ErrorMessage = "Please select a rating.")]
+        public int? Rating { get; set; } // needed to add ? for proper error message to show. Rating will never actually take on a null value due to required tag
 
-        [Required]
+        [Required(ErrorMessage = "The review field cannot be blank.")]
         [StringLength(100)]
         public string ReviewText { get; set; }
 
