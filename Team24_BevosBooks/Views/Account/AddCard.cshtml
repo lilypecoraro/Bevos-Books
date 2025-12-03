@@ -9,21 +9,24 @@
 <div class="row">
     <div class="col-md-6">
         <form asp-action="AddCard" method="post">
+            @Html.AntiForgeryToken()
 
-            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+            <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
 
+            <!-- CARD TYPE -->
             <div class="form-group mb-3">
                 <label asp-for="CardType"></label>
-                <select asp-for="CardType" class="form-control">
-                    <option value="">-- Select Card Type --</option>
-                    <option>Visa</option>
-                    <option>MasterCard</option>
-                    <option>Discover</option>
-                    <option>American Express</option>
+
+                <!-- Dropdown auto-populates Visa, MasterCard, Discover, AmericanExpress -->
+                <select asp-for="CardType"
+                        asp-items="Html.GetEnumSelectList<Team24_BevosBooks.Models.Card.CardTypes>()"
+                        class="form-control">
                 </select>
+
                 <span asp-validation-for="CardType" class="text-danger"></span>
             </div>
 
+            <!-- CARD NUMBER -->
             <div class="form-group mb-3">
                 <label asp-for="CardNumber"></label>
                 <input asp-for="CardNumber" class="form-control" />

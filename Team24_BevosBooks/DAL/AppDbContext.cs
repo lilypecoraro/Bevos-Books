@@ -39,7 +39,6 @@ namespace Team24_BevosBooks.DAL
         public DbSet<Book> Books { get; set; }
         public DbSet<Card> Cards { get; set; }
         public DbSet<Coupon> Coupons { get; set; }
-        public DbSet<AppUser> Users { get; set; }
         public DbSet<Genre> Genres { get; set; }
         public DbSet<Order> Orders { get; set; }
         public DbSet<OrderDetail> OrderDetails { get; set; }

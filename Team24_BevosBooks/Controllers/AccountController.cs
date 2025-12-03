@@ -1,4 +1,6 @@
-﻿using Microsoft.AspNetCore.Identity;
+﻿using Microsoft.AspNetCore.Authorization;
+using System.Data;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Team24_BevosBooks.DAL;
@@ -221,40 +223,44 @@ namespace Team24_BevosBooks.Controllers
             return View();
         }
 
+        // in namespace Team24_BevosBooks.Controllers
+        // inside public class AccountController : Controller
         [HttpPost]
+        [Authorize(Roles = "Customer")]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> AddCard(CardViewModel cvm)
         {
-            if (!ModelState.IsValid)
-                return View(cvm);
-
-            AppUser user = await _userManager.GetUserAsync(User);
-
-            int cardCount = _context.Cards
-                                    .Where(c => c.UserID == user.Id)
-                                    .Count();
-
-            if (cardCount >= 3)
+            var user = await _userManager.GetUserAsync(User);
+            if (user == null)
             {
-                ModelState.AddModelError("", "You may only store 3 credit cards.");
+                return RedirectToAction("Login", "Account");
+            }
+
+            if (!ModelState.IsValid)
+            {
                 return View(cvm);
             }
 
-            Card.CardTypes parsedType = Enum.Parse<Card.CardTypes>(cvm.CardType);
+            // Build a customer name for the card (matches NOT NULL column in Cards table)
+            // Build a customer name for the card
+            string customerName = $"{user.FirstName} {user.LastName}";
 
-            Card card = new Card
+            Card newCard = new Card
             {
-                UserID = user.Id,
-                User = user,
+                CardType = cvm.CardType,
                 CardNumber = cvm.CardNumber,
-                CardType = parsedType
+                UserID = user.Id,
+                CustomerName = customerName
             };
 
-            _context.Cards.Add(card);
+            _context.Cards.Add(newCard);
             await _context.SaveChangesAsync();
 
-            TempData["Message"] = "Card added successfully.";
-            return RedirectToAction("Manage");
+            // Send them back to checkout
+            return RedirectToAction("Checkout", "Orders");
+
+            // send them back to checkout (or wherever you want)
+            return RedirectToAction("Checkout", "Orders");
         }
     }
 }
