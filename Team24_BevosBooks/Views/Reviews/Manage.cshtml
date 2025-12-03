@@ -1,28 +1,31 @@
 ﻿@model IEnumerable<Team24_BevosBooks.Models.Review>
 
-<h2>All Reviews</h2>
+@{
+    ViewData["Title"] = "Moderated Reviews";
+}
 
-<table class="table table-bordered">
-    <thead>
+<h2>Approved and Rejected Reviews</h2>
+
+<table class="table table-bordered table-striped table-hover">
+    <thead class="table-dark">
         <tr>
-            <th>Book</th>
-            <th>User</th>
+            <th>Customer</th>
+            <th>Book Title</th>
             <th>Rating</th>
-            <th>Text</th>
+            <th>Review Body</th>
             <th>Status</th>
-            <th>Approver</th>
-            <th>Date</th>
         </tr>
     </thead>
     <tbody>
-        @foreach (var r in Model)
-        {
-            <tr>
-                <td>@r.Book.Title</td>
-                <td>@r.Reviewer.Email</td>
-                <td>@r.Rating</td>
-                <td>@r.ReviewText</td>
-            </tr>
-        }
+    @foreach (var r in Model)
+    {
+        <tr>
+            <td>@($"{r.Reviewer?.FirstName} {r.Reviewer?.LastName}")</td>
+            <td>@r.Book?.Title</td>
+            <td>@(r.Rating.HasValue ? r.Rating.Value.ToString() : "—")</td>
+            <td>@r.ReviewText</td>
+            <td>@r.DisputeStatus</td>
+        </tr>
+    }
     </tbody>
 </table>

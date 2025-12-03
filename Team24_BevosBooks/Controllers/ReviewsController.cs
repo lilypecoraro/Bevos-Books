@@ -72,6 +72,20 @@ namespace Team24_BevosBooks.Controllers
             return RedirectToAction(nameof(Pending));
         }
 
+        // Admin-only: view all approved and rejected reviews
+        [Authorize(Roles = "Admin")]
+        public IActionResult Manage()
+        {
+            var moderated = _context.Reviews
+                .Include(r => r.Book)
+                .Include(r => r.Reviewer)
+                .Where(r => r.DisputeStatus == "Approved" || r.DisputeStatus == "Rejected")
+                .OrderByDescending(r => r.ReviewID)
+                .ToList();
+
+            return View(moderated);
+        }
+
         // ===============================
         // WRITE REVIEW
         // ===============================

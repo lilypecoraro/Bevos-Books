@@ -113,8 +113,8 @@
                         </li>
                     }
 
-                    <!-- Admin / Employee -->
-                    @if (User.IsInRole("Admin") || User.IsInRole("Employee"))
+                    <!-- Admin Panel Dropdown -->
+                    @if (User.IsInRole("Admin"))
                     {
                         <li class="nav-item dropdown">
                             <a class="nav-link dropdown-toggle"
@@ -125,15 +125,32 @@
                                aria-expanded="false">
                                 Admin Panel
                             </a>
-
                             <ul class="dropdown-menu" aria-labelledby="adminDropdown">
+                                <li><a class="dropdown-item" asp-controller="Reviews" asp-action="Pending">Pending Reviews</a></li>
+                                <li><a class="dropdown-item" asp-controller="Reviews" asp-action="Manage">Approved/Rejected Reviews</a></li>
+                                <li><a class="dropdown-item" asp-controller="Orders" asp-action="AllOrders">All Orders</a></li>
+                                <li><a class="dropdown-item" asp-controller="Coupons" asp-action="Index">Manage Coupons</a></li>
+                                <li><a class="dropdown-item" asp-controller="RoleAdmin" asp-action="ManageEmployees">Manage Employees</a></li>
+                            </ul>
+                        </li>
+                    }
+
+                    <!-- Employee Panel Dropdown -->
+                    @if (User.IsInRole("Employee"))
+                    {
+                        <li class="nav-item dropdown">
+                            <a class="nav-link dropdown-toggle"
+                               href="#"
+                               id="employeeDropdown"
+                               role="button"
+                               data-bs-toggle="dropdown"
+                               aria-expanded="false">
+                                Employee Panel
+                            </a>
+                            <ul class="dropdown-menu" aria-labelledby="employeeDropdown">
                                 <li><a class="dropdown-item" asp-controller="Reviews" asp-action="Pending">Review Queue</a></li>
                                 <li><a class="dropdown-item" asp-controller="Orders" asp-action="AllOrders">All Orders</a></li>
-                                @if (User.IsInRole("Admin"))
-                                {
-                                    <li><a class="dropdown-item" asp-controller="Coupons" asp-action="Index">Manage Coupons</a></li>
-                                    <li><a class="dropdown-item" asp-controller="RoleAdmin" asp-action="ManageEmployees">Manage Employees</a></li>
-                                }
+                                <!-- Add more employee-specific links here if needed -->
                             </ul>
                         </li>
                     }
