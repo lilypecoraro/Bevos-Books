@@ -31,8 +31,12 @@ namespace Team24_BevosBooks.Models
             Customer,
             Employee,
             Admin,
-            Disabled   
+            Disabled
         }
+
+        // ⭐ NEW FIELD — Customer number for CUSTOMER accounts only
+        public int? CustomerNumber { get; set; }
+
         // Not stored in the database – used only for viewing roles in ManageEmployees
         [System.ComponentModel.DataAnnotations.Schema.NotMapped]
         public IList<string> RoleNames { get; set; } = new List<string>();

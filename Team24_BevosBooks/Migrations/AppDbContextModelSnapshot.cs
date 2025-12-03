@@ -179,6 +179,9 @@ namespace Team24_BevosBooks.Migrations
                         .IsConcurrencyToken()
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<int?>("CustomerNumber")
+                        .HasColumnType("int");
+
                     b.Property<string>("Email")
                         .HasMaxLength(256)
                         .HasColumnType("nvarchar(256)");
@@ -325,6 +328,11 @@ namespace Team24_BevosBooks.Migrations
 
                     b.Property<int>("CardType")
                         .HasColumnType("int");
+
+                    b.Property<string>("CustomerName")
+                        .IsRequired()
+                        .HasMaxLength(80)
+                        .HasColumnType("nvarchar(80)");
 
                     b.Property<string>("UserID")
                         .IsRequired()

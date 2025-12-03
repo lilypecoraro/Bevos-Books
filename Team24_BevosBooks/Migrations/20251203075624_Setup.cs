@@ -30,10 +30,14 @@ namespace Team24_BevosBooks.Migrations
                 columns: table => new
                 {
                     Id = table.Column<string>(type: "nvarchar(450)", nullable: false),
-                    FirstName = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    LastName = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    FirstName = table.Column<string>(type: "nvarchar(40)", maxLength: 40, nullable: false),
+                    LastName = table.Column<string>(type: "nvarchar(40)", maxLength: 40, nullable: false),
                     Address = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    City = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    State = table.Column<string>(type: "nvarchar(2)", maxLength: 2, nullable: false),
+                    ZipCode = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     Status = table.Column<int>(type: "int", nullable: false),
+                    CustomerNumber = table.Column<int>(type: "int", nullable: true),
                     UserName = table.Column<string>(type: "nvarchar(256)", maxLength: 256, nullable: true),
                     NormalizedUserName = table.Column<string>(type: "nvarchar(256)", maxLength: 256, nullable: true),
                     Email = table.Column<string>(type: "nvarchar(256)", maxLength: 256, nullable: true),
@@ -197,7 +201,8 @@ namespace Team24_BevosBooks.Migrations
                     CardID = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
                     UserID = table.Column<string>(type: "nvarchar(450)", nullable: false),
-                    CardNumber = table.Column<string>(type: "nvarchar(20)", maxLength: 20, nullable: false),
+                    CustomerName = table.Column<string>(type: "nvarchar(80)", maxLength: 80, nullable: false),
+                    CardNumber = table.Column<string>(type: "nvarchar(30)", maxLength: 30, nullable: false),
                     CardType = table.Column<int>(type: "int", nullable: false)
                 },
                 constraints: table =>
@@ -270,7 +275,7 @@ namespace Team24_BevosBooks.Migrations
                         .Annotation("SqlServer:Identity", "1, 1"),
                     OrderID = table.Column<int>(type: "int", nullable: false),
                     BookID = table.Column<int>(type: "int", nullable: false),
-                    CardID = table.Column<int>(type: "int", nullable: false),
+                    CardID = table.Column<int>(type: "int", nullable: true),
                     CouponID = table.Column<int>(type: "int", nullable: true),
                     Quantity = table.Column<int>(type: "int", nullable: false),
                     Price = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
@@ -289,8 +294,7 @@ namespace Team24_BevosBooks.Migrations
                         name: "FK_OrderDetails_Cards_CardID",
                         column: x => x.CardID,
                         principalTable: "Cards",
-                        principalColumn: "CardID",
-                        onDelete: ReferentialAction.Cascade);
+                        principalColumn: "CardID");
                     table.ForeignKey(
                         name: "FK_OrderDetails_Coupons_CouponID",
                         column: x => x.CouponID,
@@ -333,12 +337,12 @@ namespace Team24_BevosBooks.Migrations
                 {
                     ReviewID = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
-                    ReviewerID = table.Column<string>(type: "nvarchar(450)", nullable: false),
                     BookID = table.Column<int>(type: "int", nullable: false),
+                    ReviewerID = table.Column<string>(type: "nvarchar(450)", nullable: false),
                     ApproverID = table.Column<string>(type: "nvarchar(450)", nullable: true),
                     Rating = table.Column<int>(type: "int", nullable: false),
-                    ReviewText = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    DisputeStatus = table.Column<string>(type: "nvarchar(max)", nullable: false)
+                    ReviewText = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: false),
+                    DisputeStatus = table.Column<string>(type: "nvarchar(20)", maxLength: 20, nullable: false)
                 },
                 constraints: table =>
                 {

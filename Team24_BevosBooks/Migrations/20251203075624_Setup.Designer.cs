@@ -12,8 +12,8 @@ using Team24_BevosBooks.DAL;
 namespace Team24_BevosBooks.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20251120102404_MakeCardIDNullable")]
-    partial class MakeCardIDNullable
+    [Migration("20251203075624_Setup")]
+    partial class Setup
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -174,9 +174,16 @@ namespace Team24_BevosBooks.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<string>("City")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<string>("ConcurrencyStamp")
                         .IsConcurrencyToken()
                         .HasColumnType("nvarchar(max)");
+
+                    b.Property<int?>("CustomerNumber")
+                        .HasColumnType("int");
 
                     b.Property<string>("Email")
                         .HasMaxLength(256)
@@ -187,11 +194,13 @@ namespace Team24_BevosBooks.Migrations
 
                     b.Property<string>("FirstName")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(40)
+                        .HasColumnType("nvarchar(40)");
 
                     b.Property<string>("LastName")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(40)
+                        .HasColumnType("nvarchar(40)");
 
                     b.Property<bool>("LockoutEnabled")
                         .HasColumnType("bit");
@@ -219,6 +228,11 @@ namespace Team24_BevosBooks.Migrations
                     b.Property<string>("SecurityStamp")
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<string>("State")
+                        .IsRequired()
+                        .HasMaxLength(2)
+                        .HasColumnType("nvarchar(2)");
+
                     b.Property<int>("Status")
                         .HasColumnType("int");
 
@@ -228,6 +242,10 @@ namespace Team24_BevosBooks.Migrations
                     b.Property<string>("UserName")
                         .HasMaxLength(256)
                         .HasColumnType("nvarchar(256)");
+
+                    b.Property<string>("ZipCode")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
 
                     b.HasKey("Id");
 
@@ -313,6 +331,11 @@ namespace Team24_BevosBooks.Migrations
 
                     b.Property<int>("CardType")
                         .HasColumnType("int");
+
+                    b.Property<string>("CustomerName")
+                        .IsRequired()
+                        .HasMaxLength(80)
+                        .HasColumnType("nvarchar(80)");
 
                     b.Property<string>("UserID")
                         .IsRequired()
@@ -496,13 +519,16 @@ namespace Team24_BevosBooks.Migrations
 
                     b.Property<string>("DisputeStatus")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(20)
+                        .HasColumnType("nvarchar(20)");
 
                     b.Property<int>("Rating")
                         .HasColumnType("int");
 
                     b.Property<string>("ReviewText")
-                        .HasColumnType("nvarchar(max)");
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
 
                     b.Property<string>("ReviewerID")
                         .IsRequired()
@@ -652,7 +678,7 @@ namespace Team24_BevosBooks.Migrations
                         .HasForeignKey("ApproverID");
 
                     b.HasOne("Team24_BevosBooks.Models.Book", "Book")
-                        .WithMany()
+                        .WithMany("Reviews")
                         .HasForeignKey("BookID")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
@@ -668,6 +694,11 @@ namespace Team24_BevosBooks.Migrations
                     b.Navigation("Book");
 
                     b.Navigation("Reviewer");
+                });
+
+            modelBuilder.Entity("Team24_BevosBooks.Models.Book", b =>
+                {
+                    b.Navigation("Reviews");
                 });
 
             modelBuilder.Entity("Team24_BevosBooks.Models.Coupon", b =>

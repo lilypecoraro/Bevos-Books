@@ -16,6 +16,11 @@ namespace Team24_BevosBooks.Models
         public string UserID { get; set; }   // AppUser.Id is string
 
         [Required]
+        [Display(Name = "Customer Name")]
+        [StringLength(80)]
+        public string CustomerName { get; set; }
+
+        [Required]
         [Display(Name = "Card Number")]
         [MaxLength(30)]
         public string CardNumber { get; set; }

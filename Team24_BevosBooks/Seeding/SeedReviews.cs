@@ -35,109 +35,109 @@ namespace Team24_BevosBooks.Seeding
             }
 
             // REVIEWER EMAILS (From your list)
-            string CBaker = GetUserIdByEmail("cbaker@example.com");
-            string WChang = GetUserIdByEmail("wchang@example.com");
-            string LChou = GetUserIdByEmail("limchou@gogle.com");
-            string JHampton = GetUserIdByEmail("jeffh@sonic.com");
-            string CMiller = GetUserIdByEmail("cmiller@bob.com");
-            string ELowe = GetUserIdByEmail("elowe@netscare.net");
+            string ChristopherBaker = GetUserIdByEmail("cbaker@example.com");
+            string WendyChang = GetUserIdByEmail("wchang@example.com");
+            string LimChou = GetUserIdByEmail("limchou@gogle.com");
+            string JeffreyHampton = GetUserIdByEmail("jeffh@sonic.com");
+            string CharlesMiller = GetUserIdByEmail("cmiller@bob.com");
+            string ErnestLowe = GetUserIdByEmail("elowe@netscare.net");
 
             // APPROVER EMAILS (from original examples)
-            string SBarnes = GetUserIdByEmail("s.barnes@bevosbooks.com");
-            string JMason = GetUserIdByEmail("j.mason@bevosbooks.com");
-            string CSilva = GetUserIdByEmail("c.silva@bevosbooks.com");
-            string EStuart = GetUserIdByEmail("e.stuart@bevosbooks.com");
-            string ARogers = GetUserIdByEmail("a.rogers@bevosbooks.com");
-            string HGarcia = GetUserIdByEmail("h.garcia@bevosbooks.com");
+            string SusanBarnes = GetUserIdByEmail("s.barnes@bevosbooks.com");
+            string JackMason = GetUserIdByEmail("j.mason@bevosbooks.com");
+            string CindySilva = GetUserIdByEmail("c.silva@bevosbooks.com");
+            string EricStuart = GetUserIdByEmail("e.stuart@bevosbooks.com");
+            string AllenRogers = GetUserIdByEmail("a.rogers@bevosbooks.com");
+            string HectorGarcia = GetUserIdByEmail("h.garcia@bevosbooks.com");
 
             // ALL REVIEWS
             List<Review> reviews = new List<Review>
             {
                 new Review {
-                    ReviewerID = CBaker,
+                    ReviewerID = ChristopherBaker,
                     BookID     = GetBookId("Say Goodbye"),
-                    ApproverID = SBarnes,
+                    ApproverID = SusanBarnes,
                     Rating     = 5,
                     ReviewText = "Incredible pacing and tension throughout—couldn’t stop reading.",
                     DisputeStatus     = "Approved"
                 },
 
                 new Review {
-                    ReviewerID = CBaker,
+                    ReviewerID = ChristopherBaker,
                     BookID     = GetBookId("Chasing Darkness"),
-                    ApproverID = JMason,
+                    ApproverID = JackMason,
                     Rating     = 4,
                     ReviewText = "Tight mystery with solid twists; a bit slow in the middle.",
                     DisputeStatus     = "Rejected"
                 },
 
                 new Review {
-                    ReviewerID = WChang,
+                    ReviewerID = WendyChang,
                     BookID     = GetBookId("The Professional"),
-                    ApproverID = CSilva,
+                    ApproverID = CindySilva,
                     Rating     = 4,
                     ReviewText = "Classic Spenser. Sharp dialogue and old-school charm.",
                     DisputeStatus     = "Approved"
                 },
 
                 new Review {
-                    ReviewerID = LChou,
+                    ReviewerID = LimChou,
                     BookID     = GetBookId("The Other Queen"),
-                    ApproverID = EStuart,
+                    ApproverID = EricStuart,
                     Rating     = 3,
                     ReviewText = "Rich historical detail, but pacing drags at times.",
                     DisputeStatus     = "Approved"
                 },
 
                 new Review {
-                    ReviewerID = LChou,
+                    ReviewerID = LimChou,
                     BookID     = GetBookId("Wrecked"),
-                    ApproverID = ARogers,
+                    ApproverID = AllenRogers,
                     Rating     = 5,
                     ReviewText = "Fast-moving and witty. Loved the Cape Cod setting.",
                     DisputeStatus     = "Approved"
                 },
 
                 new Review {
-                    ReviewerID = LChou,
+                    ReviewerID = LimChou,
                     BookID     = GetBookId("Reckless"),
-                    ApproverID = HGarcia,
+                    ApproverID = HectorGarcia,
                     Rating     = 4,
                     ReviewText = "Emotional and thrilling. Hauck’s motives feel real.",
                     DisputeStatus     = "Approved"
                 },
 
                 new Review {
-                    ReviewerID = JHampton,
+                    ReviewerID = JeffreyHampton,
                     BookID     = GetBookId("The Professional"),
-                    ApproverID = CSilva,
+                    ApproverID = CindySilva,
                     Rating     = 5,
                     ReviewText = "Lean, witty Spenser case—couldn’t put it down.",
                     DisputeStatus     = "Approved"
                 },
 
                 new Review {
-                    ReviewerID = CMiller,
+                    ReviewerID = CharlesMiller,
                     BookID     = GetBookId("Say Goodbye"),
-                    ApproverID = ARogers,
+                    ApproverID = AllenRogers,
                     Rating     = 4,
                     ReviewText = "Creepy, clever, and tightly plotted.",
                     DisputeStatus     = "Rejected"
                 },
 
                 new Review {
-                    ReviewerID = ELowe,
+                    ReviewerID = ErnestLowe,
                     BookID     = GetBookId("Wrecked"),
-                    ApproverID = EStuart,
+                    ApproverID = EricStuart,
                     Rating     = 4,
                     ReviewText = "Light, fun mystery with brisk pacing.",
                     DisputeStatus     = "Approved"
                 },
 
                 new Review {
-                    ReviewerID = ELowe,
+                    ReviewerID = ErnestLowe,
                     BookID     = GetBookId("Reckless"),
-                    ApproverID = EStuart,
+                    ApproverID = EricStuart,
                     Rating     = 3,
                     ReviewText = "Gritty and tense, but a bit uneven.",
                     DisputeStatus     = "Approved"
