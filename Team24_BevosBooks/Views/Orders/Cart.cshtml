@@ -61,9 +61,12 @@ else
                     <td>
                         <form asp-action="UpdateQuantity" method="post" class="d-flex">
                             <input type="hidden" name="orderDetailId" value="@detail.OrderDetailID" />
-                            <input type="number" name="quantity" value="@detail.Quantity"
-                                   class="form-control form-control-sm me-2" min="0" />
-                            <button type="submit" class="btn btn-sm btn-outline-primary">Update</button>
+                            <input type="number"
+                                   name="quantity"
+                                   value="@detail.Quantity"
+                                   min="0"
+                                   class="form-control form-control-sm me-2 cart-qty-input" />
+                            <button type="submit" class="btn btn-sm cart-update-btn">Update</button>
                         </form>
                     </td>
 
@@ -94,4 +97,30 @@ else
             </a>
         </div>
     </div>
+}
+
+@section Styles {
+    <style>
+        /* Quantity input styling */
+        .cart-qty-input,
+        .cart-qty-input:focus {
+            color: #000 !important;
+            background-color: #fff !important;
+            border: 1px solid #ccc !important;
+        }
+
+        /* Update button styling */
+        .cart-update-btn {
+            color: #000 !important;
+            border-color: #000 !important;
+            background-color: rgba(255,255,255,0.85) !important;
+            font-weight: 600 !important;
+        }
+
+            .cart-update-btn:hover {
+                background-color: #fff !important;
+                color: #000 !important;
+                border-color: #000 !important;
+            }
+    </style>
 }
