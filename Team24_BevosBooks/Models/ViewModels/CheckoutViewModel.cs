@@ -5,14 +5,15 @@ namespace Team24_BevosBooks.Models.ViewModels
 {
     public class CheckoutViewModel
     {
-        public Order Order { get; set; }
+        // Order - nullable for model binding safety
+        public Order? Order { get; set; }
 
         // Payment
         public int? SelectedCardID { get; set; }
-        public List<Card> Cards { get; set; }
+        public List<Card> Cards { get; set; } = new List<Card>();
 
-        // Coupon
-        public string CouponCode { get; set; }
+        // Coupon is OPTIONAL – make it nullable
+        public string? CouponCode { get; set; }
 
         // Totals
         public decimal Subtotal { get; set; }

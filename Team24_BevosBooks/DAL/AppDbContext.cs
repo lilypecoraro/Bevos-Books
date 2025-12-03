@@ -4,7 +4,6 @@ using Microsoft.EntityFrameworkCore;
 using Team24_BevosBooks.Models;
 using System;
 using System.Collections.Generic;
-using Team24_BevosBooks.Models;
 
 //TODO: Make this namespace match your project name
 namespace Team24_BevosBooks.DAL

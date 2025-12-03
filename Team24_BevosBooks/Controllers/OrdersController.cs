@@ -12,7 +12,7 @@ using Team24_BevosBooks.Models.ViewModels;
 
 namespace Team24_BevosBooks.Controllers
 {
-    [Authorize]  // Controller requires login � specific roles added per action
+    [Authorize]
     public class OrdersController : Controller
     {
         private readonly AppDbContext _context;
@@ -27,9 +27,9 @@ namespace Team24_BevosBooks.Controllers
             _userManager = userManager;
         }
 
-        // ========================================================
+        // ==============================================
         // GET OR CREATE CART
-        // ========================================================
+        // ==============================================
         private async Task<Order> GetOrCreateCart(string userId)
         {
             var order = await _context.Orders
@@ -56,6 +56,9 @@ namespace Team24_BevosBooks.Controllers
             return order;
         }
 
+        // ==============================================
+        // UPDATE CART (discontinued / stock / price)
+        // ==============================================
         private async Task<List<string>> UpdateCartForChanges(Order cart)
         {
             List<string> messages = new();
@@ -67,14 +70,14 @@ namespace Team24_BevosBooks.Controllers
 
                 if (book == null || book.BookStatus == "Discontinued")
                 {
-                    messages.Add($"'{item.Book?.Title}' is no longer available and was removed.");
+                    messages.Add($"'{item.Book?.Title}' was discontinued and removed from your cart.");
                     _context.OrderDetails.Remove(item);
                     continue;
                 }
 
                 if (book.InventoryQuantity == 0)
                 {
-                    messages.Add($"'{book.Title}' is out of stock and was removed.");
+                    messages.Add($"'{book.Title}' is out of stock and was removed from your cart.");
                     _context.OrderDetails.Remove(item);
                     continue;
                 }
@@ -82,7 +85,7 @@ namespace Team24_BevosBooks.Controllers
                 if (item.Quantity > book.InventoryQuantity)
                 {
                     item.Quantity = book.InventoryQuantity;
-                    messages.Add($"Quantity for '{book.Title}' reduced to {book.InventoryQuantity}.");
+                    messages.Add($"Quantity for '{book.Title}' reduced to {book.InventoryQuantity} (max in stock).");
                 }
 
                 item.Price = book.Price;
@@ -93,13 +96,16 @@ namespace Team24_BevosBooks.Controllers
             return messages;
         }
 
+        // ==============================================
+        // CART TOTALS
+        // ==============================================
         private (decimal subtotal, decimal shipping, decimal total)
             ComputeCartTotals(Order cart, bool freeShipping = false)
         {
             decimal subtotal = cart.OrderDetails.Sum(od => od.Price * od.Quantity);
             int qty = cart.OrderDetails.Sum(od => od.Quantity);
 
-            decimal shipping = 0;
+            decimal shipping = 0m;
             if (!freeShipping && qty > 0)
             {
                 shipping = FIRST_BOOK_SHIPPING + (qty - 1) * ADDITIONAL_BOOK_SHIPPING;
@@ -108,9 +114,9 @@ namespace Team24_BevosBooks.Controllers
             return (subtotal, shipping, subtotal + shipping);
         }
 
-        // ========================================================
-        // CART PAGE (CUSTOMER)
-        // ========================================================
+        // ==============================================
+        // CART PAGE
+        // ==============================================
         [Authorize(Roles = "Customer")]
         public async Task<IActionResult> Cart()
         {
@@ -135,9 +141,9 @@ namespace Team24_BevosBooks.Controllers
             return View(cart);
         }
 
-        // ========================================================
-        // ADD TO CART (CUSTOMER)
-        // ========================================================
+        // ==============================================
+        // ADD TO CART
+        // ==============================================
         [Authorize(Roles = "Customer")]
         public async Task<IActionResult> AddToCart(int id)
         {
@@ -184,9 +190,9 @@ namespace Team24_BevosBooks.Controllers
             return RedirectToAction("Cart");
         }
 
-        // ========================================================
-        // REMOVE ITEM (CUSTOMER)
-        // ========================================================
+        // ==============================================
+        // REMOVE ITEM
+        // ==============================================
         [Authorize(Roles = "Customer")]
         [HttpPost]
         public async Task<IActionResult> RemoveItem(int orderDetailId)
@@ -201,9 +207,9 @@ namespace Team24_BevosBooks.Controllers
             return RedirectToAction("Cart");
         }
 
-        // ========================================================
-        // UPDATE QUANTITY (CUSTOMER)
-        // ========================================================
+        // ==============================================
+        // UPDATE QUANTITY
+        // ==============================================
         [Authorize(Roles = "Customer")]
         [HttpPost]
         public async Task<IActionResult> UpdateQuantity(int orderDetailId, int quantity)
@@ -224,9 +230,9 @@ namespace Team24_BevosBooks.Controllers
             return RedirectToAction("Cart");
         }
 
-        // ========================================================
+        // ==============================================
         // CHECKOUT (GET)
-        // ========================================================
+        // ==============================================
         [Authorize(Roles = "Customer")]
         public async Task<IActionResult> Checkout()
         {
@@ -247,98 +253,176 @@ namespace Team24_BevosBooks.Controllers
             }
 
             await UpdateCartForChanges(cart);
+
+            var cards = await _context.Cards
+                .Where(c => c.UserID == user.Id)
+                .ToListAsync();
+
             var totals = ComputeCartTotals(cart);
 
             var vm = new CheckoutViewModel
             {
                 Order = cart,
-                Cards = await _context.Cards.Where(c => c.UserID == user.Id).ToListAsync(),
-                SelectedCardID = null,
+                Cards = cards,
+                SelectedCardID = cards.Any() ? cards.First().CardID : (int?)null,
                 CouponCode = "",
                 Subtotal = totals.subtotal,
                 Shipping = totals.shipping,
                 Total = totals.total
             };
 
+            if (TempData["CheckoutMessage"] != null)
+            {
+                ViewBag.CheckoutMessage = TempData["CheckoutMessage"];
+            }
+
             return View(vm);
         }
 
-        // ========================================================
+        // ==============================================
         // CHECKOUT (POST)
-        // ========================================================
+        // ==============================================
         [Authorize(Roles = "Customer")]
         [HttpPost]
-        public async Task<IActionResult> Checkout(int orderId, int? selectedCardId, string? couponCode)
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Checkout(CheckoutViewModel model)
         {
             var user = await _userManager.GetUserAsync(User);
             if (user == null) return RedirectToAction("Login", "Account");
 
+            // Coupon is optional – ignore any implicit "required" validation on it
+            ModelState.Remove(nameof(CheckoutViewModel.CouponCode));
+
+            // Safety: Order might not be bound – get cart by user instead
             var cart = await _context.Orders
                 .Include(o => o.OrderDetails)
                     .ThenInclude(od => od.Book)
-                .FirstOrDefaultAsync(o => o.OrderID == orderId &&
-                                          o.UserID == user.Id &&
+                .FirstOrDefaultAsync(o => o.UserID == user.Id &&
                                           o.OrderStatus == "InCart");
 
             if (cart == null) return NotFound();
 
             if (!cart.OrderDetails.Any())
+            {
+                TempData["CheckoutMessage"] = "Your cart is empty.";
                 return RedirectToAction("Cart");
-
-            if (selectedCardId == null)
-            {
-                TempData["CheckoutMessage"] = "Please select a card.";
-                return RedirectToAction("Checkout");
             }
 
-            var card = await _context.Cards
-                .FirstOrDefaultAsync(c => c.CardID == selectedCardId &&
-                                          c.UserID == user.Id);
+            await UpdateCartForChanges(cart);
 
-            if (card == null)
+            var cards = await _context.Cards
+                .Where(c => c.UserID == user.Id)
+                .ToListAsync();
+
+            model.Order = cart;
+            model.Cards = cards;
+
+            if (!cards.Any())
             {
-                TempData["CheckoutMessage"] = "Invalid card.";
-                return RedirectToAction("Checkout");
+                ModelState.AddModelError(string.Empty, "You must add a credit card before checking out.");
             }
 
+            if (model.SelectedCardID == null)
+            {
+                ModelState.AddModelError(nameof(model.SelectedCardID), "Please select a credit card.");
+            }
+
+            // ---------------- COUPON VALIDATION/APPLICATION ----------------
+            Coupon? coupon = null;
             bool freeShipping = false;
+            bool couponApplied = false;
+            string? couponMessage = null;
 
-            // ============= APPLY COUPON =========================
-            if (!string.IsNullOrWhiteSpace(couponCode))
+            if (!string.IsNullOrWhiteSpace(model.CouponCode))
             {
-                var coupon = await _context.Coupons
-                    .FirstOrDefaultAsync(c => c.CouponCode == couponCode &&
+                coupon = await _context.Coupons
+                    .FirstOrDefaultAsync(c => c.CouponCode == model.CouponCode &&
                                               c.Status == "Enabled");
 
-                if (coupon != null)
+                if (coupon == null)
                 {
-                    decimal before = cart.OrderDetails.Sum(od => od.Price * od.Quantity);
-
-                    if (coupon.CouponType == "PercentOff")
-                    {
-                        foreach (var d in cart.OrderDetails)
-                        {
-                            decimal discount = d.Price * (coupon.DiscountPercent.Value / 100m);
-                            d.Price -= discount;
-                        }
-                    }
-                    else if (coupon.CouponType == "FreeShipping")
-                    {
-                        if (before >= coupon.FreeThreshold)
-                            freeShipping = true;
-                        else
-                            TempData["CheckoutMessage"] = $"This coupon requires {coupon.FreeThreshold:c}.";
-                    }
+                    couponMessage = "This coupon code is invalid or disabled.";
                 }
                 else
                 {
-                    TempData["CheckoutMessage"] = "Invalid coupon.";
+                    bool alreadyUsed = await _context.OrderDetails
+                        .Include(od => od.Order)
+                        .AnyAsync(od => od.Order.UserID == user.Id &&
+                                        od.Order.OrderStatus == "Completed" &&
+                                        od.CouponID == coupon.CouponID);
+
+                    if (alreadyUsed)
+                    {
+                        couponMessage = "You have already used this coupon.";
+                    }
+                    else
+                    {
+                        couponApplied = true;
+                    }
+                }
+            }
+
+            foreach (var od in cart.OrderDetails)
+            {
+                od.Price = od.Book.Price;
+                od.CouponID = null;
+            }
+
+            if (couponApplied && coupon != null)
+            {
+                if (coupon.CouponType == "PercentOff")
+                {
+                    foreach (var od in cart.OrderDetails)
+                    {
+                        decimal discount = od.Price * (coupon.DiscountPercent.Value / 100m);
+                        od.Price -= discount;
+                        od.CouponID = coupon.CouponID;
+                    }
+                }
+                else if (coupon.CouponType == "FreeShipping")
+                {
+                    decimal before = cart.OrderDetails.Sum(od => od.Price * od.Quantity);
+                    if (before >= coupon.FreeThreshold)
+                    {
+                        freeShipping = true;
+                        foreach (var od in cart.OrderDetails)
+                        {
+                            od.CouponID = coupon.CouponID;
+                        }
+                    }
+                    else
+                    {
+                        couponMessage = $"This coupon requires an order total of at least {coupon.FreeThreshold:c}.";
+                        couponApplied = false;
+                    }
                 }
             }
 
             var totals = ComputeCartTotals(cart, freeShipping);
+            model.Subtotal = cart.OrderDetails.Sum(od => od.Price * od.Quantity);
+            model.Shipping = totals.shipping;
+            model.Total = totals.total;
 
-            // DECREASE INVENTORY
+            if (!string.IsNullOrEmpty(couponMessage))
+            {
+                ViewBag.CheckoutMessage = couponMessage;
+            }
+
+            if (!ModelState.IsValid || !cards.Any())
+            {
+                return View(model);
+            }
+
+            var card = await _context.Cards
+                .FirstOrDefaultAsync(c => c.CardID == model.SelectedCardID &&
+                                          c.UserID == user.Id);
+
+            if (card == null)
+            {
+                ModelState.AddModelError(nameof(model.SelectedCardID), "Selected card is invalid.");
+                return View(model);
+            }
+
             foreach (var item in cart.OrderDetails)
             {
                 var book = await _context.Books.FindAsync(item.BookID);
@@ -346,22 +430,23 @@ namespace Team24_BevosBooks.Controllers
                     book.InventoryQuantity -= item.Quantity;
             }
 
-            // FINALIZE ORDER
             cart.OrderStatus = "Completed";
             cart.OrderDate = DateTime.Now;
             cart.ShippingFee = totals.shipping;
 
-            foreach (var d in cart.OrderDetails)
-                d.CardID = selectedCardId.Value;
+            foreach (var od in cart.OrderDetails)
+            {
+                od.CardID = card.CardID;
+            }
 
             await _context.SaveChangesAsync();
 
             return RedirectToAction("OrderConfirmation", new { id = cart.OrderID });
         }
 
-        // ========================================================
-        // ORDER CONFIRMATION
-        // ========================================================
+        // ==============================================
+        // ORDER CONFIRMATION + RECOMMENDATIONS
+        // ==============================================
         [Authorize]
         public async Task<IActionResult> OrderConfirmation(int id)
         {
@@ -370,31 +455,39 @@ namespace Team24_BevosBooks.Controllers
             var order = await _context.Orders
                 .Include(o => o.OrderDetails)
                     .ThenInclude(od => od.Book)
-                    .ThenInclude(b => b.Genre)
+                        .ThenInclude(b => b.Genre)
                 .Include(o => o.OrderDetails)
                     .ThenInclude(od => od.Card)
                 .FirstOrDefaultAsync(o => o.OrderID == id &&
                                           o.UserID == user.Id);
 
-            if (order == null) return NotFound();
+            if (order == null)
+                return NotFound();
 
-            var firstBook = order.OrderDetails.First().Book;
+            var firstDetailWithBook = order.OrderDetails.FirstOrDefault(od => od.Book != null);
 
-            var recs = await _context.Books
-                .Where(b => b.GenreID == firstBook.GenreID &&
-                            b.BookStatus == "Active" &&
-                            !order.OrderDetails.Select(od => od.BookID).Contains(b.BookID))
-                .Take(3)
-                .ToListAsync();
+            List<Book> recs = new List<Book>();
+
+            if (firstDetailWithBook != null)
+            {
+                var firstBook = firstDetailWithBook.Book;
+
+                recs = await _context.Books
+                    .Where(b => b.GenreID == firstBook.GenreID &&
+                                b.BookStatus == "Active" &&
+                                !order.OrderDetails.Select(od => od.BookID).Contains(b.BookID))
+                    .Take(3)
+                    .ToListAsync();
+            }
 
             ViewBag.Recommendations = recs;
 
             return View(order);
         }
 
-        // ========================================================
-        // ORDER HISTORY (CUSTOMER)
-        // ========================================================
+        // ==============================================
+        // ORDER HISTORY
+        // ==============================================
         [Authorize(Roles = "Customer")]
         public async Task<IActionResult> History()
         {
@@ -411,9 +504,9 @@ namespace Team24_BevosBooks.Controllers
             return View(orders);
         }
 
-        // ========================================================
-        // ALL ORDERS (ADMIN + EMPLOYEE)
-        // ========================================================
+        // ==============================================
+        // ALL ORDERS (ADMIN/EMPLOYEE)
+        // ==============================================
         [Authorize(Roles = "Admin,Employee")]
         public async Task<IActionResult> AllOrders()
         {

@@ -6,8 +6,6 @@ using Microsoft.EntityFrameworkCore;
 using Team24_BevosBooks.DAL;
 using Team24_BevosBooks.Models;
 using System.Globalization;
-using Team24_BevosBooks.DAL;
-using Team24_BevosBooks.Models;
 
 //create a web application builder
 var builder = WebApplication.CreateBuilder(args);

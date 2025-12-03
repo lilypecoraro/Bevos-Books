@@ -15,32 +15,34 @@
 }
 else
 {
-    <!-- CHANGE #1: Added "checkout-page" class to wrapper div -->
-    <div class="row checkout-page">
+    <!-- SINGLE FORM WRAPS BOTH COLUMNS -->
+    <form asp-action="Checkout" method="post" id="checkoutForm">
+        @Html.AntiForgeryToken()
 
-        <!-- LEFT COLUMN -->
-        <div class="col-md-7">
+        <div class="row checkout-page">
 
-            <!-- PAYMENT METHOD -->
-            <div class="card mb-4">
-                <div class="card-header">
-                    <h5>Select Payment Method</h5>
-                </div>
-                <div class="card-body">
+            <!-- LEFT COLUMN -->
+            <div class="col-md-7">
 
-                    @if (!Model.Cards.Any())
-                    {
-                        <p>You have no saved credit cards.</p>
-                        <a asp-controller="Account" asp-action="AddCard"
-                           class="btn btn-primary btn-sm">Add a Credit Card</a>
-                    }
-                    else
-                    {
-                        <form asp-action="Checkout" method="post">
-                            <input type="hidden" name="orderId" value="@Model.Order.OrderID" />
+                <!-- PAYMENT CARD BLOCK -->
+                <div class="card mb-4">
+                    <div class="card-header">
+                        <h5>Select Payment Method</h5>
+                    </div>
 
+                    <div class="card-body">
+                        @if (!Model.Cards.Any())
+                        {
+                            <p>You have no saved credit cards.</p>
+                            <a asp-controller="Account" asp-action="AddCard"
+                               class="btn btn-primary btn-sm">Add a Credit Card</a>
+                        }
+                        else
+                        {
                             <div class="mb-3">
                                 <label class="form-label"><strong>Choose a credit card:</strong></label>
+
+                                <!-- Binds to SelectedCardID in the POST -->
                                 <select asp-for="SelectedCardID" class="form-select" required>
                                     <option value="">-- Select Card --</option>
 
@@ -50,82 +52,75 @@ else
                                         <option value="@c.CardID">@c.CardType •••• @last4</option>
                                     }
                                 </select>
+
                                 <span asp-validation-for="SelectedCardID" class="text-danger"></span>
                             </div>
 
+                            <!-- Add another card button - black text -->
                             <a asp-controller="Account" asp-action="AddCard"
-                               class="btn btn-outline-secondary btn-sm mb-2">
+                               class="btn btn-outline-secondary btn-sm mb-2 add-card-btn">
                                 Add another card
                             </a>
-                        </form>
-                    }
+                        }
+                    </div>
                 </div>
-            </div>
 
-            <!-- COUPON -->
-            <div class="card mb-4">
-                <div class="card-header">
-                    <h5>Coupon Code</h5>
-                </div>
-                <div class="card-body">
-                    <form asp-action="Checkout" method="post">
-                        <input type="hidden" name="orderId" value="@Model.Order.OrderID" />
+                <!-- COUPON BLOCK -->
+                <div class="card mb-4">
+                    <div class="card-header">
+                        <h5>Coupon Code</h5>
+                    </div>
 
+                    <div class="card-body">
                         <div class="input-group">
-                            <input asp-for="CouponCode" class="form-control"
-                                   placeholder="Enter coupon code" />
-                            <button type="submit" class="btn btn-primary">Apply</button>
+                            <!-- Binds to CouponCode in the POST -->
+                            <input asp-for="CouponCode" class="form-control" placeholder="Enter coupon code" />
+                            <!-- Same action, same form — coupon applied when order is placed -->
+                            <button type="submit" class="btn btn-primary">
+                                Apply &amp; Place Order
+                            </button>
                         </div>
 
                         <span asp-validation-for="CouponCode" class="text-danger"></span>
 
-                        @if (TempData["CouponMessage"] != null)
+                        @if (ViewBag.CheckoutMessage != null)
                         {
-                            <div class="alert alert-info mt-2">@TempData["CouponMessage"]</div>
+                            <div class="alert alert-info mt-2">@ViewBag.CheckoutMessage</div>
                         }
-                    </form>
-                </div>
-            </div>
-
-        </div>
-
-        <!-- RIGHT COLUMN: SUMMARY -->
-        <div class="col-md-5">
-
-            <div class="card">
-                <div class="card-header">
-                    <h5>Order Summary</h5>
+                    </div>
                 </div>
 
-                <div class="card-body">
+            </div> <!-- END LEFT COLUMN -->
+            <!-- RIGHT COLUMN -->
+            <div class="col-md-5">
 
-                    <!-- CHANGE #2: These lines will now render black -->
-                    <p><strong>Subtotal:</strong> @Model.Subtotal.ToString("c")</p>
-                    <p><strong>Shipping:</strong> @Model.Shipping.ToString("c")</p>
-                    <p class="fs-4"><strong>Total:</strong> @Model.Total.ToString("c")</p>
+                <div class="card">
+                    <div class="card-header">
+                        <h5>Order Summary</h5>
+                    </div>
 
-                    <form asp-action="Checkout" method="post">
-                        <input type="hidden" name="orderId" value="@Model.Order.OrderID" />
-                        <input type="hidden" name="selectedCardId" value="@Model.SelectedCardID" />
-                        <input type="hidden" name="couponCode" value="@Model.CouponCode" />
+                    <div class="card-body">
+                        <p><strong>Subtotal:</strong> @Model.Subtotal.ToString("c")</p>
+                        <p><strong>Shipping:</strong> @Model.Shipping.ToString("c")</p>
+                        <p class="fs-4"><strong>Total:</strong> @Model.Total.ToString("c")</p>
 
-                        <button type="submit" class="btn btn-success w-100"
+                        <!-- This button also posts the same form -->
+                        <button type="submit"
+                                class="btn btn-success w-100"
                                 @(Model.Cards.Any() ? "" : "disabled")>
                             Place Order
                         </button>
-                    </form>
-
+                    </div>
                 </div>
-            </div>
 
-        </div>
-    </div>
+            </div> <!-- END RIGHT COLUMN -->
+
+        </div> <!-- END ROW -->
+    </form>
 }
 
-<!-- CHANGE #3: Scoped CSS overrides for ALL text inside checkout -->
 @section Styles {
     <style>
-        /* Force black text inside checkout page */
         .checkout-page,
         .checkout-page h5,
         .checkout-page p,
@@ -136,10 +131,9 @@ else
             color: #000 !important;
         }
 
-            /* Inputs and selects */
-            .checkout-page .form-label,
             .checkout-page .form-control,
-            .checkout-page .form-select {
+            .checkout-page .form-select,
+            .checkout-page .form-label {
                 color: #000 !important;
                 background-color: #fff !important;
                 border: 1px solid #ccc !important;
@@ -148,6 +142,19 @@ else
                 .checkout-page .form-control::placeholder {
                     color: #666 !important;
                 }
+
+        /* Make Add Another Card button text black */
+        .add-card-btn {
+            color: #000 !important;
+            border-color: #000 !important;
+            background-color: rgba(255,255,255,0.85) !important;
+            font-weight: 600 !important;
+        }
+
+            .add-card-btn:hover {
+                background-color: #fff !important;
+                color: #000 !important;
+                border-color: #000 !important;
+            }
     </style>
 }
-
