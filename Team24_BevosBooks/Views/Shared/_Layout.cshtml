@@ -57,7 +57,9 @@
                     @if (User.IsInRole("Admin") || User.IsInRole("Employee"))
                     {
                         <li class="nav-item dropdown">
-                            <a class="nav-link dropdown-toggle" href="#" id="adminDropdown" role="button" data-bs-toggle="dropdown">Admin Panel</a>
+                            <a class="nav-link dropdown-toggle" href="#" id="adminDropdown" role="button" data-bs-toggle="dropdown">
+                                @(User.IsInRole("Admin") ? "Admin Panel" : "Employee Panel")
+                            </a>
                             <ul class="dropdown-menu" aria-labelledby="adminDropdown">
                                 <li><a class="dropdown-item" asp-controller="Reviews" asp-action="Pending">Review Queue</a></li>
                                 <li><a class="dropdown-item" asp-controller="Orders" asp-action="AllOrders">All Orders</a></li>

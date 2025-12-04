@@ -228,9 +228,27 @@ namespace Team24_BevosBooks.Controllers
             if (detail == null) return NotFound();
 
             if (quantity <= 0)
+            {
                 _context.OrderDetails.Remove(detail);
+            }
             else
-                detail.Quantity = Math.Min(quantity, detail.Book.InventoryQuantity);
+            {
+                if (detail.Book == null)
+                {
+                    return NotFound();
+                }
+
+                // If requested quantity exceeds inventory, clamp and show message
+                if (quantity > detail.Book.InventoryQuantity)
+                {
+                    detail.Quantity = detail.Book.InventoryQuantity;
+                    TempData["CartMessage"] = $"Cannot exceed stock quantity for '{detail.Book.Title}'. Available: {detail.Book.InventoryQuantity}.";
+                }
+                else
+                {
+                    detail.Quantity = quantity;
+                }
+            }
 
             await _context.SaveChangesAsync();
             return RedirectToAction("Cart");
