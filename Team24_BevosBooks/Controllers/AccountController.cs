@@ -297,5 +297,26 @@ namespace Team24_BevosBooks.Controllers
             // send them back to checkout (or wherever you want)
             return RedirectToAction("Checkout", "Orders");
         }
+
+        // ================================
+        // VIEW MY CARDS
+        // ================================
+        // View only the current customer's credit cards
+        [Authorize(Roles = "Customer")]
+        public async Task<IActionResult> MyCards()
+        {
+            var user = await _userManager.GetUserAsync(User);
+            if (user == null)
+            {
+                return RedirectToAction("Login", "Account");
+            }
+
+            var cards = await _context.Cards
+                .Where(c => c.UserID == user.Id)
+                .OrderBy(c => c.CardType)
+                .ToListAsync();
+
+            return View(cards);
+        }
     }
 }

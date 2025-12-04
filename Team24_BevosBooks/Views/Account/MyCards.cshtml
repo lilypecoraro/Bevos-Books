@@ -1,0 +1,36 @@
+@model IEnumerable<Team24_BevosBooks.Models.Card>
+
+@{
+    ViewData["Title"] = "My Credit Cards";
+}
+
+<h2 class="mt-4 mb-3">My Credit Cards</h2>
+
+@if (!Model.Any())
+{
+    <div class="alert alert-info">You have no saved credit cards.</div>
+    <a asp-action="AddCard" class="btn btn-primary">Add Credit Card</a>
+}
+else
+{
+    <table class="table table-bordered table-striped table-hover">
+        <thead class="table-dark">
+            <tr>
+                <th>Card Type</th>
+                <th>Card Number</th>
+            </tr>
+        </thead>
+        <tbody>
+        @foreach (var card in Model)
+        {
+            var last4 = card.CardNumber?.Length >= 4 ? card.CardNumber[^4..] : card.CardNumber;
+            <tr>
+                <td>@card.CardType</td>
+                <td>•••• •••• •••• @last4</td>
+            </tr>
+        }
+        </tbody>
+    </table>
+
+    <a asp-action="AddCard" class="btn btn-outline-secondary">Add Another Card</a>
+}
