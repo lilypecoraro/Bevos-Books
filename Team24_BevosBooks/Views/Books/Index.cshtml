@@ -20,6 +20,17 @@
             border-color: var(--bevo-gold) !important;
         }
 
+    /* CLEARLY DISABLED DISCONTINUE BUTTON */
+    .catalog-dark .btn-outline-danger:disabled,
+    .catalog-dark button.btn-outline-danger[disabled] {
+        color: #666 !important;                /* darker grey text */
+        background-color: #f0f0f0 !important;  /* solid light grey background */
+        border-color: #bdbdbd !important;      /* grey border */
+        opacity: 1 !important;                 /* ensure full opacity */
+        cursor: not-allowed !important;        /* visual cue */
+        box-shadow: none !important;           /* remove any shadow */
+    }
+
     /* DETAILS BUTTON (outline-primary) */
     .catalog-dark .btn-outline-primary {
         color: #000 !important;
@@ -197,11 +208,23 @@
                                     Edit
                                 </a>
 
-                                <a asp-action="Discontinue"
-                                   asp-route-id="@item.BookID"
-                                   class="btn btn-sm btn-outline-danger">
-                                    Discontinue
-                                </a>
+                                @if (item.BookStatus == "Discontinued")
+                                {
+                                    <!-- Greyed-out, not clickable -->
+                                    <button class="btn btn-sm btn-outline-danger" disabled
+                                            title="This book is already discontinued.">
+                                        Discontinue
+                                    </button>
+                                }
+                                else
+                                {
+                                    <!-- Active link to discontinue -->
+                                    <a asp-action="Discontinue"
+                                       asp-route-id="@item.BookID"
+                                       class="btn btn-sm btn-outline-danger">
+                                        Discontinue
+                                    </a>
+                                }
                             }
 
                         </td>
