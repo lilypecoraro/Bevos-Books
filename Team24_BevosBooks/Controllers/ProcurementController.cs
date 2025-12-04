@@ -20,7 +20,7 @@ namespace Team24_BevosBooks.Controllers
         }
 
         // ==============================
-        // MANUAL REORDER (GET + POST) — to avoid 404s and support procurement flow
+        // MANUAL REORDER
         // ==============================
         public async Task<IActionResult> ManualReorder(string searchString, string genre, string sortOrder, bool inStockOnly = false)
         {
@@ -44,7 +44,7 @@ namespace Team24_BevosBooks.Controllers
                 query = query.Where(b => b.InventoryQuantity > 0);
             }
 
-            // Sort (limited to Title/Author per your current Book model)
+            // Sorting (only Title/Author for now)
             query = sortOrder switch
             {
                 "author" => query.OrderBy(b => b.Authors),
@@ -100,7 +100,7 @@ namespace Team24_BevosBooks.Controllers
         }
 
         // ==============================
-        // AUTO REORDER (GET + POST)
+        // AUTO REORDER
         // ==============================
         public async Task<IActionResult> AutoReorder()
         {
@@ -167,7 +167,7 @@ namespace Team24_BevosBooks.Controllers
         }
 
         // ==============================
-        // VIEW SUPPLIER ORDERS (shows full details and check-in forms)
+        // VIEW SUPPLIER ORDERS
         // ==============================
         public async Task<IActionResult> ViewOrders()
         {
@@ -194,18 +194,11 @@ namespace Team24_BevosBooks.Controllers
 
             if (detail == null) return NotFound();
 
-            // Clamp: do not allow more than ordered; ignore negatives
             if (arrivedQty > detail.Quantity) arrivedQty = detail.Quantity;
-            if (arrivedQty < 0)
-            {
-                ModelState.AddModelError("", "Arrived quantity cannot be negative.");
-                return RedirectToAction("ViewOrders");
-            }
+            if (arrivedQty < 0) arrivedQty = 0;
 
-            // Update inventory
             detail.Book.InventoryQuantity += arrivedQty;
 
-            // If fully received, mark order as "Received"
             if (arrivedQty == detail.Quantity)
             {
                 detail.Order.OrderStatus = "Received";
