@@ -133,8 +133,22 @@ namespace Team24_BevosBooks.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create(Book book)
         {
+            // Set server-side fields
             book.BookStatus = "Active";
 
+            // 🔹 Ignore server-set and navigation properties so they don't break validation
+            ModelState.Remove(nameof(Book.BookStatus));   // set here, not from form
+            ModelState.Remove(nameof(Book.Genre));        // nav prop
+            ModelState.Remove(nameof(Book.Reviews));      // if exists
+
+            // If BookNumber and Cost are NOT on the form and currently required,
+            // you either need to:
+            //  1) include them in the form, or
+            //  2) set them server-side and remove them from ModelState here:
+            // ModelState.Remove(nameof(Book.BookNumber));
+            // ModelState.Remove(nameof(Book.Cost));
+
+            // Custom business rules
             if (_context.Books.Any(b => b.BookNumber == book.BookNumber))
                 ModelState.AddModelError("", "That Book Number already exists.");
 
@@ -156,6 +170,7 @@ namespace Team24_BevosBooks.Controllers
 
             return RedirectToAction(nameof(Index));
         }
+
 
         // =========================================================
         // EDIT (ADMIN)
