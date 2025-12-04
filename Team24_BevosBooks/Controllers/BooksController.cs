@@ -191,6 +191,13 @@ namespace Team24_BevosBooks.Controllers
 
             if (originalBook == null) return NotFound();
 
+            // 🔹 Ignore non-editable / server-side / nav properties
+            ModelState.Remove(nameof(Book.BookNumber));   // set from originalBook, not from form
+            ModelState.Remove(nameof(Book.Cost));        // set from originalBook, not from form
+            ModelState.Remove(nameof(Book.Genre));       // nav prop
+            ModelState.Remove(nameof(Book.Reviews));     // if exists
+
+            // Your custom business rules
             if (editedBook.InventoryQuantity < 0)
                 ModelState.AddModelError("", "Inventory cannot be negative.");
 
@@ -203,6 +210,7 @@ namespace Team24_BevosBooks.Controllers
                 return View(editedBook);
             }
 
+            // Preserve fields the admin is not allowed to change via the form
             editedBook.BookNumber = originalBook.BookNumber;
             editedBook.Cost = originalBook.Cost;
 
