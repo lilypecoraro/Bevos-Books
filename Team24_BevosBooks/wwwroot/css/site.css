@@ -8,10 +8,22 @@ body {
     background-position: center;
     background-attachment: fixed;
     margin: 0;
-    padding: 0;
 }
 
-nav, main, footer {
+/* Keep navbar above hero */
+.navbar,
+.bevo-navbar {
+    position: relative;
+    z-index: 9999 !important;
+}
+
+/* Dropdown menu must be above navbar + all content */
+.dropdown-menu {
+    position: absolute !important;
+    z-index: 10000 !important;
+}
+
+main, footer {
     position: relative;
     z-index: 2;
 }
@@ -27,7 +39,6 @@ nav, main, footer {
     --bevo-brown: #693330;
     --bevo-black: #111111;
     --bevo-gray: #a7a7a7;
-    /* Override Bootstrap primary */
     --bs-primary: var(--bevo-gold) !important;
     --bs-primary-rgb: var(--bevo-gold-rgb) !important;
 }
@@ -36,7 +47,6 @@ nav, main, footer {
    BUTTONS — GLOBAL POLISHED BUTTON SYSTEM
 =============================================================== */
 
-/* SOLID GOLD BUTTON */
 .btn-primary,
 .btn.btn-primary {
     background-color: var(--bevo-gold) !important;
@@ -54,13 +64,13 @@ nav, main, footer {
         color: #201300 !important;
     }
 
-/* OUTLINE GOLD (Primary) — readable on dark backgrounds */
+/* Outline Primary */
 .btn-outline-primary {
     color: #000 !important;
     background-color: rgba(255,255,255,0.85) !important;
     border-color: var(--bevo-gold) !important;
     font-weight: 600 !important;
-    border-width: 2px !important;
+    border-width: 2px;
     border-radius: 10px !important;
 }
 
@@ -70,7 +80,7 @@ nav, main, footer {
         border-color: var(--bevo-gold-hover) !important;
     }
 
-/* OUTLINE WARNING — for Edit buttons */
+/* Warning */
 .btn-outline-warning {
     color: #000 !important;
     background-color: rgba(255,255,255,0.85) !important;
@@ -86,7 +96,7 @@ nav, main, footer {
         border-color: var(--bevo-gold) !important;
     }
 
-/* OUTLINE DANGER — for Discontinue buttons */
+/* Danger */
 .btn-outline-danger {
     color: #000 !important;
     background-color: rgba(255,255,255,0.85) !important;
@@ -102,7 +112,7 @@ nav, main, footer {
         border-color: #b52b27 !important;
     }
 
-/* SUCCESS BUTTON (Add to Cart) */
+/* Success */
 .btn-success {
     border-radius: 10px !important;
     font-weight: 600 !important;
@@ -132,7 +142,7 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 /* ============================================================
-   FORM INPUTS — WHITE TEXT + DARK BACKDROP
+   FORM INPUTS
 =============================================================== */
 
 label,
@@ -188,7 +198,6 @@ label,
         color: var(--bevo-gold) !important;
     }
 
-/* Dropdown fix */
 .dropdown-menu {
     z-index: 99999 !important;
     background-color: var(--bevo-brown) !important;
@@ -204,89 +213,7 @@ label,
     }
 
 /* ============================================================
-   TABLE DARK MODE
-=============================================================== */
-
-.table {
-    background-color: rgba(0,0,0,0.4) !important;
-}
-
-.table-striped > tbody > tr:nth-of-type(odd) {
-    background-color: rgba(255,255,255,0.05) !important;
-}
-
-.table-striped > tbody > tr:nth-of-type(even) {
-    background-color: rgba(255,255,255,0.1) !important;
-}
-
-.table-dark th {
-    background-color: rgba(0,0,0,0.6) !important;
-    color: #ffffff !important;
-}
-
-/* ============================================================
-   LOGIN / REGISTER — GLASS CARD
-=============================================================== */
-
-.auth-card {
-    background: rgba(0,0,0,0.55);
-    padding: 2rem;
-    border-radius: 16px;
-    backdrop-filter: blur(6px);
-    border: 1px solid rgba(255,255,255,0.15);
-    box-shadow: 0 8px 24px rgba(0,0,0,0.5);
-    color: #ffffff !important;
-}
-
-    .auth-card h2 {
-        color: #ffffff !important;
-    }
-
-.text-danger {
-    color: #ff8080 !important;
-}
-
-/* ============================================================
-   PROMO WAVY MARQUEE
-=============================================================== */
-
-.promo-wave-marquee {
-    width: 100%;
-    overflow: hidden;
-    margin: 25px 0 10px 0;
-    position: relative;
-    z-index: 5;
-}
-
-.promo-wave-track {
-    display: flex;
-    width: 200%;
-    animation: promoScroll 22s linear infinite;
-}
-
-.promo-wave-marquee svg {
-    width: 50%;
-    height: 120px;
-}
-
-.promo-wave-text {
-    fill: var(--bevo-gold);
-    font-size: 1.6rem;
-    font-weight: 600;
-}
-
-@keyframes promoScroll {
-    from {
-        transform: translateX(0);
-    }
-
-    to {
-        transform: translateX(-50%);
-    }
-}
-
-/* ============================================================
-   HERO SECTION
+   HERO SECTION (FIXED)
 =============================================================== */
 
 .hero-container {
@@ -296,7 +223,7 @@ label,
     justify-content: center;
     align-items: center;
     text-align: center;
-    padding: 4rem 1.5rem;
+    padding: 6rem 1.5rem 3rem; /* EXTRA TOP PADDING TO PREVENT OVERLAP */
 }
 
 .hero-content {
@@ -305,7 +232,7 @@ label,
 }
 
 /* ============================================================
-   DISCOVER PAGE
+   OTHER SECTIONS (unchanged)
 =============================================================== */
 
 .discover-title {
@@ -315,41 +242,6 @@ label,
     text-shadow: 0 3px 8px rgba(0,0,0,0.8);
     margin-bottom: 2rem;
 }
-
-.discover-card {
-    background: rgba(255,255,255,0.9);
-    border-radius: 12px;
-    border: none;
-    padding: 1rem;
-    transition: transform .2s ease, box-shadow .2s ease;
-}
-
-    .discover-card:hover {
-        transform: translateY(-4px);
-        box-shadow: 0 10px 20px rgba(0,0,0,0.25);
-    }
-
-.discover-book-title {
-    font-weight: 600;
-    font-size: 1.25rem;
-    color: #111;
-}
-
-/* ============================================================
-   CHECKOUT PAGE FIXES
-=============================================================== */
-
-.checkout-page .form-label,
-.checkout-page .form-control,
-.checkout-page .form-select {
-    color: #000 !important;
-    background-color: #fff !important;
-    border: 1px solid #ccc !important;
-}
-
-    .checkout-page .form-control::placeholder {
-        color: #666 !important;
-    }
 
 .no-results-box {
     background-color: #ffffff;

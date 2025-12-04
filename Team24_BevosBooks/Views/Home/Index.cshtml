@@ -33,6 +33,17 @@
         position: relative;
         z-index: 5;
     }
+    /* Fix hero stacking so navbar stays above */
+    .hero-container {
+        position: relative !important;
+        z-index: 0 !important;
+    }
+
+    .hero-content,
+    .hero-logo,
+    .hero-bg {
+        z-index: 0 !important;
+    }
 </style>
 
 <!-- HERO SECTION -->
