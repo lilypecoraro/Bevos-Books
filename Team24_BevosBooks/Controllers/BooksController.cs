@@ -144,20 +144,25 @@ namespace Team24_BevosBooks.Controllers
             // Set server-side fields
             book.BookStatus = "Active";
 
-            // 🔹 Ignore server-set and navigation properties so they don't break validation
-            ModelState.Remove(nameof(Book.BookStatus));   // set here, not from form
-            ModelState.Remove(nameof(Book.Genre));        // nav prop
-            ModelState.Remove(nameof(Book.Reviews));      // if exists
+            // Ignore nav/server-set properties for validation
+            ModelState.Remove(nameof(Book.BookStatus));
+            ModelState.Remove(nameof(Book.Genre));
+            ModelState.Remove(nameof(Book.Reviews));
 
-            // If BookNumber and Cost are NOT on the form and currently required,
-            // you either need to:
-            //  1) include them in the form, or
-            //  2) set them server-side and remove them from ModelState here:
-            // ModelState.Remove(nameof(Book.BookNumber));
-            // ModelState.Remove(nameof(Book.Cost));
+            // Auto-assign BookNumber if not provided (0)
+            if (book.BookNumber == 0)
+            {
+                // Find current max BookNumber; start at 222301 if no books or lower
+                int currentMax = await _context.Books.AnyAsync()
+                    ? await _context.Books.MaxAsync(b => b.BookNumber)
+                    : 0;
 
-            // Custom business rules
-            if (_context.Books.Any(b => b.BookNumber == book.BookNumber))
+                int nextNumber = Math.Max(currentMax + 1, 222301);
+                book.BookNumber = nextNumber;
+            }
+
+            // Business rules
+            if (await _context.Books.AnyAsync(b => b.BookNumber == book.BookNumber))
                 ModelState.AddModelError("", "Book Number already exists.");
 
             if (book.InventoryQuantity < 0)
