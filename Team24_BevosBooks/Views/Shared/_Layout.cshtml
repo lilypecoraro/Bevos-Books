@@ -18,81 +18,71 @@
     <link rel="stylesheet" href="~/css/bootstrap-override.css" />
     <link rel="stylesheet" href="~/css/site.css" />
 
-    <style>
-        .form-label {
-            color: #ffffff !important;
-        }
-
-        .form-select {
-            color: #ffffff !important;
-            background-color: rgba(255,255,255,0.15) !important;
-            border: 1px solid rgba(255,255,255,0.4) !important;
-        }
-
-            .form-select option {
-                color: #000000 !important;
-            }
-
-        .form-control {
-            color: #ffffff !important;
-            background-color: rgba(255,255,255,0.15) !important;
-            border: 1px solid rgba(255,255,255,0.4) !important;
-        }
-
-            .form-control::placeholder {
-                color: rgba(255,255,255,0.7) !important;
-            }
-
-        .form-check-label {
-            color: #ffffff !important;
-        }
-    </style>
-
     @RenderSection("Styles", required: false)
 </head>
+
 <body>
-    <nav class="navbar navbar-expand-lg navbar-dark bevo-navbar fixed-top">
+
+    <!-- ============================================================
+         FIXED NAVBAR (ALWAYS ON TOP)
+         ============================================================ -->
+    <nav class="navbar navbar-expand-lg navbar-dark bevo-navbar fixed-top" style="z-index:99999;">
         <div class="container-fluid">
+
+            <!-- BRAND -->
             <a class="navbar-brand d-flex align-items-center" asp-controller="Home" asp-action="Index">
-                <img src="~/BevoBookLogo.png" alt="BB Logo" style="height:32px; width:auto; margin-right:8px;">
+                <img src="~/BevoBookLogo.png" alt="BB Logo"
+                     style="height:32px; width:auto; margin-right:8px;">
                 Bevo's Books
             </a>
 
+            <!-- MOBILE TOGGLER -->
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navMenu">
                 <span class="navbar-toggler-icon"></span>
             </button>
 
+            <!-- NAV CONTENT -->
             <div class="collapse navbar-collapse" id="navMenu">
                 <ul class="navbar-nav me-auto mb-2 mb-lg-0">
-                    <!-- PUBLIC NAV -->
-                    <li class="nav-item">
-                        <a class="nav-link" asp-controller="Books" asp-action="HomeCatalog">Discover</a>
-                    </li>
 
-                    <!-- BOOKS DROPDOWN -->
+                    <!-- ============================================================
+                         BOOKS (FIRST)
+                         ============================================================ -->
                     <li class="nav-item dropdown">
                         <a class="nav-link dropdown-toggle" href="#" id="booksDropdown" role="button" data-bs-toggle="dropdown">
                             Books
                         </a>
+
                         <ul class="dropdown-menu" aria-labelledby="booksDropdown">
-                            <li>
-                                <a class="dropdown-item" asp-controller="Books" asp-action="Index">Browse Books</a>
-                            </li>
+                            <li><a class="dropdown-item" asp-controller="Books" asp-action="Index">Browse Books</a></li>
+
                             @if (User.IsInRole("Admin"))
                             {
                                 <li><hr class="dropdown-divider" /></li>
                                 <li class="dropdown-header">Catalog Management</li>
-                                <li>
-                                    <a class="dropdown-item" asp-controller="Books" asp-action="Create">Add Book</a>
-                                </li>
-                                <li>
-                                    <a class="dropdown-item" asp-controller="Genres" asp-action="Index">Manage Genres</a>
-                                </li>
+                                <li><a class="dropdown-item" asp-controller="Books" asp-action="Create">Add Book</a></li>
+                                <li><a class="dropdown-item" asp-controller="Genres" asp-action="Index">Manage Genres</a></li>
                             }
                         </ul>
                     </li>
 
-                    <!-- CUSTOMER NAV -->
+                    <!-- ============================================================
+                         DISCOVER (SECOND)
+                         ============================================================ -->
+                    <li class="nav-item">
+                        <a class="nav-link" asp-controller="Books" asp-action="HomeCatalog">Discover</a>
+                    </li>
+
+                    <!-- ============================================================
+                         ABOUT US (THIRD)
+                         ============================================================ -->
+                    <li class="nav-item">
+                        <a class="nav-link" asp-controller="Home" asp-action="AboutUs">About Us</a>
+                    </li>
+
+                    <!-- ============================================================
+                         CUSTOMER NAVIGATION
+                         ============================================================ -->
                     @if (User.IsInRole("Customer"))
                     {
                         <li class="nav-item">
@@ -100,99 +90,95 @@
                         </li>
                     }
 
-                    <!-- REPORTS (ADMIN ONLY) -->
+                    <!-- ============================================================
+                         REPORTS (ADMIN ONLY)
+                         ============================================================ -->
                     @if (User.IsInRole("Admin"))
                     {
                         <li class="nav-item dropdown">
                             <a class="nav-link dropdown-toggle" href="#" id="reportsDropdown" role="button" data-bs-toggle="dropdown">
                                 Reports
                             </a>
+
                             <ul class="dropdown-menu" aria-labelledby="reportsDropdown">
+
                                 <li class="dropdown-header">Sales & Orders</li>
                                 <li><a class="dropdown-item" asp-controller="Reports" asp-action="BooksSold">Books Sold</a></li>
                                 <li><a class="dropdown-item" asp-controller="Reports" asp-action="OrdersReport">Orders Report</a></li>
 
                                 <li><hr class="dropdown-divider" /></li>
+
                                 <li class="dropdown-header">Customers & Reviews</li>
                                 <li><a class="dropdown-item" asp-controller="Reports" asp-action="CustomersReport">Customers Report</a></li>
                                 <li><a class="dropdown-item" asp-controller="Reports" asp-action="ReviewsReport">Reviews Report</a></li>
 
                                 <li><hr class="dropdown-divider" /></li>
+
                                 <li class="dropdown-header">Inventory & Totals</li>
                                 <li><a class="dropdown-item" asp-controller="Reports" asp-action="CurrentInventory">Current Inventory</a></li>
                                 <li><a class="dropdown-item" asp-controller="Reports" asp-action="Totals">Totals</a></li>
+
                             </ul>
                         </li>
                     }
 
-                    <!-- ADMIN / EMPLOYEE PANEL -->
+                    <!-- ============================================================
+                         ADMIN / EMPLOYEE PANEL
+                         ============================================================ -->
                     @if (User.IsInRole("Admin") || User.IsInRole("Employee"))
                     {
                         <li class="nav-item dropdown">
                             <a class="nav-link dropdown-toggle" href="#" id="adminDropdown" role="button" data-bs-toggle="dropdown">
                                 @(User.IsInRole("Admin") ? "Admin Panel" : "Employee Panel")
                             </a>
+
                             <ul class="dropdown-menu" aria-labelledby="adminDropdown">
-                                <!-- SECTION: Orders & Customers -->
+
                                 <li class="dropdown-header">Orders & Customers</li>
-                                <li>
-                                    <a class="dropdown-item" asp-controller="Orders" asp-action="AllOrders">All Orders</a>
-                                </li>
-                                <li>
-                                    <a class="dropdown-item" asp-controller="RoleAdmin" asp-action="ManageCustomers">Manage Customers</a>
-                                </li>
+                                <li><a class="dropdown-item" asp-controller="Orders" asp-action="AllOrders">All Orders</a></li>
+                                <li><a class="dropdown-item" asp-controller="RoleAdmin" asp-action="ManageCustomers">Manage Customers</a></li>
 
                                 @if (User.IsInRole("Admin"))
                                 {
-                                    <li>
-                                        <a class="dropdown-item" asp-controller="RoleAdmin" asp-action="ManageEmployees">Manage Employees</a>
-                                    </li>
+                                    <li><a class="dropdown-item" asp-controller="RoleAdmin" asp-action="ManageEmployees">Manage Employees</a></li>
                                 }
 
                                 <li><hr class="dropdown-divider" /></li>
 
-                                <!-- SECTION: Reviews & Coupons -->
                                 <li class="dropdown-header">Reviews & Promotions</li>
-                                <li>
-                                    <a class="dropdown-item" asp-controller="Reviews" asp-action="Pending">Review Queue</a>
-                                </li>
+                                <li><a class="dropdown-item" asp-controller="Reviews" asp-action="Pending">Review Queue</a></li>
 
                                 @if (User.IsInRole("Admin"))
                                 {
-                                    <li>
-                                        <a class="dropdown-item" asp-controller="Reviews" asp-action="Manage">Approved / Rejected Reviews</a>
-                                    </li>
-                                    <li>
-                                        <a class="dropdown-item" asp-controller="Coupons" asp-action="Index">Manage Coupons</a>
-                                    </li>
+                                    <li><a class="dropdown-item" asp-controller="Reviews" asp-action="Manage">Approved / Rejected Reviews</a></li>
+                                    <li><a class="dropdown-item" asp-controller="Coupons" asp-action="Index">Manage Coupons</a></li>
                                 }
 
                                 <li><hr class="dropdown-divider" /></li>
 
-                                <!-- SECTION: Inventory & Procurement (Admin only) -->
                                 @if (User.IsInRole("Admin"))
                                 {
                                     <li class="dropdown-header">Inventory & Procurement</li>
-                                    <li>
-                                        <a class="dropdown-item" asp-controller="Procurement" asp-action="ManualReorder">Manual Reorder</a>
-                                    </li>
-                                    <li>
-                                        <a class="dropdown-item" asp-controller="Procurement" asp-action="AutoReorder">Automatic Reorder</a>
-                                    </li>
-                                    <li>
-                                        <a class="dropdown-item" asp-controller="Procurement" asp-action="ViewOrders">Supplier Orders</a>
-                                    </li>
+                                    <li><a class="dropdown-item" asp-controller="Procurement" asp-action="ManualReorder">Manual Reorder</a></li>
+                                    <li><a class="dropdown-item" asp-controller="Procurement" asp-action="AutoReorder">Automatic Reorder</a></li>
+                                    <li><a class="dropdown-item" asp-controller="Procurement" asp-action="ViewOrders">Supplier Orders</a></li>
                                 }
+
                             </ul>
                         </li>
                     }
+
                 </ul>
 
+                <!-- LOGIN PARTIAL -->
                 @await Html.PartialAsync("_LoginPartial")
             </div>
         </div>
     </nav>
 
+    <!-- ============================================================
+         BODY CONTENT
+         ============================================================ -->
     @if (ViewData["FullWidth"] is bool full && full)
     {
         @RenderBody()
@@ -204,13 +190,16 @@
         </div>
     }
 
+    <!-- FOOTER -->
     <footer class="border-top footer text-muted mt-4">
         <div class="container">
             &copy; @(DateTime.Now.Year) - Bevo's Books - Team 24
         </div>
     </footer>
 
+    <!-- SCRIPTS -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
     @RenderSection("Scripts", required: false)
+
 </body>
 </html>

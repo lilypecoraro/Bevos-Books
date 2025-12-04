@@ -33,5 +33,9 @@ namespace Team24_BevosBooks.Controllers
 
             return View(books);
         }
+        public IActionResult AboutUs()
+        {
+            return View();
+        }
     }
 }

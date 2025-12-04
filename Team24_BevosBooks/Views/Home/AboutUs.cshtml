@@ -1,0 +1,113 @@
+﻿@{
+    ViewData["Title"] = "About Us";
+    ViewData["FullWidth"] = true;
+}
+
+<style>
+    .about-wrapper {
+        max-width: 800px;
+        margin: 0 auto;
+        padding: 3rem 1.5rem;
+        text-align: center;
+    }
+
+    .about-title {
+        font-family: "VT323", monospace;
+        font-size: clamp(3rem, 6vw, 4rem);
+        color: #fff;
+        margin-bottom: 1rem;
+    }
+
+    .about-text {
+        font-size: 1.1rem;
+        line-height: 1.6;
+        color: rgba(255,255,255,0.9);
+        max-width: 650px;
+        margin: 0 auto 2.5rem auto;
+    }
+
+    .team-container {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+        gap: 1.5rem;
+        margin-top: 1.5rem;
+    }
+
+    .team-card {
+        background: rgba(255,255,255,0.12);
+        padding: 1.25rem;
+        border-radius: 10px;
+        border: 1px solid rgba(255,255,255,0.15);
+        text-align: center;
+    }
+
+    .team-photo {
+        width: 100px;
+        height: 100px;
+        border-radius: 50%;
+        object-fit: cover;
+        border: 2px solid #f5b338;
+        margin-bottom: 0.75rem;
+    }
+
+    .team-name {
+        color: #fff;
+        font-weight: 600;
+        margin-bottom: 0.25rem;
+        font-size: 1.05rem;
+    }
+
+    .team-role {
+        color: #f5b338;
+        font-size: 0.9rem;
+    }
+
+    .team-container {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr); /* 4 cards per row on desktop */
+        gap: 1.5rem;
+        margin-top: 1.5rem;
+    }
+
+</style>
+
+<div class="about-wrapper">
+
+    <h1 class="about-title">About Our Team</h1>
+
+    <p class="about-text">
+        Bevo’s Books was created as part of MIS 333K at The University of Texas at Austin.
+        Our small team of four worked together to design and build a functional online bookstore
+        using ASP.NET Core MVC and Entity Framework. We focused on clean design, consistent user experience,
+        and a reliable backend to support features like carts, checkout, reviews, reports, and admin tools.
+    </p>
+
+    <div class="team-container">
+
+        <div class="team-card">
+            <img src="~/images/lillian.jpg" class="team-photo" alt="Lillian">
+            <div class="team-name">Lillian Pecoraro</div>
+            <div class="team-role">UI/UX • Identity • Email Integration</div>
+        </div>
+
+        <div class="team-card">
+            <img src="~/images/skylar.jpg" class="team-photo" alt="Skylar">
+            <div class="team-name">Skylar Nguyen</div>
+            <div class="team-role">Books + Reviews • Controllers</div>
+        </div>
+
+        <div class="team-card">
+            <img src="~/images/sean.jpg" class="team-photo" alt="Sean">
+            <div class="team-name">Sean Tran</div>
+            <div class="team-role">Orders • Checkout Workflow</div>
+        </div>
+
+        <div class="team-card">
+            <img src="~/images/sachi.jpg" class="team-photo" alt="Sachi">
+            <div class="team-name">Sachi Sooda</div>
+            <div class="team-role">Reports • Testing</div>
+        </div>
+
+    </div>
+
+</div>
