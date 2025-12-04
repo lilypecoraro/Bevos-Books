@@ -1,0 +1,19 @@
+﻿@model Team24_BevosBooks.Models.OrderDetail
+
+@{
+    ViewData["Title"] = "Check In Book Arrival";
+}
+
+<h2>Check In Book Arrival</h2>
+
+<p><strong>Book:</strong> @Model.Book.Title</p>
+<p><strong>Ordered Quantity:</strong> @Model.Quantity</p>
+
+<form asp-action="CheckIn" method="post">
+    <input type="hidden" name="orderDetailId" value="@Model.OrderDetailID" />
+    <div class="mb-3">
+        <label for="arrivedQty" class="form-label">Arrived Quantity</label>
+        <input type="number" id="arrivedQty" name="arrivedQty" min="0" max="@Model.Quantity" value="@Model.Quantity" class="form-control" />
+    </div>
+    <button type="submit" class="btn btn-primary">Confirm Arrival</button>
+</form>

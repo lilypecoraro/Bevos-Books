@@ -1,0 +1,48 @@
+﻿@model IEnumerable<Team24_BevosBooks.Models.Order>
+
+@{
+    ViewData["Title"] = "Supplier Orders";
+}
+
+<h2>Supplier Orders</h2>
+
+<p>View all supplier orders. You can check in arrivals directly from this page.</p>
+
+<table class="table table-bordered">
+    <thead>
+        <tr>
+            <th>Order ID</th>
+            <th>Date</th>
+            <th>Status</th>
+            <th>Books Ordered</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var order in Model)
+        {
+            <tr>
+                <td>@order.OrderID</td>
+                <td>@order.OrderDate.ToShortDateString()</td>
+                <td>@order.OrderStatus</td>
+                <td>
+                    <ul>
+                        @foreach (var detail in order.OrderDetails)
+                        {
+                            <li>
+                                <strong>@detail.Book.Title</strong> — Qty: @detail.Quantity, Cost: @detail.Cost.ToString("c")
+                                @if (order.OrderStatus == "SupplierOrder")
+                                {
+                                    <form asp-action="CheckIn" method="post" class="mt-1">
+                                        <input type="hidden" name="orderDetailId" value="@detail.OrderDetailID" />
+                                        <input type="number" name="arrivedQty" min="0" max="@detail.Quantity" value="@detail.Quantity" class="form-control form-control-sm d-inline-block" style="width:80px;" />
+                                        <button type="submit" class="btn btn-secondary btn-sm">Check In</button>
+                                    </form>
+                                }
+                            </li>
+                        }
+                    </ul>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>

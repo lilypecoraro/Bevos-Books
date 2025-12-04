@@ -1,0 +1,44 @@
+﻿@model IEnumerable<Team24_BevosBooks.Models.Book>
+
+@{
+    ViewData["Title"] = "Manual Reorder";
+}
+
+<h2>Manual Reorder</h2>
+
+<p>Select books to reorder manually. You can adjust quantity and supplier cost.</p>
+
+<table class="table table-striped">
+    <thead>
+        <tr>
+            <th>Title</th>
+            <th>Authors</th>
+            <th>Price</th>
+            <th>Last Cost</th>
+            <th>Inventory</th>
+            <th>Reorder Point</th>
+            <th>Order</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var book in Model)
+        {
+            <tr>
+                <td>@book.Title</td>
+                <td>@book.Authors</td>
+                <td>@book.Price.ToString("c")</td>
+                <td>@book.Cost.ToString("c")</td>
+                <td>@book.InventoryQuantity</td>
+                <td>@book.ReorderPoint</td>
+                <td>
+                    <form asp-action="ManualReorder" method="post" class="d-flex flex-column">
+                        <input type="hidden" name="bookId" value="@book.BookID" />
+                        <input type="number" name="quantity" value="5" min="1" class="form-control form-control-sm mb-1" />
+                        <input type="number" step="0.01" name="cost" value="@book.Cost" class="form-control form-control-sm mb-1" />
+                        <button type="submit" class="btn btn-primary btn-sm">Order</button>
+                    </form>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
