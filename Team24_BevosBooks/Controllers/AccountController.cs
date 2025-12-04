@@ -161,12 +161,35 @@ namespace Team24_BevosBooks.Controllers
         // ================================
         [HttpPost]
         [ValidateAntiForgeryToken]
+        [Authorize] // good idea to lock this down
         public async Task<IActionResult> Manage(AppUser updatedUser)
         {
             ViewBag.States = GetStates();
 
+            // Get the *real* user from the database (the logged-in account)
             AppUser user = await _userManager.GetUserAsync(User);
+            if (user == null)
+            {
+                return RedirectToAction("Login", "Account");
+            }
 
+            // 🔹 Ignore properties that are not edited in the form and are server-controlled
+            ModelState.Remove(nameof(AppUser.Id));
+            ModelState.Remove(nameof(AppUser.UserName));
+            ModelState.Remove(nameof(AppUser.Email));
+            ModelState.Remove(nameof(AppUser.Status));
+            ModelState.Remove(nameof(AppUser.LockoutEnd));
+            ModelState.Remove(nameof(AppUser.LockoutEnabled));
+            ModelState.Remove(nameof(AppUser.AccessFailedCount));
+            // add/remove any other Identity / nav properties you’re not editing
+
+            if (!ModelState.IsValid)
+            {
+                // Show validation messages back on the form
+                return View(user);
+            }
+
+            // Copy over only the editable fields
             user.FirstName = updatedUser.FirstName;
             user.LastName = updatedUser.LastName;
             user.Address = updatedUser.Address;
@@ -175,7 +198,19 @@ namespace Team24_BevosBooks.Controllers
             user.ZipCode = updatedUser.ZipCode;
             user.PhoneNumber = updatedUser.PhoneNumber;
 
-            await _userManager.UpdateAsync(user);
+            // Try to save via Identity
+            var result = await _userManager.UpdateAsync(user);
+
+            if (!result.Succeeded)
+            {
+                foreach (var error in result.Errors)
+                {
+                    ModelState.AddModelError("", error.Description);
+                }
+
+                // Something about the update failed – show errors on the same page
+                return View(user);
+            }
 
             TempData["Message"] = "Profile updated successfully.";
             return RedirectToAction("Manage");
