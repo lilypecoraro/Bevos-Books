@@ -34,7 +34,10 @@ namespace Team24_BevosBooks.Controllers
             bool inStockOnly = false,
             string sortOrder = "title")
         {
-            IQueryable<Book> query = _context.Books.Include(b => b.Genre);
+            // Include Reviews so the Index view can compute average ratings
+            IQueryable<Book> query = _context.Books
+                .Include(b => b.Genre)
+                .Include(b => b.Reviews);
 
             if (!string.IsNullOrEmpty(searchString))
             {

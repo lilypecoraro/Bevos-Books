@@ -138,6 +138,7 @@
                     <th>Publish Date</th>
                     <th>Inventory</th>
                     <th>Status</th>
+                    <th>Avg Rating</th>
                     <th class="text-center">Actions</th>
                 </tr>
             </thead>
@@ -147,6 +148,17 @@
                 {
                     bool canAdd = item.BookStatus == "Active" && item.InventoryQuantity > 0;
 
+                    // Compute average rating from approved reviews, if available
+                    double? avgRating = null;
+                    if (item.Reviews != null)
+                    {
+                        var approved = item.Reviews.Where(r => r.DisputeStatus == "Approved").ToList();
+                        if (approved.Any() && approved.All(r => r.Rating.HasValue))
+                        {
+                            avgRating = Math.Round(approved.Average(r => (double)r.Rating!.Value), 1);
+                        }
+                    }
+
                     <tr>
                         <td>@item.BookNumber</td>
                         <td>@item.Title</td>
@@ -155,9 +167,9 @@
                         <td>@item.PublishDate.ToShortDateString()</td>
                         <td>@item.InventoryQuantity</td>
                         <td>@item.BookStatus</td>
+                        <td>@(avgRating.HasValue ? avgRating.Value.ToString("0.0") : "N/A")</td>
 
                         <td class="text-nowrap text-center">
-
                             <!-- DETAILS BUTTON -->
                             <a asp-action="Details"
                                asp-route-id="@item.BookID"
