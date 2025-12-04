@@ -2,9 +2,16 @@
 
 @{
     ViewData["Title"] = "My Credit Cards";
+    var alertClass = (string)(TempData["AlertClass"] ?? "info");
+    var message = TempData["Message"] as string;
 }
 
 <h2 class="mt-4 mb-3">My Credit Cards</h2>
+
+@if (!string.IsNullOrEmpty(message))
+{
+    <div class="alert alert-@alertClass" role="alert">@message</div>
+}
 
 @if (!Model.Any())
 {
@@ -18,15 +25,26 @@ else
             <tr>
                 <th>Card Type</th>
                 <th>Card Number</th>
+                <th style="width: 140px;">Actions</th>
             </tr>
         </thead>
         <tbody>
         @foreach (var card in Model)
         {
-            var last4 = card.CardNumber?.Length >= 4 ? card.CardNumber[^4..] : card.CardNumber;
             <tr>
                 <td>@card.CardType</td>
-                <td>•••• •••• •••• @last4</td>
+                <td>@card.CardNumber</td>
+                <td>
+                    <form asp-action="RemoveCard" method="post" class="d-inline">
+                        @Html.AntiForgeryToken()
+                        <input type="hidden" name="id" value="@card.CardID" />
+                        <button type="submit"
+                                class="btn btn-sm btn-danger"
+                                onclick="return confirm('Remove this credit card?');">
+                            Remove
+                        </button>
+                    </form>
+                </td>
             </tr>
         }
         </tbody>

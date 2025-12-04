@@ -258,8 +258,7 @@ namespace Team24_BevosBooks.Controllers
             return View();
         }
 
-        // in namespace Team24_BevosBooks.Controllers
-        // inside public class AccountController : Controller
+        // ADD CREDIT CARD (POST)
         [HttpPost]
         [Authorize(Roles = "Customer")]
         [ValidateAntiForgeryToken]
@@ -276,11 +275,17 @@ namespace Team24_BevosBooks.Controllers
                 return View(cvm);
             }
 
-            // Build a customer name for the card (matches NOT NULL column in Cards table)
-            // Build a customer name for the card
+            // Hard limit: max 3 cards per customer
+            int cardCount = await _context.Cards.CountAsync(c => c.UserID == user.Id);
+            if (cardCount >= 3)
+            {
+                ModelState.AddModelError(string.Empty, "You can only register up to three credit cards on Bevo's Books.");
+                return View(cvm);
+            }
+
             string customerName = $"{user.FirstName} {user.LastName}";
 
-            Card newCard = new Card
+            var newCard = new Card
             {
                 CardType = cvm.CardType,
                 CardNumber = cvm.CardNumber,
@@ -291,10 +296,6 @@ namespace Team24_BevosBooks.Controllers
             _context.Cards.Add(newCard);
             await _context.SaveChangesAsync();
 
-            // Send them back to checkout
-            return RedirectToAction("Checkout", "Orders");
-
-            // send them back to checkout (or wherever you want)
             return RedirectToAction("Checkout", "Orders");
         }
 
@@ -317,6 +318,42 @@ namespace Team24_BevosBooks.Controllers
                 .ToListAsync();
 
             return View(cards);
+        }
+
+        // ================================
+        // REMOVE CREDIT CARD (CUSTOMER ONLY)
+        // ================================
+        [Authorize(Roles = "Customer")]
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> RemoveCard(int id)
+        {
+            var user = await _userManager.GetUserAsync(User);
+            if (user == null) return RedirectToAction("Login", "Account");
+
+            var card = await _context.Cards.FirstOrDefaultAsync(c => c.CardID == id && c.UserID == user.Id);
+            if (card == null)
+            {
+                TempData["AlertClass"] = "danger";
+                TempData["Message"] = "Card not found.";
+                return RedirectToAction(nameof(MyCards));
+            }
+
+            // Prevent deleting cards that were used on orders (FK constraint)
+            bool inUse = await _context.OrderDetails.AnyAsync(od => od.CardID == id);
+            if (inUse)
+            {
+                TempData["AlertClass"] = "warning";
+                TempData["Message"] = "This card was used in an order and cannot be removed.";
+                return RedirectToAction(nameof(MyCards));
+            }
+
+            _context.Cards.Remove(card);
+            await _context.SaveChangesAsync();
+
+            TempData["AlertClass"] = "success";
+            TempData["Message"] = "Credit card removed.";
+            return RedirectToAction(nameof(MyCards));
         }
     }
 }
