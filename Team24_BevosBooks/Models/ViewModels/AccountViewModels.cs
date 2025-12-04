@@ -45,14 +45,16 @@ namespace Team24_BevosBooks.Models.ViewModels
         public string State { get; set; }
 
         [Required, Display(Name = "ZIP Code")]
-        [RegularExpression(@"^\d{5}$")]
+        [RegularExpression(@"^\d{5}$", ErrorMessage = "Please enter a standardized ZIP code.")]
         public string ZipCode { get; set; }
 
-        [Required, StringLength(100, MinimumLength = 6)]
+        [Required(ErrorMessage = "Please enter a password.")] 
+        [StringLength(100, MinimumLength = 6, ErrorMessage = "Password must be between 6 and 100 characters.")]
         [DataType(DataType.Password)]
         [Display(Name = "Password")]
         public string Password { get; set; }
 
+        [Required(ErrorMessage = "Please confirm your password.")]
         [DataType(DataType.Password)]
         [Display(Name = "Confirm Password")]
         [Compare("Password", ErrorMessage = "Passwords do not match.")]
