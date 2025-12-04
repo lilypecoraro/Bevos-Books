@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Team24_BevosBooks.DAL;
@@ -10,18 +11,22 @@ namespace Team24_BevosBooks.Controllers
     public class ProcurementController : Controller
     {
         private readonly AppDbContext _context;
+        private readonly UserManager<AppUser> _userManager;
 
-        public ProcurementController(AppDbContext context)
+        public ProcurementController(AppDbContext context, UserManager<AppUser> userManager)
         {
             _context = context;
+            _userManager = userManager;
         }
 
         // ==============================
-        // MANUAL REORDER (with search)
+        // MANUAL REORDER (GET + POST) — to avoid 404s and support procurement flow
         // ==============================
-        public async Task<IActionResult> ManualReorder(string searchString)
+        public async Task<IActionResult> ManualReorder(string searchString, string genre, string sortOrder, bool inStockOnly = false)
         {
-            var query = _context.Books.Where(b => b.BookStatus == "Active");
+            var query = _context.Books
+                .Include(b => b.Genre)
+                .Where(b => b.BookStatus == "Active");
 
             if (!string.IsNullOrEmpty(searchString))
             {
@@ -29,59 +34,80 @@ namespace Team24_BevosBooks.Controllers
                                          b.Authors.Contains(searchString));
             }
 
-            var books = await query.OrderBy(b => b.Title).ToListAsync();
+            if (!string.IsNullOrEmpty(genre))
+            {
+                query = query.Where(b => b.Genre.GenreName == genre);
+            }
+
+            if (inStockOnly)
+            {
+                query = query.Where(b => b.InventoryQuantity > 0);
+            }
+
+            // Sort (limited to Title/Author per your current Book model)
+            query = sortOrder switch
+            {
+                "author" => query.OrderBy(b => b.Authors),
+                _ => query.OrderBy(b => b.Title)
+            };
+
+            ViewBag.Genres = await _context.Genres.Select(g => g.GenreName).ToListAsync();
+            var books = await query.ToListAsync();
             return View(books);
         }
 
         [HttpPost]
-        public async Task<IActionResult> ManualReorder(int bookId, int quantity, decimal? cost)
+        public async Task<IActionResult> ManualReorder(List<int> bookIds)
         {
-            var book = await _context.Books.FindAsync(bookId);
-            if (book == null) return NotFound();
+            if (bookIds == null || bookIds.Count == 0)
+                return RedirectToAction("ManualReorder");
 
-            if (quantity <= 0) ModelState.AddModelError("", "Quantity must be greater than zero.");
-            if (cost <= 0) ModelState.AddModelError("", "Cost must be greater than zero.");
-            if (!ModelState.IsValid) return RedirectToAction("ManualReorder");
+            var adminId = _userManager.GetUserId(User);
 
-            decimal reorderCost = cost ?? book.Cost;
-
-            var order = new Order
+            foreach (var id in bookIds)
             {
-                UserID = null, // supplier order, not tied to customer
-                OrderDate = DateTime.Now,
-                OrderStatus = "SupplierOrder",
-                ShippingFee = 0
-            };
+                var book = await _context.Books.FindAsync(id);
+                if (book == null) continue;
 
-            _context.Orders.Add(order);
-            await _context.SaveChangesAsync();
+                if (!int.TryParse(Request.Form[$"qty_{id}"], out var qty)) continue;
+                if (!decimal.TryParse(Request.Form[$"cost_{id}"], out var cost)) continue;
 
-            var detail = new OrderDetail
-            {
-                OrderID = order.OrderID,
-                BookID = book.BookID,
-                Quantity = quantity,
-                Price = book.Price,
-                Cost = reorderCost
-            };
+                if (qty < 0 || cost <= 0) continue;
 
-            _context.OrderDetails.Add(detail);
-            await _context.SaveChangesAsync();
+                var order = new Order
+                {
+                    UserID = adminId,
+                    OrderDate = DateTime.Now,
+                    OrderStatus = "SupplierOrder",
+                    ShippingFee = 0
+                };
+                _context.Orders.Add(order);
+                await _context.SaveChangesAsync();
+
+                var detail = new OrderDetail
+                {
+                    OrderID = order.OrderID,
+                    BookID = book.BookID,
+                    Quantity = qty,
+                    Price = book.Price,
+                    Cost = cost
+                };
+                _context.OrderDetails.Add(detail);
+                await _context.SaveChangesAsync();
+            }
 
             return RedirectToAction("ViewOrders");
         }
 
         // ==============================
-        // AUTO REORDER
+        // AUTO REORDER (GET + POST)
         // ==============================
         public async Task<IActionResult> AutoReorder()
         {
-            // Books below reorder point
             var books = await _context.Books
                 .Where(b => b.BookStatus == "Active")
                 .ToListAsync();
 
-            // Exclude books already covered by pending supplier orders
             var pendingOrders = await _context.OrderDetails
                 .Include(od => od.Order)
                 .Where(od => od.Order.OrderStatus == "SupplierOrder")
@@ -97,24 +123,31 @@ namespace Team24_BevosBooks.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> AutoReorder(List<int> bookIds)
+        public async Task<IActionResult> AutoReorder(List<int> bookIds, List<int> removeIds)
         {
             if (bookIds == null || bookIds.Count == 0)
                 return RedirectToAction("AutoReorder");
 
+            var adminId = _userManager.GetUserId(User);
+
             foreach (var id in bookIds)
             {
+                if (removeIds != null && removeIds.Contains(id)) continue;
+
                 var book = await _context.Books.FindAsync(id);
                 if (book == null) continue;
 
+                if (!int.TryParse(Request.Form[$"qty_{id}"], out var qty)) continue;
+                if (!decimal.TryParse(Request.Form[$"cost_{id}"], out var cost)) continue;
+                if (qty < 0 || cost <= 0) continue;
+
                 var order = new Order
                 {
-                    UserID = null,
+                    UserID = adminId,
                     OrderDate = DateTime.Now,
                     OrderStatus = "SupplierOrder",
                     ShippingFee = 0
                 };
-
                 _context.Orders.Add(order);
                 await _context.SaveChangesAsync();
 
@@ -122,11 +155,10 @@ namespace Team24_BevosBooks.Controllers
                 {
                     OrderID = order.OrderID,
                     BookID = book.BookID,
-                    Quantity = 5, // default reorder qty
+                    Quantity = qty,
                     Price = book.Price,
-                    Cost = book.Cost
+                    Cost = cost
                 };
-
                 _context.OrderDetails.Add(detail);
                 await _context.SaveChangesAsync();
             }
@@ -135,13 +167,13 @@ namespace Team24_BevosBooks.Controllers
         }
 
         // ==============================
-        // VIEW SUPPLIER ORDERS
+        // VIEW SUPPLIER ORDERS (shows full details and check-in forms)
         // ==============================
         public async Task<IActionResult> ViewOrders()
         {
             var orders = await _context.Orders
                 .Include(o => o.OrderDetails)
-                .ThenInclude(od => od.Book)
+                    .ThenInclude(od => od.Book)
                 .Where(o => o.OrderStatus == "SupplierOrder" || o.OrderStatus == "Received")
                 .OrderByDescending(o => o.OrderDate)
                 .ToListAsync();
@@ -162,13 +194,18 @@ namespace Team24_BevosBooks.Controllers
 
             if (detail == null) return NotFound();
 
-            if (arrivedQty < 0) ModelState.AddModelError("", "Arrived quantity cannot be negative.");
-            if (arrivedQty > detail.Quantity) ModelState.AddModelError("", "Arrived quantity cannot exceed ordered quantity.");
-            if (!ModelState.IsValid) return RedirectToAction("ViewOrders");
+            // Clamp: do not allow more than ordered; ignore negatives
+            if (arrivedQty > detail.Quantity) arrivedQty = detail.Quantity;
+            if (arrivedQty < 0)
+            {
+                ModelState.AddModelError("", "Arrived quantity cannot be negative.");
+                return RedirectToAction("ViewOrders");
+            }
 
+            // Update inventory
             detail.Book.InventoryQuantity += arrivedQty;
 
-            // If fully received, mark order as completed
+            // If fully received, mark order as "Received"
             if (arrivedQty == detail.Quantity)
             {
                 detail.Order.OrderStatus = "Received";
