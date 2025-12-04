@@ -134,7 +134,6 @@
                     <th>Book #</th>
                     <th>Title</th>
                     <th>Authors</th>
-                    <th>Genre</th>
                     <th>Price</th>
                     <th>Publish Date</th>
                     <th>Inventory</th>
@@ -152,7 +151,6 @@
                         <td>@item.BookNumber</td>
                         <td>@item.Title</td>
                         <td>@item.Authors</td>
-                        <td>@item.Genre?.GenreName</td>
                         <td>@item.Price.ToString("c")</td>
                         <td>@item.PublishDate.ToShortDateString()</td>
                         <td>@item.InventoryQuantity</td>
