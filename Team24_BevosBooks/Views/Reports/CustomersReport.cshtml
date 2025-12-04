@@ -1,0 +1,43 @@
+﻿@model Team24_BevosBooks.ViewModels.CustomersReportVM
+@{
+    ViewData["Title"] = "Customers Report";
+}
+<h2>Customers Report</h2>
+
+<form method="get" class="mb-3 d-flex gap-2">
+    <input class="form-control" type="date" name="StartDate" />
+    <input class="form-control" type="date" name="EndDate" />
+    <select class="form-select" name="sort">
+        <option value="profitDesc">Profit ↓</option>
+        <option value="profitAsc">Profit ↑</option>
+        <option value="revenueDesc">Revenue ↓</option>
+        <option value="revenueAsc">Revenue ↑</option>
+    </select>
+    <button class="btn btn-primary" type="submit">Apply</button>
+</form>
+
+<p><strong>Record count:</strong> @Model.RecordCount</p>
+
+<table class="table table-striped">
+    <thead>
+        <tr>
+            <th>Customer</th>
+            <th>Total Qty</th>
+            <th>Revenue</th>
+            <th>Cost</th>
+            <th>Profit</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var r in Model.Rows)
+        {
+            <tr>
+                <td>@r.CustomerName (@r.CustomerId)</td>
+                <td>@r.TotalQuantity</td>
+                <td>@r.Revenue.ToString("c")</td>
+                <td>@r.Cost.ToString("c")</td>
+                <td>@r.Profit.ToString("c")</td>
+            </tr>
+        }
+    </tbody>
+</table>
