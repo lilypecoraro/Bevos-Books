@@ -17,7 +17,8 @@
             <th>Name</th>
             <th>Email</th>
             <th>Roles</th>
-            <th></th>
+            <th>Status</th>
+            <th>Actions</th>
         </tr>
     </thead>
 
@@ -43,6 +44,8 @@
                     }
                 </td>
 
+                <td>@emp.Status</td>
+
                 <td class="text-nowrap">
 
                     <!-- EDIT BUTTON -->
@@ -58,7 +61,7 @@
                         <a asp-action="Promote"
                            asp-route-id="@emp.Id"
                            class="btn btn-sm btn-info me-2"
-                           onclick="return confirm('Promote this employee to ADMIN? They will gain full system access.');">
+                           onclick="return confirm('Promote this employee to ADMIN?');">
                             Promote to Admin
                         </a>
                     }
@@ -68,12 +71,31 @@
                     {
                         <a asp-action="Demote"
                            asp-route-id="@emp.Id"
-                           class="btn btn-sm btn-secondary"
-                           onclick="return confirm('Demote this ADMIN back to Employee? They will lose admin privileges.');">
+                           class="btn btn-sm btn-secondary me-2"
+                           onclick="return confirm('Demote this ADMIN back to Employee?');">
                             Demote to Employee
                         </a>
                     }
 
+                    <!-- NEW: FIRE / REHIRE BUTTON -->
+                    @if (emp.Status != AppUser.UserStatus.Disabled)
+                    {
+                        <a asp-action="Disable"
+                           asp-route-id="@emp.Id"
+                           class="btn btn-sm btn-danger me-2"
+                           onclick="return confirm('Fire this employee? They will be disabled and blocked from logging in.');">
+                            Fire
+                        </a>
+                    }
+                    else
+                    {
+                        <a asp-action="Enable"
+                           asp-route-id="@emp.Id"
+                           class="btn btn-sm btn-success me-2"
+                           onclick="return confirm('Rehire this employee? They will regain access.');">
+                            Rehire
+                        </a>
+                    }
                 </td>
             </tr>
         }
