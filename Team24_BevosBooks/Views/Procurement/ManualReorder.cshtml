@@ -6,46 +6,74 @@
 
 <h2>Manual Reorder</h2>
 
-<!-- Search bar -->
-<form asp-action="ManualReorder" method="get" class="mb-3 d-flex">
-    <input type="text" name="searchString" value="@Context.Request.Query["searchString"]"
-           class="form-control me-2" placeholder="Search books..." />
-    <button type="submit" class="btn btn-outline-primary">Search</button>
+<!-- Search form -->
+<form asp-action="ManualReorder" method="get" class="mb-3 row">
+    <div class="col-md-4">
+        <input type="text" name="searchString" value="@Context.Request.Query["searchString"]"
+               class="form-control" placeholder="Search title/author..." />
+    </div>
+    <div class="col-md-3">
+        <select name="genre" class="form-select">
+            <option value="">All Genres</option>
+            @foreach (var g in ViewBag.Genres as List<string>)
+            {
+                <option value="@g">@g</option>
+            }
+        </select>
+    </div>
+    <div class="col-md-3">
+        <select name="sortOrder" class="form-select">
+            <option value="title">Title</option>
+            <option value="author">Author</option>
+        </select>
+    </div>
+    <div class="col-md-2 form-check">
+        <input type="checkbox" name="inStockOnly" value="true" class="form-check-input" />
+        <label class="form-check-label">In Stock Only</label>
+    </div>
+    <div class="col-md-12 mt-2">
+        <button type="submit" class="btn btn-outline-primary">Search</button>
+    </div>
 </form>
 
-<table class="table table-striped">
-    <thead>
-        <tr>
-            <th>Title</th>
-            <th>Authors</th>
-            <th>Price</th>
-            <th>Last Cost</th>
-            <th>Inventory</th>
-            <th>Reorder Point</th>
-            <th>Avg Profit Margin</th>
-            <th>Order</th>
-        </tr>
-    </thead>
-    <tbody>
-        @foreach (var book in Model)
-        {
+<!-- Order form -->
+<form asp-action="ManualReorder" method="post">
+    <table class="table table-striped">
+        <thead>
             <tr>
-                <td>@book.Title</td>
-                <td>@book.Authors</td>
-                <td>@book.Price.ToString("c")</td>
-                <td>@book.Cost.ToString("c")</td>
-                <td>@book.InventoryQuantity</td>
-                <td>@book.ReorderPoint</td>
-                <td><!-- TODO: calculate margin later --></td>
-                <td>
-                    <form asp-action="ManualReorder" method="post" class="d-flex flex-column">
-                        <input type="hidden" name="bookId" value="@book.BookID" />
-                        <input type="number" name="quantity" value="5" min="1" class="form-control form-control-sm mb-1" />
-                        <input type="number" step="0.01" name="cost" value="@book.Cost" class="form-control form-control-sm mb-1" />
-                        <button type="submit" class="btn btn-primary btn-sm">Order</button>
-                    </form>
-                </td>
+                <th>Select</th>
+                <th>Title</th>
+                <th>Authors</th>
+                <th>Price</th>
+                <th>Last Cost</th>
+                <th>Inventory</th>
+                <th>Reorder Point</th>
+                <th>Quantity</th>
+                <th>Cost</th>
             </tr>
-        }
-    </tbody>
-</table>
+        </thead>
+        <tbody>
+            @foreach (var book in Model)
+            {
+                <tr>
+                    <td><input type="checkbox" name="bookIds" value="@book.BookID" /></td>
+                    <td>@book.Title</td>
+                    <td>@book.Authors</td>
+                    <td>@book.Price.ToString("c")</td>
+                    <td>@book.Cost.ToString("c")</td>
+                    <td>@book.InventoryQuantity</td>
+                    <td>@book.ReorderPoint</td>
+                    <td>
+                        <input type="number" name="qty_@book.BookID" value="5" min="1"
+                               class="form-control form-control-sm" style="color:black; width:90px;" />
+                    </td>
+                    <td>
+                        <input type="number" step="0.01" name="cost_@book.BookID" value="@book.Cost"
+                               class="form-control form-control-sm" style="color:black; width:90px;" />
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+    <button type="submit" class="btn btn-primary">Place Orders</button>
+</form>

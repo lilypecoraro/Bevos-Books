@@ -13,25 +13,31 @@
         <thead>
             <tr>
                 <th>Select</th>
-                <th>Title</th>
-                <th>Authors</th>
+                <th>Book Name</th>
                 <th>Inventory</th>
                 <th>Reorder Point</th>
-                <th>Cost</th>
                 <th>Quantity</th>
+                <th>Cost</th>
+                <th>Remove</th>
             </tr>
         </thead>
         <tbody>
             @foreach (var book in Model)
             {
                 <tr>
-                    <td><input type="checkbox" name="bookIds" value="@book.BookID" /></td>
+                    <td><input type="checkbox" name="bookIds" value="@book.BookID" checked /></td>
                     <td>@book.Title</td>
-                    <td>@book.Authors</td>
                     <td>@book.InventoryQuantity</td>
                     <td>@book.ReorderPoint</td>
-                    <td><input type="number" step="0.01" name="cost_@book.BookID" value="@book.Cost" class="form-control form-control-sm" /></td>
-                    <td><input type="number" name="qty_@book.BookID" value="5" min="0" class="form-control form-control-sm" /></td>
+                    <td>
+                        <input type="number" name="qty_@book.BookID" value="5" min="0"
+                               class="form-control form-control-sm" style="color:black; width:90px;" />
+                    </td>
+                    <td>
+                        <input type="number" step="0.01" name="cost_@book.BookID" value="@book.Cost"
+                               class="form-control form-control-sm" style="color:black; width:90px;" />
+                    </td>
+                    <td><input type="checkbox" name="removeIds" value="@book.BookID" /></td>
                 </tr>
             }
         </tbody>

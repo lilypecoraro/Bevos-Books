@@ -64,6 +64,7 @@
                                 <li><a class="dropdown-item" asp-controller="RoleAdmin" asp-action="ManageCustomers">Manage Customers</a></li>
                                 @if (User.IsInRole("Admin"))
                                 {
+                                    <li><a class="dropdown-item" asp-controller="Reviews" asp-action="Manage">Approved/Rejected Reviews</a></li>
                                     <li><a class="dropdown-item" asp-controller="Coupons" asp-action="Index">Manage Coupons</a></li>
                                     <li><a class="dropdown-item" asp-controller="RoleAdmin" asp-action="ManageEmployees">Manage Employees</a></li>
                                     <li><a class="dropdown-item" asp-controller="Procurement" asp-action="ManualReorder">Manual Reorder</a></li>

@@ -3,9 +3,9 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.AspNetCore.Identity.UI.Services;
 using Team24_BevosBooks.DAL;
 using Team24_BevosBooks.Models;
-using Microsoft.AspNetCore.Identity.UI.Services;
 using Team24_BevosBooks.Services;
 
 namespace Team24_BevosBooks.Controllers
@@ -88,14 +88,14 @@ namespace Team24_BevosBooks.Controllers
 
             if (book == null) return NotFound();
 
-            // approved reviews only
+            // Approved reviews only
             book.Reviews = book.Reviews
                 .Where(r => r.DisputeStatus == "Approved")
                 .ToList();
 
             var userId = _userManager.GetUserId(User);
 
-            // carts containing this book
+            // Count other carts containing this book
             int cartsContaining = await _context.OrderDetails
                 .Where(od => od.BookID == id)
                 .Where(od => od.Order.OrderStatus == "InCart")
@@ -104,7 +104,6 @@ namespace Team24_BevosBooks.Controllers
 
             ViewBag.CartsContaining = cartsContaining;
 
-            // review permissions
             bool purchased = false;
             bool hasReviewed = false;
 
@@ -125,7 +124,7 @@ namespace Team24_BevosBooks.Controllers
         }
 
         // =========================================================
-        // CREATE (ADMIN)
+        // CREATE
         // =========================================================
         [Authorize(Roles = "Admin")]
         public async Task<IActionResult> Create()
@@ -164,7 +163,7 @@ namespace Team24_BevosBooks.Controllers
         }
 
         // =========================================================
-        // EDIT (ADMIN) — FIXED ERROR
+        // EDIT (MERGED)
         // =========================================================
         [Authorize(Roles = "Admin")]
         public async Task<IActionResult> Edit(int? id)
@@ -185,19 +184,17 @@ namespace Team24_BevosBooks.Controllers
         {
             if (id != editedBook.BookID) return NotFound();
 
-            Book? originalBook = await _context.Books
-                .AsNoTracking()
+            Book? originalBook = await _context.Books.AsNoTracking()
                 .FirstOrDefaultAsync(b => b.BookID == id);
 
             if (originalBook == null) return NotFound();
 
-            // 🔹 Ignore non-editable / server-side / nav properties
-            ModelState.Remove(nameof(Book.BookNumber));   // set from originalBook, not from form
-            ModelState.Remove(nameof(Book.Cost));        // set from originalBook, not from form
-            ModelState.Remove(nameof(Book.Genre));       // nav prop
-            ModelState.Remove(nameof(Book.Reviews));     // if exists
+            // Combined safe model-state cleanup
+            ModelState.Remove(nameof(Book.Genre));
+            ModelState.Remove(nameof(Book.Reviews));
+            ModelState.Remove(nameof(Book.BookNumber));
+            ModelState.Remove(nameof(Book.Cost));
 
-            // Your custom business rules
             if (editedBook.InventoryQuantity < 0)
                 ModelState.AddModelError("", "Inventory cannot be negative.");
 
@@ -210,7 +207,7 @@ namespace Team24_BevosBooks.Controllers
                 return View(editedBook);
             }
 
-            // Preserve fields the admin is not allowed to change via the form
+            // Preserve non-user-editable values
             editedBook.BookNumber = originalBook.BookNumber;
             editedBook.Cost = originalBook.Cost;
 
@@ -218,11 +215,11 @@ namespace Team24_BevosBooks.Controllers
             await _context.SaveChangesAsync();
 
             TempData["Message"] = $"Book '{editedBook.Title}' updated.";
-            return RedirectToAction(nameof(Index)); // FIXED
+            return RedirectToAction(nameof(Index));
         }
 
         // =========================================================
-        // DISCONTINUE + EMAIL ALL CUSTOMERS (WITH DEBUG)
+        // DISCONTINUE + EMAIL USERS (FULL COMBINED)
         // =========================================================
         [Authorize(Roles = "Admin")]
         public async Task<IActionResult> Discontinue(int? id)
@@ -254,16 +251,10 @@ namespace Team24_BevosBooks.Controllers
 
             TempData["Message"] = $"Book '{book.Title}' discontinued.";
 
-            // ========== DEBUG START ==========
-            int emailCount = 0;
+            // DEBUG
+            System.Diagnostics.Debug.WriteLine($"[DEBUG] Discontinue triggered for: {book.Title}");
 
-            // Debug email to YOU
-            await _emailSender.SendEmailAsync(
-                "lilypecoraro@gmail.com",
-                "DEBUG — Discontinue Triggered",
-                $"The discontinue method successfully triggered for: {book.Title}"
-            );
-
+            // Email all customers
             var users = await _context.Users
                 .Where(u => u.Status == AppUser.UserStatus.Customer &&
                             u.Email != null)
@@ -271,23 +262,20 @@ namespace Team24_BevosBooks.Controllers
 
             foreach (var user in users)
             {
+                System.Diagnostics.Debug.WriteLine($"[DEBUG] Sending email to: {user.Email}");
+
                 await _emailSender.SendEmailAsync(
                     user.Email,
                     "Team 24: Book Discontinued",
                     EmailTemplate.Wrap($@"
                         <h2>Book Discontinued</h2>
                         <p>Hello {user.FirstName},</p>
-                        <p>The book <strong>{book.Title}</strong> by {book.Authors} has been discontinued.</p>
-                        <p>Thank you for being part of Bevo's Books!</p>
+                        <p>The book <strong>{book.Title}</strong> by {book.Authors} is now discontinued.</p>
+                        <p>Genre: {book.Genre?.GenreName}</p>
+                        <p>Thank you for being part of Bevo's Books! 🤘</p>
                     ")
                 );
-
-                emailCount++;
             }
-
-            TempData["DebugEmailCount"] = $"Emails sent: {emailCount}";
-            Console.WriteLine($"DEBUG: Sent {emailCount} discontinue emails.");
-            // ========== DEBUG END ==========
 
             return RedirectToAction(nameof(Index));
         }
@@ -303,7 +291,7 @@ namespace Team24_BevosBooks.Controllers
         }
 
         // =========================================================
-        // HOME CATALOG
+        // HOMECATALOG
         // =========================================================
         public async Task<IActionResult> HomeCatalog()
         {
@@ -327,14 +315,15 @@ namespace Team24_BevosBooks.Controllers
 
             foreach (var genre in spotlightGenres)
             {
-                var books = await _context.Books
-                    .Where(b => b.GenreID == genre.GenreID &&
-                                b.BookStatus == "Active")
-                    .OrderBy(b => b.Title)
-                    .Take(4)
-                    .ToListAsync();
-
-                genreSections.Add(genre.GenreName, books);
+                genreSections.Add(
+                    genre.GenreName,
+                    await _context.Books
+                        .Where(b => b.GenreID == genre.GenreID &&
+                                    b.BookStatus == "Active")
+                        .OrderBy(b => b.Title)
+                        .Take(4)
+                        .ToListAsync()
+                );
             }
 
             ViewBag.Bestsellers = bestsellers;
