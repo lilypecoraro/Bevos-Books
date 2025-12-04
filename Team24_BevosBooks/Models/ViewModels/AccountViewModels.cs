@@ -4,11 +4,11 @@ namespace Team24_BevosBooks.Models.ViewModels
 {
     public class LoginViewModel
     {
-        [Required, EmailAddress]
+        [Required(ErrorMessage = "Please enter your email address."), EmailAddress]
         [Display(Name = "Email")]
         public string Email { get; set; }
 
-        [Required, DataType(DataType.Password)]
+        [Required(ErrorMessage = "Please enter your password."), DataType(DataType.Password)]
         [Display(Name = "Password")]
         public string Password { get; set; }
 
@@ -18,33 +18,33 @@ namespace Team24_BevosBooks.Models.ViewModels
 
     public class RegisterViewModel
     {
-        [Required, EmailAddress]
+        [Required(ErrorMessage = "Please enter an email address."), EmailAddress]
         [Display(Name = "Email")]
         public string Email { get; set; }
 
-        [Required, Phone]
+        [Required(ErrorMessage = "Please enter your phone number."), Phone]
         [Display(Name = "Phone Number")]
         public string PhoneNumber { get; set; }
 
-        [Required, StringLength(40)]
+        [Required(ErrorMessage = "Please enter your first name."), StringLength(40)]
         [Display(Name = "First Name")]
         public string FirstName { get; set; }
 
-        [Required, StringLength(40)]
+        [Required(ErrorMessage = "Please enter your last name."), StringLength(40)]
         [Display(Name = "Last Name")]
         public string LastName { get; set; }
 
         // REQUIRED BY SPEC AND YOUR CONTROLLER
-        [Required]
+        [Required(ErrorMessage = "Please enter an address.")]
         public string Address { get; set; }
 
-        [Required]
+        [Required(ErrorMessage = "Please enter a city.")]
         public string City { get; set; }
 
-        [Required, StringLength(2)]
+        [Required(ErrorMessage = "Please select a state."), StringLength(2)]
         public string State { get; set; }
 
-        [Required, Display(Name = "ZIP Code")]
+        [Required(ErrorMessage = "Please enter a ZIP code."), Display(Name = "ZIP Code")]
         [RegularExpression(@"^\d{5}$", ErrorMessage = "Please enter a standardized ZIP code.")]
         public string ZipCode { get; set; }
 
@@ -64,15 +64,16 @@ namespace Team24_BevosBooks.Models.ViewModels
 
     public class ChangePasswordViewModel
     {
-        [Required, DataType(DataType.Password)]
+        [Required(ErrorMessage = "Please enter your current password."), DataType(DataType.Password)]
         [Display(Name = "Current Password")]
         public string OldPassword { get; set; }
 
-        [Required, StringLength(100, MinimumLength = 6)]
+        [Required(ErrorMessage = "Please enter a new password."), StringLength(100, MinimumLength = 6)]
         [DataType(DataType.Password)]
         [Display(Name = "New Password")]
         public string NewPassword { get; set; }
 
+        [Required(ErrorMessage = "Please confirm your password.")]
         [DataType(DataType.Password)]
         [Display(Name = "Confirm Password")]
         [Compare("NewPassword", ErrorMessage = "Passwords do not match.")]
