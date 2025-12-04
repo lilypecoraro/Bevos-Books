@@ -6,9 +6,11 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.AspNetCore.Identity.UI.Services;
 using Team24_BevosBooks.DAL;
 using Team24_BevosBooks.Models;
 using Team24_BevosBooks.Models.ViewModels;
+using Team24_BevosBooks.Services;
 
 namespace Team24_BevosBooks.Controllers
 {
@@ -17,14 +19,18 @@ namespace Team24_BevosBooks.Controllers
     {
         private readonly AppDbContext _context;
         private readonly UserManager<AppUser> _userManager;
+        private readonly IEmailSender _emailSender;
 
         private const decimal FIRST_BOOK_SHIPPING = 3.50m;
         private const decimal ADDITIONAL_BOOK_SHIPPING = 1.50m;
 
-        public OrdersController(AppDbContext context, UserManager<AppUser> userManager)
+        public OrdersController(AppDbContext context,
+                                UserManager<AppUser> userManager,
+                                IEmailSender emailSender)
         {
             _context = context;
             _userManager = userManager;
+            _emailSender = emailSender;
         }
 
         // ==============================================
@@ -290,10 +296,10 @@ namespace Team24_BevosBooks.Controllers
             var user = await _userManager.GetUserAsync(User);
             if (user == null) return RedirectToAction("Login", "Account");
 
-            // Coupon is optional – ignore any implicit "required" validation on it
+            // Don't force CouponCode to be required
             ModelState.Remove(nameof(CheckoutViewModel.CouponCode));
 
-            // Safety: Order might not be bound – get cart by user instead
+            // Fetch cart by user
             var cart = await _context.Orders
                 .Include(o => o.OrderDetails)
                     .ThenInclude(od => od.Book)
@@ -308,8 +314,10 @@ namespace Team24_BevosBooks.Controllers
                 return RedirectToAction("Cart");
             }
 
+            // Update cart items
             await UpdateCartForChanges(cart);
 
+            // Load cards
             var cards = await _context.Cards
                 .Where(c => c.UserID == user.Id)
                 .ToListAsync();
@@ -317,17 +325,15 @@ namespace Team24_BevosBooks.Controllers
             model.Order = cart;
             model.Cards = cards;
 
+            // No card?
             if (!cards.Any())
-            {
                 ModelState.AddModelError(string.Empty, "You must add a credit card before checking out.");
-            }
 
+            // No selected card?
             if (model.SelectedCardID == null)
-            {
                 ModelState.AddModelError(nameof(model.SelectedCardID), "Please select a credit card.");
-            }
 
-            // ---------------- COUPON VALIDATION/APPLICATION ----------------
+            // ---------------- COUPON LOGIC ----------------
             Coupon? coupon = null;
             bool freeShipping = false;
             bool couponApplied = false;
@@ -362,12 +368,14 @@ namespace Team24_BevosBooks.Controllers
                 }
             }
 
+            // Reset prices
             foreach (var od in cart.OrderDetails)
             {
                 od.Price = od.Book.Price;
                 od.CouponID = null;
             }
 
+            // Apply Coupon
             if (couponApplied && coupon != null)
             {
                 if (coupon.CouponType == "PercentOff")
@@ -398,21 +406,20 @@ namespace Team24_BevosBooks.Controllers
                 }
             }
 
+            // Compute totals
             var totals = ComputeCartTotals(cart, freeShipping);
             model.Subtotal = cart.OrderDetails.Sum(od => od.Price * od.Quantity);
             model.Shipping = totals.shipping;
             model.Total = totals.total;
 
             if (!string.IsNullOrEmpty(couponMessage))
-            {
                 ViewBag.CheckoutMessage = couponMessage;
-            }
 
-            if (!ModelState.IsValid || !cards.Any())
-            {
+            // Validation failure → back to checkout
+            if (!ModelState.IsValid)
                 return View(model);
-            }
 
+            // Validate card ownership
             var card = await _context.Cards
                 .FirstOrDefaultAsync(c => c.CardID == model.SelectedCardID &&
                                           c.UserID == user.Id);
@@ -423,6 +430,7 @@ namespace Team24_BevosBooks.Controllers
                 return View(model);
             }
 
+            // Deduct inventory
             foreach (var item in cart.OrderDetails)
             {
                 var book = await _context.Books.FindAsync(item.BookID);
@@ -430,16 +438,50 @@ namespace Team24_BevosBooks.Controllers
                     book.InventoryQuantity -= item.Quantity;
             }
 
+            // Finalize order
             cart.OrderStatus = "Completed";
             cart.OrderDate = DateTime.Now;
             cart.ShippingFee = totals.shipping;
 
+            // Store card used
             foreach (var od in cart.OrderDetails)
-            {
                 od.CardID = card.CardID;
-            }
 
             await _context.SaveChangesAsync();
+
+            // ==============================================
+            // EMAIL: ORDER CONFIRMATION
+            // ==============================================
+            string itemHtml = string.Join("",
+                cart.OrderDetails.Select(od =>
+                    $"<li>{od.Book.Title} — {od.Quantity} × {od.Price:C}</li>"
+                ));
+
+            string emailBody = EmailTemplate.Wrap($@"
+                <h2>Your Order Is Confirmed!</h2>
+
+                <p>Hello {user.FirstName},</p>
+
+                <p>Your order <strong>#{cart.OrderID}</strong> has been successfully placed on {cart.OrderDate:g}.</p>
+
+                <h3>Order Details</h3>
+                <ul>
+                    {itemHtml}
+                </ul>
+
+                <p><strong>Subtotal:</strong> {model.Subtotal:C}<br/>
+                   <strong>Shipping:</strong> {model.Shipping:C}<br/>
+                   <strong>Total:</strong> {model.Total:C}</p>
+
+                <p>Thank you for shopping at Bevo's Books! 🤘</p>
+                <p><i>Team 24 — Bevo's Books</i></p>
+            ");
+
+            await _emailSender.SendEmailAsync(
+                user.Email,
+                "Team 24: Order Confirmation",
+                emailBody
+            );
 
             return RedirectToAction("OrderConfirmation", new { id = cart.OrderID });
         }
@@ -464,6 +506,7 @@ namespace Team24_BevosBooks.Controllers
             if (order == null)
                 return NotFound();
 
+            // Recommendation logic
             var firstDetailWithBook = order.OrderDetails.FirstOrDefault(od => od.Book != null);
 
             List<Book> recs = new List<Book>();

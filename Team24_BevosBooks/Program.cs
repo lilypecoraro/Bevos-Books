@@ -1,93 +1,86 @@
-﻿//add a using statement for currency
-using Microsoft.AspNetCore.Identity;
+﻿using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
-//TODO: Update these namespaces to match your project name 
-//Be sure to remove the []
+using Microsoft.AspNetCore.Identity.UI.Services;
+using Team24_BevosBooks.Services;
 using Team24_BevosBooks.DAL;
 using Team24_BevosBooks.Models;
 using System.Globalization;
 
-//create a web application builder
 var builder = WebApplication.CreateBuilder(args);
 
-// Add services to the container.
+// MVC
 builder.Services.AddControllersWithViews();
 
-//TODO: Add database on Azure so you have a connection string
-//TODO: Add a connection string here once you have created it on Azure
-String connectionString = "Server=tcp:fa25skylernguyen.database.windows.net,1433;Initial Catalog=fa25team24bevosbooks;Persist Security Info=False;User ID=MISAdmin;Password=Password123;MultipleActiveResultSets=True;Encrypt=True;TrustServerCertificate=False;Connection Timeout=30;";
+// Email sender (SMTP)
+builder.Services.AddTransient<IEmailSender, SmtpEmailSender>();
 
-//NOTE: This tells your application how to get a connection to the database
-builder.Services.AddDbContext<AppDbContext>(options => options.UseSqlServer(connectionString));
+// Database connection
+string connectionString = "Server=tcp:fa25skylernguyen.database.windows.net,1433;Initial Catalog=fa25team24bevosbooks;Persist Security Info=False;User ID=MISAdmin;Password=Password123;MultipleActiveResultSets=True;Encrypt=True;TrustServerCertificate=False;Connection Timeout=30;";
+builder.Services.AddDbContext<AppDbContext>(options =>
+    options.UseSqlServer(connectionString));
 
-//NOTE: You need this line for including Identity in your project
-builder.Services.AddDefaultIdentity<AppUser>()
-    .AddRoles<IdentityRole>()
-    .AddEntityFrameworkStores<AppDbContext>();
+// Identity
+builder.Services.AddDefaultIdentity<AppUser>(options =>
+{
+    options.SignIn.RequireConfirmedAccount = false; // or true if using confirmation
+})
+.AddRoles<IdentityRole>()
+.AddEntityFrameworkStores<AppDbContext>()
+.AddDefaultTokenProviders();   // ✔ REQUIRED FOR EMAIL TOKENS
 
+// Identity Options
 builder.Services.Configure<IdentityOptions>(options =>
 {
-    // Password settings.
     options.Password.RequireDigit = false;
     options.Password.RequireLowercase = false;
     options.Password.RequireNonAlphanumeric = false;
     options.Password.RequireUppercase = false;
     options.Password.RequiredLength = 6;
-    options.Password.RequiredUniqueChars = 1;
 
-    // User settings.
-    options.User.AllowedUserNameCharacters =
-    "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789-._@+";
     options.User.RequireUniqueEmail = true;
 });
 
+// Cookie
 builder.Services.ConfigureApplicationCookie(options =>
 {
-    // Cookie settings
     options.Cookie.HttpOnly = true;
-    options.ExpireTimeSpan = TimeSpan.FromMinutes(5);
-
     options.LoginPath = "/Account/Login";
     options.AccessDeniedPath = "/Account/AccessDenied";
+    options.ExpireTimeSpan = TimeSpan.FromMinutes(5);
     options.SlidingExpiration = true;
 });
 
-
-//build the app
 var app = builder.Build();
 
-//These lines allow you to see more detailed error messages
-app.UseDeveloperExceptionPage();
-app.UseStatusCodePages();
+// Error handling (correct for Azure)
+if (!app.Environment.IsDevelopment())
+{
+    app.UseExceptionHandler("/Home/Error");
+}
+else
+{
+    app.UseDeveloperExceptionPage();
+}
 
-//This line allows you to use static pages like style sheets and images
+// Static files
 app.UseStaticFiles();
 
-//This marks the position in the middleware pipeline where a routing decision
-//is made for a URL.
+// Routing
 app.UseRouting();
 
-//TODO: (HW4 & Beyond) Once you have added Identity into your project, you will 
-//need to uncomment these lines
+// Identity
 app.UseAuthentication();
 app.UseAuthorization();
 
-
-//This allows the data annotations for currency to work on Macs
+// Culture fix for macOS currency
 app.Use(async (context, next) =>
 {
-    CultureInfo.CurrentCulture = System.Globalization.CultureInfo.CreateSpecificCulture("en-US");
+    CultureInfo.CurrentCulture = CultureInfo.CreateSpecificCulture("en-US");
     CultureInfo.CurrentUICulture = CultureInfo.CurrentCulture;
-
-    await next.Invoke();
+    await next();
 });
 
-
-//This method maps the controllers and their actions to a patter for
-//requests that's known as the default route. This route identifies
-//the Home controller as the default controller and the Index() action
-//method as the default action. The default route also identifies a 
-//third segment of the URL that's a parameter named id.
+// Default route
 app.MapControllerRoute(
     name: "default",
     pattern: "{controller=Home}/{action=Index}/{id?}");

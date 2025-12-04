@@ -29,24 +29,24 @@ else
             </tr>
         </thead>
         <tbody>
-        @foreach (var card in Model)
-        {
-            <tr>
-                <td>@card.CardType</td>
-                <td>@card.CardNumber</td>
-                <td>
-                    <form asp-action="RemoveCard" method="post" class="d-inline">
-                        @Html.AntiForgeryToken()
-                        <input type="hidden" name="id" value="@card.CardID" />
-                        <button type="submit"
-                                class="btn btn-sm btn-danger"
-                                onclick="return confirm('Remove this credit card?');">
-                            Remove
-                        </button>
-                    </form>
-                </td>
-            </tr>
-        }
+            @foreach (var card in Model)
+            {
+                <tr>
+                    <td>@card.CardType</td>
+                    <td>@card.CardNumber</td>
+                    <td>
+                        <form asp-action="RemoveCard" method="post" class="d-inline">
+                            @Html.AntiForgeryToken()
+                            <input type="hidden" name="id" value="@card.CardID" />
+                            <button type="submit"
+                                    class="btn btn-sm btn-danger"
+                                    onclick="return confirm('Remove this credit card?');">
+                                Remove
+                            </button>
+                        </form>
+                    </td>
+                </tr>
+            }
         </tbody>
     </table>
 
