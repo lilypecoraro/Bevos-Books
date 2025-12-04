@@ -6,8 +6,6 @@
 
 <h2>Supplier Orders</h2>
 
-<p>View all supplier orders. You can check in arrivals directly from this page.</p>
-
 <table class="table table-bordered">
     <thead>
         <tr>
@@ -25,22 +23,46 @@
                 <td>@order.OrderDate.ToShortDateString()</td>
                 <td>@order.OrderStatus</td>
                 <td>
-                    <ul>
-                        @foreach (var detail in order.OrderDetails)
-                        {
-                            <li>
-                                <strong>@detail.Book.Title</strong> — Qty: @detail.Quantity, Cost: @detail.Cost.ToString("c")
-                                @if (order.OrderStatus == "SupplierOrder")
-                                {
-                                    <form asp-action="CheckIn" method="post" class="mt-1">
-                                        <input type="hidden" name="orderDetailId" value="@detail.OrderDetailID" />
-                                        <input type="number" name="arrivedQty" min="0" max="@detail.Quantity" value="@detail.Quantity" class="form-control form-control-sm d-inline-block" style="width:80px;" />
-                                        <button type="submit" class="btn btn-secondary btn-sm">Check In</button>
-                                    </form>
-                                }
-                            </li>
-                        }
-                    </ul>
+                    <table class="table table-sm">
+                        <thead>
+                            <tr>
+                                <th>Book Name</th>
+                                <th>Amount Ordered</th>
+                                <th>Order Price</th>
+                                <th>Check In</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var detail in order.OrderDetails)
+                            {
+                                <tr>
+                                    <td>@detail.Book?.Title</td>
+                                    <td>@detail.Quantity</td>
+                                    <td>@detail.Cost.ToString("c")</td>
+                                    <td>
+                                        @if (order.OrderStatus == "SupplierOrder")
+                                        {
+                                            <form asp-action="CheckIn" method="post" class="d-flex align-items-center gap-2">
+                                                <input type="hidden" name="orderDetailId" value="@detail.OrderDetailID" />
+                                                <input type="number"
+                                                       name="arrivedQty"
+                                                       min="0"
+                                                       max="@detail.Quantity"
+                                                       value="@detail.Quantity"
+                                                       class="form-control form-control-sm"
+                                                       style="width:90px; color:black;" />
+                                                <button type="submit" class="btn btn-secondary btn-sm">Check In</button>
+                                            </form>
+                                        }
+                                        else
+                                        {
+                                            <span class="text-success">Received</span>
+                                        }
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
                 </td>
             </tr>
         }
