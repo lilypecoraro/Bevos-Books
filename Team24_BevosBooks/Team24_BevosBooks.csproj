@@ -16,9 +16,13 @@
     <None Remove="Seeding\" />
     <None Remove="Utilities\" />
     <None Remove="Views\Shared\" />
+    <None Remove="Services\" />
+    <None Remove="Views\EmailTest\" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="wwwroot\lib\" />
+    <Folder Include="Services\" />
+    <Folder Include="Views\EmailTest\" />
   </ItemGroup>
   <ItemGroup>
     <Content Remove="wwwroot\" />

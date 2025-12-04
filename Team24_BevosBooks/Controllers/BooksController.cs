@@ -5,6 +5,8 @@ using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using Team24_BevosBooks.DAL;
 using Team24_BevosBooks.Models;
+using Microsoft.AspNetCore.Identity.UI.Services;
+using Team24_BevosBooks.Services;
 
 namespace Team24_BevosBooks.Controllers
 {
@@ -12,11 +14,15 @@ namespace Team24_BevosBooks.Controllers
     {
         private readonly AppDbContext _context;
         private readonly UserManager<AppUser> _userManager;
+        private readonly IEmailSender _emailSender;
 
-        public BooksController(AppDbContext context, UserManager<AppUser> userManager)
+        public BooksController(AppDbContext context,
+                               UserManager<AppUser> userManager,
+                               IEmailSender emailSender)
         {
             _context = context;
             _userManager = userManager;
+            _emailSender = emailSender;
         }
 
         // =========================================================
@@ -55,8 +61,9 @@ namespace Team24_BevosBooks.Controllers
                 _ => query.OrderBy(b => b.Title),
             };
 
-            ViewBag.GenreID = new SelectList(await _context.Genres.OrderBy(g => g.GenreName).ToListAsync(),
-                                             "GenreID", "GenreName");
+            ViewBag.GenreID = new SelectList(
+                await _context.Genres.OrderBy(g => g.GenreName).ToListAsync(),
+                "GenreID", "GenreName");
 
             ViewBag.SelectedGenreId = genreId ?? 0;
             ViewBag.SearchString = searchString;
@@ -71,8 +78,7 @@ namespace Team24_BevosBooks.Controllers
         // =========================================================
         public async Task<IActionResult> Details(int? id)
         {
-            if (id == null)
-                return NotFound();
+            if (id == null) return NotFound();
 
             var book = await _context.Books
                 .Include(b => b.Genre)
@@ -80,25 +86,25 @@ namespace Team24_BevosBooks.Controllers
                     .ThenInclude(r => r.Reviewer)
                 .FirstOrDefaultAsync(b => b.BookID == id);
 
-            if (book == null)
-                return NotFound();
+            if (book == null) return NotFound();
 
-            // show only approved reviews
+            // approved reviews only
             book.Reviews = book.Reviews
                 .Where(r => r.DisputeStatus == "Approved")
                 .ToList();
 
             var userId = _userManager.GetUserId(User);
 
-            int cartsContainingBook = await _context.OrderDetails
+            // carts containing this book
+            int cartsContaining = await _context.OrderDetails
                 .Where(od => od.BookID == id)
                 .Where(od => od.Order.OrderStatus == "InCart")
                 .Where(od => od.Order.UserID != userId)
                 .CountAsync();
 
-            ViewBag.CartsContaining = cartsContainingBook;
+            ViewBag.CartsContaining = cartsContaining;
 
-            // --- NEW: determine if the signed-in customer can leave a review for this book
+            // review permissions
             bool purchased = false;
             bool hasReviewed = false;
 
@@ -136,7 +142,7 @@ namespace Team24_BevosBooks.Controllers
             book.BookStatus = "Active";
 
             if (_context.Books.Any(b => b.BookNumber == book.BookNumber))
-                ModelState.AddModelError("", "That Book Number already exists.");
+                ModelState.AddModelError("", "Book Number already exists.");
 
             if (book.InventoryQuantity < 0)
                 ModelState.AddModelError("", "Inventory cannot be negative.");
@@ -152,13 +158,13 @@ namespace Team24_BevosBooks.Controllers
 
             _context.Add(book);
             await _context.SaveChangesAsync();
-            TempData["Message"] = $"Book '{book.Title}' created successfully.";
+            TempData["Message"] = $"Book '{book.Title}' created.";
 
             return RedirectToAction(nameof(Index));
         }
 
         // =========================================================
-        // EDIT (ADMIN)
+        // EDIT (ADMIN) — FIXED ERROR
         // =========================================================
         [Authorize(Roles = "Admin")]
         public async Task<IActionResult> Edit(int? id)
@@ -179,7 +185,8 @@ namespace Team24_BevosBooks.Controllers
         {
             if (id != editedBook.BookID) return NotFound();
 
-            Book? originalBook = await _context.Books.AsNoTracking()
+            Book? originalBook = await _context.Books
+                .AsNoTracking()
                 .FirstOrDefaultAsync(b => b.BookID == id);
 
             if (originalBook == null) return NotFound();
@@ -202,12 +209,12 @@ namespace Team24_BevosBooks.Controllers
             _context.Update(editedBook);
             await _context.SaveChangesAsync();
 
-            TempData["Message"] = $"Book '{editedBook.Title}' updated successfully.";
-            return RedirectToAction(nameof(Index));
+            TempData["Message"] = $"Book '{editedBook.Title}' updated.";
+            return RedirectToAction(nameof(Index)); // FIXED
         }
 
         // =========================================================
-        // DISCONTINUE
+        // DISCONTINUE + EMAIL ALL CUSTOMERS (WITH DEBUG)
         // =========================================================
         [Authorize(Roles = "Admin")]
         public async Task<IActionResult> Discontinue(int? id)
@@ -228,43 +235,81 @@ namespace Team24_BevosBooks.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DiscontinueConfirmed(int id)
         {
-            Book? book = await _context.Books.FindAsync(id);
+            Book? book = await _context.Books
+                .Include(b => b.Genre)
+                .FirstOrDefaultAsync(b => b.BookID == id);
+
             if (book == null) return NotFound();
 
             book.BookStatus = "Discontinued";
             await _context.SaveChangesAsync();
 
             TempData["Message"] = $"Book '{book.Title}' discontinued.";
+
+            // ========== DEBUG START ==========
+            int emailCount = 0;
+
+            // Debug email to YOU
+            await _emailSender.SendEmailAsync(
+                "lilypecoraro@gmail.com",
+                "DEBUG — Discontinue Triggered",
+                $"The discontinue method successfully triggered for: {book.Title}"
+            );
+
+            var users = await _context.Users
+                .Where(u => u.Status == AppUser.UserStatus.Customer &&
+                            u.Email != null)
+                .ToListAsync();
+
+            foreach (var user in users)
+            {
+                await _emailSender.SendEmailAsync(
+                    user.Email,
+                    "Team 24: Book Discontinued",
+                    EmailTemplate.Wrap($@"
+                        <h2>Book Discontinued</h2>
+                        <p>Hello {user.FirstName},</p>
+                        <p>The book <strong>{book.Title}</strong> by {book.Authors} has been discontinued.</p>
+                        <p>Thank you for being part of Bevo's Books!</p>
+                    ")
+                );
+
+                emailCount++;
+            }
+
+            TempData["DebugEmailCount"] = $"Emails sent: {emailCount}";
+            Console.WriteLine($"DEBUG: Sent {emailCount} discontinue emails.");
+            // ========== DEBUG END ==========
+
             return RedirectToAction(nameof(Index));
         }
 
         // =========================================================
-        // HELPER: GENRES DROPDOWN
+        // GENRES DROPDOWN
         // =========================================================
         private async Task PopulateGenresDropDownList(object? selectedGenre = null)
         {
-            var genres = await _context.Genres.OrderBy(g => g.GenreName).ToListAsync();
-            ViewBag.GenreID = new SelectList(genres, "GenreID", "GenreName", selectedGenre);
+            ViewBag.GenreID = new SelectList(
+                await _context.Genres.OrderBy(g => g.GenreName).ToListAsync(),
+                "GenreID", "GenreName", selectedGenre);
         }
 
         // =========================================================
-        // DISCOVER / HOMECATALOG
+        // HOME CATALOG
         // =========================================================
         public async Task<IActionResult> HomeCatalog()
         {
-            // ⭐ Bestsellers (safe even if no orders exist)
             var bestsellers = await _context.Books
                 .Include(b => b.Genre)
                 .Where(b => b.BookStatus == "Active")
                 .OrderByDescending(b =>
                     _context.OrderDetails
-                        .Where(od => od.BookID == b.BookID
-                                     && od.Order.OrderStatus == "Completed")
+                        .Where(od => od.BookID == b.BookID &&
+                                     od.Order.OrderStatus == "Completed")
                         .Sum(od => (int?)od.Quantity) ?? 0)
                 .Take(6)
                 .ToListAsync();
 
-            // ⭐ Spotlight genres — pick first 3 genres alphabetically (safe)
             var spotlightGenres = await _context.Genres
                 .OrderBy(g => g.GenreName)
                 .Take(3)
