@@ -1,0 +1,13 @@
+﻿@model Team24_BevosBooks.ViewModels.TotalsReportVM
+@{
+    ViewData["Title"] = "Totals";
+}
+<h2>Totals</h2>
+
+<p><strong>Record count:</strong> @Model.RecordCount</p>
+
+<ul class="list-group">
+    <li class="list-group-item"><strong>Total Revenue:</strong> @Model.TotalRevenue.ToString("c")</li>
+    <li class="list-group-item"><strong>Total Cost:</strong> @Model.TotalCost.ToString("c")</li>
+    <li class="list-group-item"><strong>Total Profit:</strong> @Model.TotalProfit.ToString("c")</li>
+</ul>
