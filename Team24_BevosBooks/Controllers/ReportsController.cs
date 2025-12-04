@@ -88,9 +88,12 @@ namespace Team24_BevosBooks.Controllers
         public async Task<IActionResult> OrdersReport(string sort = "recent")
         {
             var avgCost = await GetWeightedAverageCostByBook();
-            var q = SalesQuery();
 
-            var grouped = await q
+            // Step 1: pull the raw data from the database
+            var q = await SalesQuery().ToListAsync();
+
+            // Step 2: group and calculate in memory
+            var grouped = q
                 .GroupBy(od => od.OrderID)
                 .Select(g => new OrderReportRowVM
                 {
@@ -101,7 +104,7 @@ namespace Team24_BevosBooks.Controllers
                     OrderRevenue = g.Sum(x => x.Price * x.Quantity),
                     OrderCost = g.Sum(x => (avgCost.ContainsKey(x.BookID) ? avgCost[x.BookID] : 0m) * x.Quantity)
                 })
-                .ToListAsync();
+                .ToList();
 
             foreach (var row in grouped)
             {
@@ -129,9 +132,12 @@ namespace Team24_BevosBooks.Controllers
         public async Task<IActionResult> CustomersReport(string sort = "profitDesc")
         {
             var avgCost = await GetWeightedAverageCostByBook();
-            var q = SalesQuery();
 
-            var grouped = await q
+            // Step 1: pull raw order details into memory
+            var q = await SalesQuery().ToListAsync();
+
+            // Step 2: group and calculate in memory
+            var grouped = q
                 .GroupBy(od => od.Order.UserID)
                 .Select(g => new CustomerReportRowVM
                 {
@@ -141,7 +147,7 @@ namespace Team24_BevosBooks.Controllers
                     Revenue = g.Sum(x => x.Price * x.Quantity),
                     Cost = g.Sum(x => (avgCost.ContainsKey(x.BookID) ? avgCost[x.BookID] : 0m) * x.Quantity)
                 })
-                .ToListAsync();
+                .ToList();
 
             foreach (var row in grouped)
             {
