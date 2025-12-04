@@ -6,7 +6,12 @@
 
 <h2>Manual Reorder</h2>
 
-<p>Select books to reorder manually. You can adjust quantity and supplier cost.</p>
+<!-- Search bar -->
+<form asp-action="ManualReorder" method="get" class="mb-3 d-flex">
+    <input type="text" name="searchString" value="@Context.Request.Query["searchString"]"
+           class="form-control me-2" placeholder="Search books..." />
+    <button type="submit" class="btn btn-outline-primary">Search</button>
+</form>
 
 <table class="table table-striped">
     <thead>
@@ -17,6 +22,7 @@
             <th>Last Cost</th>
             <th>Inventory</th>
             <th>Reorder Point</th>
+            <th>Avg Profit Margin</th>
             <th>Order</th>
         </tr>
     </thead>
@@ -30,6 +36,7 @@
                 <td>@book.Cost.ToString("c")</td>
                 <td>@book.InventoryQuantity</td>
                 <td>@book.ReorderPoint</td>
+                <td><!-- TODO: calculate margin later --></td>
                 <td>
                     <form asp-action="ManualReorder" method="post" class="d-flex flex-column">
                         <input type="hidden" name="bookId" value="@book.BookID" />
