@@ -6,17 +6,21 @@
 }
 
 <style>
+    /* ============================================================
+       HERO FIXES
+    ============================================================ */
+
     .hero-logo {
-        width: 130px;
-        max-width: 130px;
-        height: auto;
-        object-fit: contain;
-        display: block;
-        margin: 0 auto 1.5rem;
+        width: 130px !important;
+        max-width: 130px !important;
+        height: auto !important;
+        object-fit: contain !important;
+        display: block !important;
+        margin: 0 auto 1.5rem !important;
     }
 
     .hero-bg {
-        position: absolute;
+        position: absolute !important;
         inset: 0;
         width: 100%;
         height: 100%;
@@ -30,36 +34,53 @@
     }
 
     .hero-container {
-        position: relative;
-        z-index: 0;
+        position: relative !important;
+        z-index: 0 !important;
     }
 
+    .hero-content,
+    .hero-logo,
+    .hero-bg {
+        z-index: 0 !important;
+    }
+
+    /* ============================================================
+       WAVY PROMO BAR (COMPACT + SCROLLING)
+    ============================================================ */
+
     .promo-wave-marquee {
-        position: relative;
+        position: relative !important;
         width: 100%;
         overflow: hidden;
-        padding: 1.25rem 0;
-        z-index: 999999;
+        padding: 1.25rem 0 !important;
+        z-index: 999999 !important;
         display: flex;
         justify-content: center;
-        background: transparent;
+        pointer-events: none;
+        background: transparent !important;
     }
 
     .promo-wave-track {
         display: flex;
-        width: 100%;
+        width: calc(900px * 2); /* compact scroll width */
+        animation: promoWaveScroll 20s linear infinite;
     }
 
     .promo-wave-marquee svg {
-        width: 900px;
-        height: 80px;
+        width: 900px !important; /* compact size */
+        height: 80px !important;
         flex-shrink: 0;
     }
 
     .promo-wave-text {
-        fill: #ffffff; /* white text */
-        font-size: 1.6rem;
-        font-weight: 600;
+        fill: #f5b338 !important; /* YELLOW */
+        font-size: 1.6rem !important;
+        font-weight: 600 !important;
+    }
+
+    @@keyframes promoWaveScroll {
+        0% { transform: translateX(0); }
+        100% { transform: translateX(-900px); }
     }
 </style>
 
@@ -68,18 +89,25 @@
     <div class="hero-bg"></div>
 
     <div class="hero-content text-center">
-        <img src="~/BevoBookLogo.png" alt="Bevo Books Logo" class="hero-logo" />
+
+        <img src="~/BevoBookLogo.png"
+             alt="Bevo Books Logo"
+             class="hero-logo" />
+
         <h1 class="hero-title">Bevo’s Books</h1>
         <p class="hero-subtitle">Your online bookstore for all your favorite titles.</p>
 
-        <!-- Search bar -->
-        <form asp-controller="Books" asp-action="Index" method="get"
+        <form asp-controller="Books"
+              asp-action="Index"
+              method="get"
               class="hero-searchbar d-flex justify-content-center mt-4">
+
             <input type="text"
                    name="searchString"
                    value="@Context.Request.Query["searchString"]"
                    class="form-control hero-search-input"
                    placeholder="Search books by title or author..." />
+
             <button type="submit" class="btn hero-btn-solid ms-2">Search</button>
         </form>
     </div>
@@ -88,21 +116,24 @@
 <!-- PROMO MARQUEE -->
 <div class="promo-wave-marquee">
     <div class="promo-wave-track">
+
+        <!-- COPY SET #1 -->
         @foreach (var promo in ViewBag.Promos as List<Team24_BevosBooks.Models.Coupon>)
         {
             <svg xmlns="http://www.w3.org/2000/svg"
                  viewBox="0 0 1200 120"
                  preserveAspectRatio="none">
-                <path id="promoWavePath@promo.CouponID"
+                <path id="promoWavePath1_@promo.CouponID"
                       d="M 0 60
                          C 200 20, 400 100, 600 60
                          C 800 20, 1000 100, 1200 60"
                       fill="none" stroke="none" />
+
                 <text class="promo-wave-text">
-                    <textPath href="#promoWavePath@promo.CouponID" text-anchor="start">
+                    <textPath href="#promoWavePath1_@promo.CouponID" text-anchor="start">
                         ★ Promo: Use code @promo.CouponCode —
                         @(promo.CouponType == "PercentOff"
-                            ? $"{promo.DiscountPercent}% off your order!"
+                            ? $"{promo.DiscountPercent}% off your entire order!"
                             : !promo.FreeThreshold.HasValue
                                 ? "Free shipping on all orders!"
                                 : $"Free shipping over ${promo.FreeThreshold}") ★
@@ -110,5 +141,31 @@
                 </text>
             </svg>
         }
+
+        <!-- COPY SET #2 - Required for seamless scroll -->
+        @foreach (var promo in ViewBag.Promos as List<Team24_BevosBooks.Models.Coupon>)
+        {
+            <svg xmlns="http://www.w3.org/2000/svg"
+                 viewBox="0 0 1200 120"
+                 preserveAspectRatio="none">
+                <path id="promoWavePath2_@promo.CouponID"
+                      d="M 0 60
+                         C 200 20, 400 100, 600 60
+                         C 800 20, 1000 100, 1200 60"
+                      fill="none" stroke="none" />
+
+                <text class="promo-wave-text">
+                    <textPath href="#promoWavePath2_@promo.CouponID" text-anchor="start">
+                        ★ Promo: Use code @promo.CouponCode —
+                        @(promo.CouponType == "PercentOff"
+                            ? $"{promo.DiscountPercent}% off your entire order!"
+                            : !promo.FreeThreshold.HasValue
+                                ? "Free shipping on all orders!"
+                                : $"Free shipping over ${promo.FreeThreshold}") ★
+                    </textPath>
+                </text>
+            </svg>
+        }
+
     </div>
 </div>
