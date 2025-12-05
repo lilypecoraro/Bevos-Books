@@ -10,14 +10,6 @@
 
 <h2>Coupons</h2>
 
-@if (TempData["Message"] != null)
-{
-    <div class="alert alert-success alert-dismissible fade show" role="alert">
-        @TempData["Message"]
-        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-    </div>
-}
-
 @if (isAdmin)
 {
     <p>
@@ -42,78 +34,76 @@
         </tr>
     </thead>
     <tbody>
-    @foreach (var coupon in Model)
-    {
-        <tr class="@(coupon.Status == "Disabled" ? "table-secondary" : "")">
-            <td>
-                <strong>@coupon.CouponCode</strong>
-            </td>
-            <td>@coupon.CouponType</td>
-            <td>
-                @if (coupon.DiscountPercent.HasValue)
-                {
-                    <span class="badge bg-success">@coupon.DiscountPercent.Value.ToString("F2")% OFF</span>
-                }
-                else
-                {
-                    <span>-</span>
-                }
-            </td>
-            <td>
-                @if (coupon.FreeThreshold.HasValue)
-                {
-                    <span>@coupon.FreeThreshold.Value.ToString("C")</span>
-                }
-                else
-                {
-                    <span>-</span>
-                }
-            </td>
-            <td>
-                @if (coupon.Status == "Enabled")
-                {
-                    <span class="badge bg-success">Enabled</span>
-                }
-                else
-                {
-                    <span class="badge bg-secondary">Disabled</span>
-                }
-            </td>
-            @if (isAdmin)
-            {
+        @foreach (var coupon in Model)
+        {
+            <tr class="@(coupon.Status == "Disabled" ? "table-secondary" : "")">
+                <td><strong>@coupon.CouponCode</strong></td>
+                <td>@coupon.CouponType</td>
                 <td>
-                    <a asp-action="Details" asp-route-id="@coupon.CouponID" class="btn btn-sm btn-info">Details</a>
-                    @if (coupon.Status == "Enabled")
+                    @if (coupon.DiscountPercent.HasValue)
                     {
-                        <a asp-action="Disable" asp-route-id="@coupon.CouponID" 
-                           class="btn btn-sm btn-warning"
-                           onclick="return confirm('Are you sure you want to disable this coupon?');">
-                            Disable
-                        </a>
+                        <span class="badge bg-success">@coupon.DiscountPercent.Value.ToString("F2")% OFF</span>
                     }
                     else
                     {
-                        <a asp-action="Enable" asp-route-id="@coupon.CouponID" 
-                           class="btn btn-sm btn-success">
-                            Enable
-                        </a>
+                        <span>-</span>
                     }
                 </td>
-            }
-        </tr>
-    }
+                <td>
+                    @if (coupon.FreeThreshold.HasValue)
+                    {
+                        <span>@coupon.FreeThreshold.Value.ToString("C")</span>
+                    }
+                    else
+                    {
+                        <span>-</span>
+                    }
+                </td>
+                <td>
+                    @if (coupon.Status == "Enabled")
+                    {
+                        <span class="badge bg-success">Enabled</span>
+                    }
+                    else
+                    {
+                        <span class="badge bg-secondary">Disabled</span>
+                    }
+                </td>
+                @if (isAdmin)
+                {
+                    <td>
+                        <a asp-action="Details" asp-route-id="@coupon.CouponID" class="btn btn-sm btn-info">Details</a>
+                        @if (coupon.Status == "Enabled")
+                        {
+                            <a asp-action="Disable" asp-route-id="@coupon.CouponID"
+                               class="btn btn-sm btn-warning"
+                               onclick="return confirm('Are you sure you want to disable this coupon?');">
+                                Disable
+                            </a>
+                        }
+                        else
+                        {
+                            <a asp-action="Enable" asp-route-id="@coupon.CouponID"
+                               class="btn btn-sm btn-success">
+                                Enable
+                            </a>
+                        }
+                    </td>
+                }
+            </tr>
+        }
     </tbody>
 </table>
 
 @if (!Model.Any())
 {
-<div class="no-results-box">
-    No coupons available.
-    @if (isAdmin)
-    {
-        <a asp-action="Create" class="fw-bold" style="color: var(--bevo-gold);">
-            Create your first coupon
-        </a>
-    }
-</div>
+    <div class="no-results-box text-dark">
+        No coupons available.
+        @if (isAdmin)
+        {
+            <a asp-action="Create" class="fw-bold text-dark">
+                Create your first coupon
+            </a>
+        }
+    </div>
 }

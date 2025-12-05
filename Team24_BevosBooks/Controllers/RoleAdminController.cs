@@ -132,10 +132,13 @@ namespace Team24_BevosBooks.Controllers
         public async Task<IActionResult> Disable(string id)
         {
             AppUser user = await _userManager.FindByIdAsync(id);
+            if (user == null) return NotFound();
 
             user.Status = AppUser.UserStatus.Disabled;
             user.LockoutEnabled = true;
-            user.LockoutEnd = DateTime.MaxValue;
+
+            // Use DateTimeOffset.MaxValue for indefinite lockout
+            user.LockoutEnd = DateTimeOffset.MaxValue;
 
             await _userManager.UpdateAsync(user);
 
@@ -146,8 +149,11 @@ namespace Team24_BevosBooks.Controllers
         public async Task<IActionResult> Enable(string id)
         {
             AppUser user = await _userManager.FindByIdAsync(id);
+            if (user == null) return NotFound();
 
             user.Status = AppUser.UserStatus.Customer;
+
+            // Clear lockout
             user.LockoutEnd = null;
 
             await _userManager.UpdateAsync(user);
