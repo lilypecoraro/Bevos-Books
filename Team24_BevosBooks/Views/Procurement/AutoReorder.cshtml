@@ -25,19 +25,23 @@
             @foreach (var book in Model)
             {
                 <tr>
-                    <td><input type="checkbox" name="bookIds" value="@book.BookID" checked /></td>
+                    <td>
+                        <input type="checkbox" name="bookIds" value="@book.BookID" checked style="color:black; background-color:white;" />
+                    </td>
                     <td>@book.Title</td>
                     <td>@book.InventoryQuantity</td>
                     <td>@book.ReorderPoint</td>
                     <td>
                         <input type="number" name="qty_@book.BookID" value="5" min="0"
-                               class="form-control form-control-sm" style="color:black; width:90px;" />
+                               class="form-control form-control-sm" style="color:black; background-color:white; width:90px;" />
                     </td>
                     <td>
                         <input type="number" step="0.01" name="cost_@book.BookID" value="@book.Cost"
-                               class="form-control form-control-sm" style="color:black; width:90px;" />
+                               class="form-control form-control-sm" style="color:black; background-color:white; width:90px;" />
                     </td>
-                    <td><input type="checkbox" name="removeIds" value="@book.BookID" /></td>
+                    <td>
+                        <input type="checkbox" name="removeIds" value="@book.BookID" style="color:black; background-color:white;" />
+                    </td>
                 </tr>
             }
         </tbody>

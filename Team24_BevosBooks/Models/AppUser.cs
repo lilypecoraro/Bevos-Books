@@ -31,7 +31,8 @@ namespace Team24_BevosBooks.Models
             Customer,
             Employee,
             Admin,
-            Disabled
+            Disabled,
+            Fired
         }
 
         // ⭐ NEW FIELD — Customer number for CUSTOMER accounts only
