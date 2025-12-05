@@ -19,20 +19,28 @@ namespace Team24_BevosBooks.Controllers
         // ----------------------------
         public async Task<IActionResult> Index(string? searchString)
         {
-            // CHANGE: If user searched from Home, send them to full catalog page
+            // If user searched from Home, send them to full catalog page
             if (!string.IsNullOrWhiteSpace(searchString))
             {
                 return RedirectToAction("Index", "Books", new { searchString });
             }
 
-            // Optional: keep lightweight data for future home widgets
+            // Lightweight book data for homepage widgets
             var books = await _context.Books
                 .OrderBy(b => b.Title)
                 .Take(6)
                 .ToListAsync();
 
+            // Get enabled coupons for promo marquee
+            var promos = await _context.Coupons
+                .Where(c => c.Status == "Enabled")
+                .ToListAsync();
+
+            ViewBag.Promos = promos;
+
             return View(books);
         }
+
         public IActionResult AboutUs()
         {
             return View();

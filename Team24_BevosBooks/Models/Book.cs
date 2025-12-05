@@ -1,6 +1,7 @@
 using System;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using System.Collections.Generic;
 
 namespace Team24_BevosBooks.Models
 {
@@ -47,5 +48,15 @@ namespace Team24_BevosBooks.Models
 
         public List<Review> Reviews { get; set; } = new List<Review>();
 
+        // ✅ Computed property for average profit margin
+        [NotMapped] // ensures EF doesn’t try to persist this
+        public decimal AvgProfitMargin
+        {
+            get
+            {
+                if (Price <= 0) return 0;
+                return (Price - Cost) / Price;
+            }
+        }
     }
 }

@@ -24,5 +24,11 @@ namespace Team24_BevosBooks.Models
         public string OrderStatus { get; set; }
 
         public ICollection<OrderDetail> OrderDetails { get; set; }
+
+        [ForeignKey("Coupon")]
+        public int? CouponID { get; set; }   // FK to Coupon (nullable if no coupon used)
+
+        public Coupon Coupon { get; set; }
+
     }
 }

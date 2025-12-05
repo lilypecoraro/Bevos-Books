@@ -336,7 +336,7 @@ namespace Team24_BevosBooks.Controllers
             if (!string.IsNullOrWhiteSpace(model.CouponCode))
             {
                 coupon = await _context.Coupons
-                    .FirstOrDefaultAsync(c => c.CouponCode == model.CouponCode &&
+                    .FirstOrDefaultAsync(c => c.CouponCode == model.CouponCode.ToUpper() &&
                                               c.Status == "Enabled");
 
                 if (coupon == null)
@@ -345,16 +345,20 @@ namespace Team24_BevosBooks.Controllers
                 }
                 else
                 {
-                    bool used = await _context.OrderDetails
-                        .Include(od => od.Order)
-                        .AnyAsync(od => od.Order.UserID == user.Id &&
-                                        od.Order.OrderStatus == "Completed" &&
-                                        od.CouponID == coupon.CouponID);
+                    // Enforce one use per customer
+                    bool used = await _context.Orders
+                        .AnyAsync(o => o.UserID == user.Id &&
+                                       o.OrderStatus == "Completed" &&
+                                       o.CouponID == coupon.CouponID);
 
                     if (used)
+                    {
                         error = "You have already used this coupon before.";
+                    }
                     else
+                    {
                         applied = true;
+                    }
                 }
             }
 
@@ -369,21 +373,36 @@ namespace Team24_BevosBooks.Controllers
             {
                 if (coupon.CouponType == "PercentOff")
                 {
-                    foreach (var od in cart.OrderDetails)
+                    if (!coupon.DiscountPercent.HasValue || coupon.DiscountPercent.Value <= 0)
                     {
-                        decimal discount = od.Price * coupon.DiscountPercent.Value / 100m;
-                        od.Price -= discount;
-                        od.CouponID = coupon.CouponID;
+                        applied = false;
+                        error = "This coupon requires a valid percent off value.";
+                    }
+                    else
+                    {
+                        foreach (var od in cart.OrderDetails)
+                        {
+                            decimal discount = od.Price * coupon.DiscountPercent.Value / 100m;
+                            od.Price -= discount;
+                            od.CouponID = coupon.CouponID;
+                        }
                     }
                 }
                 else if (coupon.CouponType == "FreeShipping")
                 {
                     var subtotalBefore = cart.OrderDetails.Sum(od => od.Price * od.Quantity);
 
-                    if (subtotalBefore >= coupon.FreeThreshold)
+                    if (!coupon.FreeThreshold.HasValue)
                     {
+                        // ✅ Free shipping for all orders
                         freeShipping = true;
-
+                        foreach (var od in cart.OrderDetails)
+                            od.CouponID = coupon.CouponID;
+                    }
+                    else if (subtotalBefore >= coupon.FreeThreshold.Value)
+                    {
+                        // ✅ Free shipping above threshold
+                        freeShipping = true;
                         foreach (var od in cart.OrderDetails)
                             od.CouponID = coupon.CouponID;
                     }
@@ -394,47 +413,6 @@ namespace Team24_BevosBooks.Controllers
                     }
                 }
             }
-
-            if (error != null)
-                ViewBag.CheckoutMessage = error;
-
-            var totals = ComputeCartTotals(cart, freeShipping);
-            model.Subtotal = cart.OrderDetails.Sum(od => od.Price * od.Quantity);
-            model.Shipping = totals.shipping;
-            model.Total = totals.total;
-
-            if (!ModelState.IsValid)
-                return View(model);
-
-            // Validate card
-            var card = await _context.Cards
-                .FirstOrDefaultAsync(c => c.CardID == model.SelectedCardID &&
-                                          c.UserID == user.Id);
-
-            if (card == null)
-            {
-                ModelState.AddModelError(nameof(model.SelectedCardID), "Invalid card selection.");
-                return View(model);
-            }
-
-            // Deduct inventory
-            foreach (var item in cart.OrderDetails)
-            {
-                var book = await _context.Books.FindAsync(item.BookID);
-
-                if (book != null)
-                    book.InventoryQuantity -= item.Quantity;
-            }
-
-            // Finalize order
-            cart.OrderStatus = "Completed";
-            cart.OrderDate = DateTime.Now;
-            cart.ShippingFee = totals.shipping;
-
-            foreach (var od in cart.OrderDetails)
-                od.CardID = card.CardID;
-
-            await _context.SaveChangesAsync();
 
             // ---------------- SEND EMAIL ----------------
             string listHtml = string.Join("", cart.OrderDetails

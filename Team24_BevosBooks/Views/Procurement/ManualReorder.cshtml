@@ -38,29 +38,43 @@
 
 <!-- Order form -->
 <form asp-action="ManualReorder" method="post">
-    <table class="table table-striped">
-        <thead>
+    <table class="table table-striped align-middle">
+        <thead class="table-dark">
             <tr>
                 <th>Select</th>
                 <th>Title</th>
                 <th>Authors</th>
                 <th>Price</th>
                 <th>Last Cost</th>
+                <th>Avg Profit Margin</th>
                 <th>Inventory</th>
                 <th>Reorder Point</th>
                 <th>Quantity</th>
                 <th>Cost</th>
+                <th>Details</th>
             </tr>
         </thead>
         <tbody>
             @foreach (var book in Model)
             {
                 <tr>
-                    <td><input type="checkbox" name="bookIds" value="@book.BookID" style="color:black; background-color:white;" /></td>
+                    <td>
+                        <input type="checkbox" name="bookIds" value="@book.BookID" style="color:black; background-color:white;" />
+                    </td>
                     <td>@book.Title</td>
                     <td>@book.Authors</td>
                     <td>@book.Price.ToString("c")</td>
                     <td>@book.Cost.ToString("c")</td>
+                    <td>
+                        @if (book.AvgProfitMargin != null)
+                        {
+                            @($"{book.AvgProfitMargin:P2}") <!-- formatted as percentage -->
+                        }
+                        else
+                        {
+                            <span class="text-muted">N/A</span>
+                        }
+                    </td>
                     <td>@book.InventoryQuantity</td>
                     <td>@book.ReorderPoint</td>
                     <td>
@@ -70,6 +84,10 @@
                     <td>
                         <input type="number" step="0.01" name="cost_@book.BookID" value="@book.Cost"
                                class="form-control form-control-sm" style="color:black; background-color:white; width:90px;" />
+                    </td>
+                    <td>
+                        <a asp-action="Details" asp-route-id="@book.BookID"
+                           class="btn btn-sm btn-info">Book Details</a>
                     </td>
                 </tr>
             }

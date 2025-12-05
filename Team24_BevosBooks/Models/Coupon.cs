@@ -6,31 +6,27 @@ namespace Team24_BevosBooks.Models
     public class Coupon
     {
         [Key]
-        public int CouponID { get; set; }   // PK
+        public int CouponID { get; set; }
 
         [Required]
-        [StringLength(20)]                  // 1–20 characters, letters/numbers
+        [StringLength(20)]
         public string CouponCode { get; set; }
 
         [Required]
         [StringLength(20)]
-        public string CouponType { get; set; }  
-        // "FreeShipping" or "PercentOff"
+        public string CouponType { get; set; }  // "FreeShipping" or "PercentOff"
 
         [Column(TypeName = "decimal(5,2)")]
-        public decimal? DiscountPercent { get; set; }  
-        // Only used for PercentOff type (e.g., 10.00 = 10%)
+        public decimal? DiscountPercent { get; set; }
 
         [Column(TypeName = "decimal(18,2)")]
-        public decimal? FreeThreshold { get; set; }    
-        // Minimum order amount for free shipping (nullable)
+        public decimal? FreeThreshold { get; set; }
 
         [Required]
         [StringLength(20)]
-        public string Status { get; set; }  
-        // "Enabled" or "Disabled"
+        public string Status { get; set; } = "Enabled"; // default value
 
-        // Navigation property (optional, if you want to track usage in orders)
-        public ICollection<OrderDetail> OrderDetails { get; set; }
+        // Optional navigation property
+        public ICollection<OrderDetail> OrderDetails { get; set; } = new List<OrderDetail>();
     }
 }

@@ -2,6 +2,7 @@
 
 @{
     ViewData["Title"] = "Create Coupon";
+    bool freeAllChecked = (ViewBag.FreeShippingAllOrders as bool?) ?? false;
 }
 
 <h2>Create New Coupon</h2>
@@ -9,19 +10,20 @@
 
 <div class="row">
     <div class="col-md-6">
-        <form asp-action="Create">
-            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+        <form asp-action="Create" method="post">
+            <div asp-validation-summary="All" class="text-danger"></div>
 
+            <!-- Coupon Code -->
             <div class="form-group mb-3">
                 <label asp-for="CouponCode" class="control-label"></label>
-                <input asp-for="CouponCode" class="form-control" maxlength="20" style="text-transform: uppercase;" />
+                <input asp-for="CouponCode" id="CouponCode" class="form-control" maxlength="20" style="text-transform: uppercase;" />
                 <span asp-validation-for="CouponCode" class="text-danger"></span>
-                <small class="form-text text-muted">1-20 characters, letters and numbers only.</small>
             </div>
 
+            <!-- Coupon Type -->
             <div class="form-group mb-3">
                 <label asp-for="CouponType" class="control-label"></label>
-                <select asp-for="CouponType" class="form-control" id="couponTypeSelect">
+                <select asp-for="CouponType" id="couponTypeSelect" class="form-control">
                     <option value="">-- Select Type --</option>
                     <option value="PercentOff">Percent Off</option>
                     <option value="FreeShipping">Free Shipping</option>
@@ -29,24 +31,29 @@
                 <span asp-validation-for="CouponType" class="text-danger"></span>
             </div>
 
-            <div class="form-group mb-3" id="discountPercentGroup" style="display: none;">
+            <!-- Percent Off group -->
+            <div class="form-group mb-3" id="discountPercentGroup" style="display:none;">
                 <label asp-for="DiscountPercent" class="control-label"></label>
-                <input asp-for="DiscountPercent" class="form-control" type="number" step="0.01" min="0" max="100" />
+                <input asp-for="DiscountPercent" id="DiscountPercent" class="form-control" type="number" step="0.01" min="0" max="100" />
                 <span asp-validation-for="DiscountPercent" class="text-danger"></span>
-                <small class="form-text text-muted">Enter percentage (e.g., 10 for 10% off).</small>
             </div>
 
-            <div class="form-group mb-3" id="freeThresholdGroup" style="display: none;">
+            <!-- Free Shipping group -->
+            <div class="form-group mb-3" id="freeShippingGroup" style="display:none;">
                 <label asp-for="FreeThreshold" class="control-label"></label>
-                <input asp-for="FreeThreshold" class="form-control" type="number" step="0.01" min="0" />
+                <input asp-for="FreeThreshold" id="FreeThreshold" class="form-control" type="number" step="0.01" min="0" />
                 <span asp-validation-for="FreeThreshold" class="text-danger"></span>
-                <small class="form-text text-muted">Minimum order amount required for free shipping.</small>
+
+                <div class="form-check mt-2">
+                    <!-- Plain checkbox, not bound to model -->
+                    <input type="checkbox" name="FreeShippingAllOrders" id="FreeShippingAllOrders" class="form-check-input" @(freeAllChecked ? "checked" : "") />
+                    <label for="FreeShippingAllOrders" class="form-check-label">Apply to all orders (ignore threshold)</label>
+                </div>
             </div>
 
             <div class="alert alert-info mt-3 text-dark">
                 <strong>Note:</strong> Once created, coupons cannot be edited. You can only enable or disable them.
             </div>
-
 
             <div class="form-group mt-4">
                 <input type="submit" value="Create Coupon" class="btn btn-primary" />
@@ -57,29 +64,29 @@
 </div>
 
 @section Scripts {
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script>(function () {
+            function toggleFields() {
+                var selectedType = $('#couponTypeSelect').val();
 
-    
-    <script>
-        $(document).ready(function() {
-            $('#couponTypeSelect').on('change', function() {
-                var selectedType = $(this).val();
-                
                 if (selectedType === 'PercentOff') {
                     $('#discountPercentGroup').show();
-                    $('#freeThresholdGroup').hide();
+                    $('#freeShippingGroup').hide();
                     $('#FreeThreshold').val('');
+                    $('#FreeShippingAllOrders').prop('checked', false);
                 } else if (selectedType === 'FreeShipping') {
                     $('#discountPercentGroup').hide();
-                    $('#freeThresholdGroup').show();
+                    $('#freeShippingGroup').show();
                     $('#DiscountPercent').val('');
                 } else {
                     $('#discountPercentGroup').hide();
-                    $('#freeThresholdGroup').hide();
+                    $('#freeShippingGroup').hide();
                 }
-            });
+            }
 
-            // Trigger on page load if value is already selected
-            $('#couponTypeSelect').trigger('change');
-        });
-    </script>
+            $(document).ready(function () {
+                $('#couponTypeSelect').on('change', toggleFields);
+                toggleFields(); // run once on page load
+            });
+        })();</script>
 }

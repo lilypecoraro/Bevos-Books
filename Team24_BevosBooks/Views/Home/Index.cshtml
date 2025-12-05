@@ -6,21 +6,17 @@
 }
 
 <style>
-    /* ============================================================
-       HERO FIXES
-    ============================================================ */
-
     .hero-logo {
-        width: 130px !important;
-        max-width: 130px !important;
-        height: auto !important;
-        object-fit: contain !important;
-        display: block !important;
-        margin: 0 auto 1.5rem !important;
+        width: 130px;
+        max-width: 130px;
+        height: auto;
+        object-fit: contain;
+        display: block;
+        margin: 0 auto 1.5rem;
     }
 
     .hero-bg {
-        position: absolute !important;
+        position: absolute;
         inset: 0;
         width: 100%;
         height: 100%;
@@ -34,61 +30,36 @@
     }
 
     .hero-container {
-        position: relative !important;
-        z-index: 0 !important;
+        position: relative;
+        z-index: 0;
     }
-
-    .hero-content,
-    .hero-logo,
-    .hero-bg {
-        z-index: 0 !important;
-    }
-
-    /* ============================================================
-   COMPACT WAVY PROMO BAR (NOT FULL WIDTH)
-=========================================================== */
 
     .promo-wave-marquee {
-        position: relative !important;
+        position: relative;
         width: 100%;
         overflow: hidden;
-        padding: 1.25rem 0 !important;
-        z-index: 999999 !important;
+        padding: 1.25rem 0;
+        z-index: 999999;
         display: flex;
-        justify-content: center; /* centers the wave */
-        pointer-events: none;
-        background: transparent !important;
+        justify-content: center;
+        background: transparent;
     }
 
-    /* two svg copies stacked horizontally */
     .promo-wave-track {
         display: flex;
-        width: calc(900px * 2); /* very compact — only 900px wide */
-        animation: promoWaveScroll 20s linear infinite;
+        width: 100%;
     }
 
-    /* compact svg */
     .promo-wave-marquee svg {
-        width: 900px !important; /* compact width */
-        height: 80px !important; /* smaller height */
+        width: 900px;
+        height: 80px;
         flex-shrink: 0;
     }
 
     .promo-wave-text {
-        fill: #f5b338 !important;
-        font-size: 1.6rem !important;
-        font-weight: 600 !important;
-    }
-
-    /* smooth loop, moves ONLY 900px instead of full screen */
-    @@keyframes promoWaveScroll {
-        0% {
-            transform: translateX(0);
-        }
-
-        100% {
-            transform: translateX(-900px);
-        }
+        fill: #ffffff; /* white text */
+        font-size: 1.6rem;
+        font-weight: 600;
     }
 </style>
 
@@ -97,69 +68,47 @@
     <div class="hero-bg"></div>
 
     <div class="hero-content text-center">
-
-        <!-- LOGO -->
-        <img src="~/BevoBookLogo.png"
-             alt="Bevo Books Logo"
-             class="hero-logo" />
-
+        <img src="~/BevoBookLogo.png" alt="Bevo Books Logo" class="hero-logo" />
         <h1 class="hero-title">Bevo’s Books</h1>
         <p class="hero-subtitle">Your online bookstore for all your favorite titles.</p>
 
         <!-- Search bar -->
-        <form asp-controller="Books"
-              asp-action="Index"
-              method="get"
+        <form asp-controller="Books" asp-action="Index" method="get"
               class="hero-searchbar d-flex justify-content-center mt-4">
-
             <input type="text"
                    name="searchString"
                    value="@Context.Request.Query["searchString"]"
                    class="form-control hero-search-input"
                    placeholder="Search books by title or author..." />
-
             <button type="submit" class="btn hero-btn-solid ms-2">Search</button>
         </form>
     </div>
 </section>
 
-<!-- CURVY PROMO MARQUEE -->
+<!-- PROMO MARQUEE -->
 <div class="promo-wave-marquee">
     <div class="promo-wave-track">
-
-        <!-- copy #1 -->
-        <svg xmlns="http://www.w3.org/2000/svg"
-             viewBox="0 0 1200 120"
-             preserveAspectRatio="none">
-            <path id="promoWavePath1"
-                  d="M 0 60
-                     C 200 20, 400 100, 600 60
-                     C 800 20, 1000 100, 1200 60"
-                  fill="none" stroke="none" />
-
-            <text class="promo-wave-text">
-                <textPath href="#promoWavePath1" text-anchor="start">
-                    ★ Promo: Use code BEVO10 for 10% off your entire order! ★
-                </textPath>
-            </text>
-        </svg>
-
-        <!-- copy #2 -->
-        <svg xmlns="http://www.w3.org/2000/svg"
-             viewBox="0 0 1200 120"
-             preserveAspectRatio="none">
-            <path id="promoWavePath2"
-                  d="M 0 60
-                     C 200 20, 400 100, 600 60
-                     C 800 20, 1000 100, 1200 60"
-                  fill="none" stroke="none" />
-
-            <text class="promo-wave-text">
-                <textPath href="#promoWavePath2" text-anchor="start">
-                    ★ Promo: Use code BEVO10 for 10% off your entire order! ★
-                </textPath>
-            </text>
-        </svg>
-
+        @foreach (var promo in ViewBag.Promos as List<Team24_BevosBooks.Models.Coupon>)
+        {
+            <svg xmlns="http://www.w3.org/2000/svg"
+                 viewBox="0 0 1200 120"
+                 preserveAspectRatio="none">
+                <path id="promoWavePath@promo.CouponID"
+                      d="M 0 60
+                         C 200 20, 400 100, 600 60
+                         C 800 20, 1000 100, 1200 60"
+                      fill="none" stroke="none" />
+                <text class="promo-wave-text">
+                    <textPath href="#promoWavePath@promo.CouponID" text-anchor="start">
+                        ★ Promo: Use code @promo.CouponCode —
+                        @(promo.CouponType == "PercentOff"
+                            ? $"{promo.DiscountPercent}% off your order!"
+                            : !promo.FreeThreshold.HasValue
+                                ? "Free shipping on all orders!"
+                                : $"Free shipping over ${promo.FreeThreshold}") ★
+                    </textPath>
+                </text>
+            </svg>
+        }
     </div>
 </div>
