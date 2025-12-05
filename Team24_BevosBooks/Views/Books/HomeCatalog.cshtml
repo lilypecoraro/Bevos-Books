@@ -1,5 +1,4 @@
-﻿
-@using Team24_BevosBooks.Models
+﻿@using Team24_BevosBooks.Models
 @{
     ViewData["Title"] = "Discover Books";
 
@@ -8,20 +7,35 @@
                    ?? new Dictionary<string, List<Book>>();
 }
 
-<h1 class="discover-title text-center">Discover Your Next Read</h1>
+<h1 class="discover-title text-center mb-4">Discover Your Next Read</h1>
 
 <style>
-    /* Make all book card text black (except buttons + badges) */
-    .discover-card,
-    .discover-card h5,
-    .discover-card p,
-    .discover-card .fw-bold {
-        color: #111 !important;
+    /* Card styling */
+    .discover-card {
+        background-color: #fff; /* white background */
+        border: 1px solid #ddd; /* subtle border */
+        border-radius: 6px;
+        padding: 1rem;
+        min-height: 220px;
+        color: #111 !important; /* force dark text */
     }
 
-        /* Authors slightly lighter */
+        .discover-card h5,
+        .discover-card p,
+        .discover-card .fw-bold {
+            color: #111 !important;
+        }
+
         .discover-card .text-muted {
             color: #333 !important;
+        }
+
+        .discover-card .badge {
+            margin-top: 0.25rem;
+        }
+
+        .discover-card .btn {
+            margin-top: 0.75rem;
         }
 </style>
 
@@ -63,7 +77,6 @@
     }
 </section>
 
-
 <!-- ⭐ GENRE SPOTLIGHTS -->
 @foreach (var pair in sections)
 {
@@ -71,7 +84,6 @@
     var books = pair.Value ?? new List<Book>();
 
     <section class="mb-5">
-
         <div class="d-flex justify-content-between align-items-center mb-3">
             <h3 class="discover-section-title">@genreName Spotlight</h3>
 
