@@ -33,7 +33,8 @@ namespace Team24_BevosBooks.Controllers
         {
             var users = await _userManager.Users
                 .Where(u => u.Status == AppUser.UserStatus.Employee
-                         || u.Status == AppUser.UserStatus.Admin)
+                         || u.Status == AppUser.UserStatus.Admin
+                         || u.Status == AppUser.UserStatus.Fired)   // include fired employees
                 .OrderBy(u => u.LastName)
                 .ThenBy(u => u.FirstName)
                 .ToListAsync();
@@ -209,5 +210,43 @@ namespace Team24_BevosBooks.Controllers
 
             return RedirectToAction("ManageEmployees");
         }
+
+        // ============================================================
+        // FIRE EMPLOYEE (Admin only)
+        // ============================================================
+        [Authorize(Roles = "Admin")]
+        public async Task<IActionResult> Fire(string id)
+        {
+            AppUser user = await _userManager.FindByIdAsync(id);
+            if (user == null) return NotFound();
+
+            // Mark status as Fired but keep them in the employees list
+            user.Status = AppUser.UserStatus.Fired;
+            user.LockoutEnabled = true;
+            user.LockoutEnd = DateTimeOffset.MaxValue;
+
+            await _userManager.UpdateAsync(user);
+
+            return RedirectToAction("ManageEmployees");
+        }
+
+        // ============================================================
+        // REHIRE EMPLOYEE (Admin only)
+        // ============================================================
+        [Authorize(Roles = "Admin")]
+        public async Task<IActionResult> Rehire(string id)
+        {
+            AppUser user = await _userManager.FindByIdAsync(id);
+            if (user == null) return NotFound();
+
+            // Restore status to Employee
+            user.Status = AppUser.UserStatus.Employee;
+            user.LockoutEnd = null;
+
+            await _userManager.UpdateAsync(user);
+
+            return RedirectToAction("ManageEmployees");
+        }
+
     }
 }

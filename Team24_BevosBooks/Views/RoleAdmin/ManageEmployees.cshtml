@@ -36,15 +36,15 @@
                 <td>
                     @if (isAdmin)
                     {
-                        <span>Admin</span>
+                        <span class="text-dark">Admin</span>
                     }
                     else if (isEmployee)
                     {
-                        <span>Employee</span>
+                        <span class="text-dark">Employee</span>
                     }
                 </td>
 
-                <td>@emp.Status</td>
+                <td class="text-dark">@emp.Status</td>
 
                 <td class="text-nowrap">
 
@@ -77,23 +77,23 @@
                         </a>
                     }
 
-                    <!-- NEW: FIRE / REHIRE BUTTON -->
-                    @if (emp.Status != AppUser.UserStatus.Disabled)
+                    <!-- FIRE / REHIRE BUTTON -->
+                    @if (emp.Status == AppUser.UserStatus.Fired)
                     {
-                        <a asp-action="Disable"
-                           asp-route-id="@emp.Id"
-                           class="btn btn-sm btn-danger me-2"
-                           onclick="return confirm('Fire this employee? They will be disabled and blocked from logging in.');">
-                            Fire
-                        </a>
-                    }
-                    else
-                    {
-                        <a asp-action="Enable"
+                        <a asp-action="Rehire"
                            asp-route-id="@emp.Id"
                            class="btn btn-sm btn-success me-2"
                            onclick="return confirm('Rehire this employee? They will regain access.');">
                             Rehire
+                        </a>
+                    }
+                    else if (!isCurrentUser)
+                    {
+                        <a asp-action="Fire"
+                           asp-route-id="@emp.Id"
+                           class="btn btn-sm btn-danger me-2"
+                           onclick="return confirm('Fire this employee? They will be blocked from logging in but remain in the system.');">
+                            Fire
                         </a>
                     }
                 </td>
