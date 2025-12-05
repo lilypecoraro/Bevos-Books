@@ -130,6 +130,7 @@ namespace Team24_BevosBooks.Controllers
             return View(vm);
         }
         // ========= C. Customers Report =========
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> CustomersReport(string sort = "profitDesc")
         {
             var avgCost = await GetWeightedAverageCostByBook();
@@ -146,15 +147,13 @@ namespace Team24_BevosBooks.Controllers
                     CustomerName = g.Max(x => x.Order.User.FirstName + " " + x.Order.User.LastName),
                     TotalQuantity = g.Sum(x => x.Quantity),
                     Revenue = g.Sum(x => x.Price * x.Quantity),
-                    Cost = g.Sum(x => (avgCost.ContainsKey(x.BookID) ? avgCost[x.BookID] : 0m) * x.Quantity)
+                    Cost = g.Sum(x => (avgCost.ContainsKey(x.BookID) ? avgCost[x.BookID] : 0m) * x.Quantity),
+                    Profit = g.Sum(x => x.Price * x.Quantity) -
+                             g.Sum(x => (avgCost.ContainsKey(x.BookID) ? avgCost[x.BookID] : 0m) * x.Quantity)
                 })
                 .ToList();
 
-            foreach (var row in grouped)
-            {
-                row.Profit = row.Revenue - row.Cost;
-            }
-
+            // Step 3: apply sorting
             grouped = sort switch
             {
                 "profitAsc" => grouped.OrderBy(r => r.Profit).ToList(),
@@ -167,10 +166,13 @@ namespace Team24_BevosBooks.Controllers
             var vm = new CustomersReportVM
             {
                 Rows = grouped,
-                RecordCount = grouped.Count()
+                RecordCount = grouped.Count(),
+                CurrentSort = sort
             };
+
             return View(vm);
         }
+
 
         // ========= D. Totals =========
         public async Task<IActionResult> Totals()
