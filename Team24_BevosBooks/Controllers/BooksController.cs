@@ -61,6 +61,21 @@ namespace Team24_BevosBooks.Controllers
                 "oldest" => query.OrderBy(b => b.PublishDate),
                 "priceAsc" => query.OrderBy(b => b.Price),
                 "priceDesc" => query.OrderByDescending(b => b.Price),
+
+                // ⭐ Highest rated (average of approved reviews)
+                "rating" => query.OrderByDescending(b =>
+                    b.Reviews.Any(r => r.DisputeStatus == "Approved")
+                        ? b.Reviews.Where(r => r.DisputeStatus == "Approved").Average(r => r.Rating)
+                        : 0
+                ),
+
+                // ⭐ Popularity (total completed order quantities)
+                "popularity" => query.OrderByDescending(b =>
+                    _context.OrderDetails
+                        .Where(od => od.BookID == b.BookID && od.Order.OrderStatus == "Completed")
+                        .Sum(od => (int?)od.Quantity) ?? 0
+                ),
+
                 _ => query.OrderBy(b => b.Title),
             };
 
