@@ -485,7 +485,9 @@ namespace Team24_BevosBooks.Controllers
 
             var orders = await _context.Orders
                 .Include(o => o.OrderDetails)
-                    .ThenInclude(od => od.Card)
+                    .ThenInclude(od => od.Book)   // <-- load Book
+                .Include(o => o.OrderDetails)
+                    .ThenInclude(od => od.Card)   // <-- load Card
                 .Where(o => o.UserID == user.Id &&
                             o.OrderStatus == "Completed")
                 .OrderByDescending(o => o.OrderDate)
