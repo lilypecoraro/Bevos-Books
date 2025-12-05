@@ -8,7 +8,8 @@ using Team24_BevosBooks.Models.ViewModels;
 
 namespace Team24_BevosBooks.Controllers
 {
-    [Authorize(Roles = "Admin")]
+    // Allow authenticated users; restrict actions individually
+    [Authorize]
     public class RoleAdminController : Controller
     {
         private readonly UserManager<AppUser> _userManager;
@@ -25,11 +26,11 @@ namespace Team24_BevosBooks.Controllers
         }
 
         // ============================================================
-        // MANAGE EMPLOYEES / ADMINS
+        // MANAGE EMPLOYEES / ADMINS (Admin only)
         // ============================================================
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> ManageEmployees()
         {
-            // Load users who are Employees OR Admins
             var users = await _userManager.Users
                 .Where(u => u.Status == AppUser.UserStatus.Employee
                          || u.Status == AppUser.UserStatus.Admin)
@@ -37,7 +38,6 @@ namespace Team24_BevosBooks.Controllers
                 .ThenBy(u => u.FirstName)
                 .ToListAsync();
 
-            // Load roles for each user (so the view can show them correctly)
             foreach (var user in users)
             {
                 user.RoleNames = await _userManager.GetRolesAsync(user);
@@ -47,14 +47,16 @@ namespace Team24_BevosBooks.Controllers
         }
 
         // ============================================================
-        // CREATE EMPLOYEE
+        // CREATE EMPLOYEE (Admin only)
         // ============================================================
+        [Authorize(Roles = "Admin")]
         public IActionResult CreateEmployee()
         {
             return View();
         }
 
         [HttpPost]
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> CreateEmployee(RegisterViewModel rvm)
         {
             if (!ModelState.IsValid) return View(rvm);
@@ -66,13 +68,10 @@ namespace Team24_BevosBooks.Controllers
                 FirstName = rvm.FirstName,
                 LastName = rvm.LastName,
                 PhoneNumber = rvm.PhoneNumber,
-
-                // Admin can create employees WITHOUT full address
                 Address = "",
                 City = "",
                 State = "",
                 ZipCode = "",
-
                 Status = AppUser.UserStatus.Employee
             };
 
@@ -91,8 +90,9 @@ namespace Team24_BevosBooks.Controllers
         }
 
         // ============================================================
-        // EDIT EMPLOYEE
+        // EDIT EMPLOYEE (Admin only)
         // ============================================================
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> EditEmployee(string id)
         {
             AppUser employee = await _userManager.FindByIdAsync(id);
@@ -102,6 +102,7 @@ namespace Team24_BevosBooks.Controllers
         }
 
         [HttpPost]
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> EditEmployee(AppUser edited)
         {
             var employee = await _userManager.FindByIdAsync(edited.Id);
@@ -117,8 +118,9 @@ namespace Team24_BevosBooks.Controllers
         }
 
         // ============================================================
-        // MANAGE CUSTOMERS (disable/enable)
+        // MANAGE CUSTOMERS (Admin + Employee)
         // ============================================================
+        [Authorize(Roles = "Admin,Employee")]
         public async Task<IActionResult> ManageCustomers()
         {
             var customers = await _userManager.GetUsersInRoleAsync("Customer");
@@ -126,6 +128,7 @@ namespace Team24_BevosBooks.Controllers
             return View(sorted);
         }
 
+        [Authorize(Roles = "Admin,Employee")]
         public async Task<IActionResult> Disable(string id)
         {
             AppUser user = await _userManager.FindByIdAsync(id);
@@ -139,6 +142,7 @@ namespace Team24_BevosBooks.Controllers
             return RedirectToAction("ManageCustomers");
         }
 
+        [Authorize(Roles = "Admin,Employee")]
         public async Task<IActionResult> Enable(string id)
         {
             AppUser user = await _userManager.FindByIdAsync(id);
@@ -152,14 +156,14 @@ namespace Team24_BevosBooks.Controllers
         }
 
         // ============================================================
-        // PROMOTE TO ADMIN
+        // PROMOTE TO ADMIN (Admin only)
         // ============================================================
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> Promote(string id)
         {
             AppUser user = await _userManager.FindByIdAsync(id);
             if (user == null) return NotFound();
 
-            // Remove Employee role if they have it
             if (await _userManager.IsInRoleAsync(user, "Employee"))
                 await _userManager.RemoveFromRoleAsync(user, "Employee");
 
@@ -172,14 +176,14 @@ namespace Team24_BevosBooks.Controllers
         }
 
         // ============================================================
-        // DEMOTE FROM ADMIN
+        // DEMOTE FROM ADMIN (Admin only)
         // ============================================================
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> Demote(string id)
         {
             AppUser user = await _userManager.FindByIdAsync(id);
             if (user == null) return NotFound();
 
-            // Prevent removing the ONLY admin
             var admins = await _userManager.GetUsersInRoleAsync("Admin");
             if (admins.Count == 1 && admins.First().Id == id)
             {
@@ -187,13 +191,11 @@ namespace Team24_BevosBooks.Controllers
                 return RedirectToAction("ManageEmployees");
             }
 
-            // Remove admin role
             if (await _userManager.IsInRoleAsync(user, "Admin"))
             {
                 await _userManager.RemoveFromRoleAsync(user, "Admin");
             }
 
-            // Add employee role
             await _userManager.AddToRoleAsync(user, "Employee");
 
             user.Status = AppUser.UserStatus.Employee;
