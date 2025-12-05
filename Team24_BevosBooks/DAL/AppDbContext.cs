@@ -32,6 +32,16 @@ namespace Team24_BevosBooks.DAL
                 .WithMany()
                 .HasForeignKey(od => od.BookID)
                 .OnDelete(DeleteBehavior.Restrict); // or DeleteBehavior.NoAction
+
+            modelBuilder.Entity<ShippingSetting>().HasData(
+                new ShippingSetting
+                {
+                    SettingID = 1,
+                    FirstBookRate = 3.50m,
+                    AdditionalBookRate = 1.50m
+                }
+            );
+
         }
 
 
@@ -44,6 +54,8 @@ namespace Team24_BevosBooks.DAL
         public DbSet<OrderDetail> OrderDetails { get; set; }
         public DbSet<Reorder> Reorders { get; set; }
         public DbSet<Review> Reviews { get; set; }
+        public DbSet<ShippingSetting> ShippingSettings { get; set; }
+
 
     }
 }

@@ -83,14 +83,14 @@ else
         </tbody>
     </table>
 
-    <div class="row text-dark bg-white p-3">
+    <div class="row bg-white p-3">
         <div class="col-md-6">
             <a asp-controller="Books" asp-action="Index" class="btn btn-secondary">Continue Shopping</a>
         </div>
         <div class="col-md-6 text-end">
-            <p><strong>Subtotal:</strong> @subtotal.ToString("c")</p>
-            <p><strong>Shipping:</strong> @shipping.ToString("c")</p>
-            <p class="fs-5"><strong>Total:</strong> @total.ToString("c")</p>
+            <p class="subtotal-text"><strong>Subtotal:</strong> @subtotal.ToString("c")</p>
+            <p class="shipping-text"><strong>Shipping:</strong> @shipping.ToString("c")</p>
+            <p class="total-text fs-5"><strong>Total:</strong> @total.ToString("c")</p>
 
             <a asp-action="Checkout" class="@checkoutClass">
                 Proceed to Checkout
@@ -122,5 +122,16 @@ else
                 color: #000 !important;
                 border-color: #000 !important;
             }
+
+        /* Totals styling - force dark text */
+        .subtotal-text,
+        .shipping-text,
+        .total-text {
+            color: #000 !important; /* force black text */
+        }
+
+        .total-text {
+            font-weight: 700;
+        }
     </style>
 }
