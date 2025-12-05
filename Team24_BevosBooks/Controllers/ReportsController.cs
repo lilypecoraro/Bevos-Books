@@ -223,19 +223,27 @@ namespace Team24_BevosBooks.Controllers
             {
                 Rows = rows,
                 TotalInventoryValue = rows.Sum(r => r.AverageCost * r.InventoryQuantity),
-                RecordCount = rows.Count()
+                RecordCount = rows.Count(),
+                CurrentSort = sort
             };
+
             return View(vm);
         }
+
 
         // ========= F. Reviews Report =========
         public async Task<IActionResult> ReviewsReport(string sort = "empAsc")
         {
             var rows = await _context.Reviews
+                .Where(r => !string.IsNullOrEmpty(r.ApproverID)) // filter out null/empty IDs
                 .GroupBy(r => r.ApproverID)
                 .Select(g => new ReviewsRowVM
                 {
                     EmployeeId = g.Key,
+                    EmployeeName = _context.Users
+                        .Where(u => u.Id == g.Key)
+                        .Select(u => u.FirstName + " " + u.LastName)
+                        .FirstOrDefault() ?? "Unknown",
                     ApprovedCount = g.Count(x => x.DisputeStatus == "Approved"),
                     RejectedCount = g.Count(x => x.DisputeStatus == "Rejected")
                 })
@@ -243,7 +251,6 @@ namespace Team24_BevosBooks.Controllers
 
             rows = sort switch
             {
-                "empAsc" => rows.OrderBy(r => r.EmployeeId).ToList(),
                 "approvedAsc" => rows.OrderBy(r => r.ApprovedCount).ToList(),
                 "approvedDesc" => rows.OrderByDescending(r => r.ApprovedCount).ToList(),
                 "rejectedAsc" => rows.OrderBy(r => r.RejectedCount).ToList(),
@@ -254,9 +261,12 @@ namespace Team24_BevosBooks.Controllers
             var vm = new ReviewsReportVM
             {
                 Rows = rows,
-                RecordCount = rows.Count()
+                RecordCount = rows.Count(),
+                CurrentSort = sort
             };
+
             return View(vm);
         }
-}
+
+    }
 }

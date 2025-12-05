@@ -1,16 +1,18 @@
 ﻿@model Team24_BevosBooks.ViewModels.ReviewsReportVM
+
 @{
     ViewData["Title"] = "Approved/Rejected Reviews";
 }
+
 <h2>Approved/Rejected Reviews</h2>
 
 <form method="get" class="mb-3 d-flex gap-2">
     <select class="form-select" name="sort">
-        <option value="empAsc">EmpID ↑</option>
-        <option value="approvedAsc">Approved ↑</option>
-        <option value="approvedDesc">Approved ↓</option>
-        <option value="rejectedAsc">Rejected ↑</option>
-        <option value="rejectedDesc">Rejected ↓</option>
+        <option value="empAsc" selected="@(Model.CurrentSort == "empAsc")">EmpID ↑</option>
+        <option value="approvedAsc" selected="@(Model.CurrentSort == "approvedAsc")">Approved ↑</option>
+        <option value="approvedDesc" selected="@(Model.CurrentSort == "approvedDesc")">Approved ↓</option>
+        <option value="rejectedAsc" selected="@(Model.CurrentSort == "rejectedAsc")">Rejected ↑</option>
+        <option value="rejectedDesc" selected="@(Model.CurrentSort == "rejectedDesc")">Rejected ↓</option>
     </select>
     <button class="btn btn-primary" type="submit">Apply</button>
 </form>
@@ -21,6 +23,7 @@
     <thead>
         <tr>
             <th>Employee ID</th>
+            <th>Employee Name</th>
             <th>Approved</th>
             <th>Rejected</th>
         </tr>
@@ -30,6 +33,7 @@
         {
             <tr>
                 <td>@r.EmployeeId</td>
+                <td>@r.EmployeeName</td>
                 <td>@r.ApprovedCount</td>
                 <td>@r.RejectedCount</td>
             </tr>

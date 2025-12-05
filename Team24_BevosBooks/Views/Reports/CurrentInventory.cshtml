@@ -1,16 +1,18 @@
 ﻿@model Team24_BevosBooks.ViewModels.InventoryReportVM
+
 @{
     ViewData["Title"] = "Current Inventory";
 }
+
 <h2>Current Inventory</h2>
 
 <form method="get" class="mb-3 d-flex gap-2">
     <select class="form-select" name="sort">
-        <option value="title">Title</option>
-        <option value="qtyAsc">Qty ↑</option>
-        <option value="qtyDesc">Qty ↓</option>
-        <option value="costAsc">Avg Cost ↑</option>
-        <option value="costDesc">Avg Cost ↓</option>
+        <option value="title" selected="@(Model.CurrentSort == "title")">Title</option>
+        <option value="qtyAsc" selected="@(Model.CurrentSort == "qtyAsc")">Qty ↑</option>
+        <option value="qtyDesc" selected="@(Model.CurrentSort == "qtyDesc")">Qty ↓</option>
+        <option value="costAsc" selected="@(Model.CurrentSort == "costAsc")">Avg Cost ↑</option>
+        <option value="costDesc" selected="@(Model.CurrentSort == "costDesc")">Avg Cost ↓</option>
     </select>
     <button class="btn btn-primary" type="submit">Apply</button>
 </form>
