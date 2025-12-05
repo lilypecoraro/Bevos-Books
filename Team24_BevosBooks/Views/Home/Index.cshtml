@@ -6,19 +6,19 @@
 }
 
 <style>
-    /* Force logo to stay small */
+    /* ============================================================
+       HERO FIXES
+    ============================================================ */
+
     .hero-logo {
         width: 130px !important;
         max-width: 130px !important;
         height: auto !important;
         object-fit: contain !important;
-        flex: 0 0 auto !important;
         display: block !important;
-        margin: 0 auto 1.5rem auto !important;
-        z-index: 10 !important;
+        margin: 0 auto 1.5rem !important;
     }
 
-    /* Make sure the background element does NOT affect layout */
     .hero-bg {
         position: absolute !important;
         inset: 0;
@@ -28,12 +28,11 @@
         pointer-events: none;
     }
 
-    /* Ensure hero content is above background */
     .hero-content {
         position: relative;
         z-index: 5;
     }
-    /* Fix hero stacking so navbar stays above */
+
     .hero-container {
         position: relative !important;
         z-index: 0 !important;
@@ -43,6 +42,53 @@
     .hero-logo,
     .hero-bg {
         z-index: 0 !important;
+    }
+
+    /* ============================================================
+   COMPACT WAVY PROMO BAR (NOT FULL WIDTH)
+=========================================================== */
+
+    .promo-wave-marquee {
+        position: relative !important;
+        width: 100%;
+        overflow: hidden;
+        padding: 1.25rem 0 !important;
+        z-index: 999999 !important;
+        display: flex;
+        justify-content: center; /* centers the wave */
+        pointer-events: none;
+        background: transparent !important;
+    }
+
+    /* two svg copies stacked horizontally */
+    .promo-wave-track {
+        display: flex;
+        width: calc(900px * 2); /* very compact — only 900px wide */
+        animation: promoWaveScroll 20s linear infinite;
+    }
+
+    /* compact svg */
+    .promo-wave-marquee svg {
+        width: 900px !important; /* compact width */
+        height: 80px !important; /* smaller height */
+        flex-shrink: 0;
+    }
+
+    .promo-wave-text {
+        fill: #f5b338 !important;
+        font-size: 1.6rem !important;
+        font-weight: 600 !important;
+    }
+
+    /* smooth loop, moves ONLY 900px instead of full screen */
+    @@keyframes promoWaveScroll {
+        0% {
+            transform: translateX(0);
+        }
+
+        100% {
+            transform: translateX(-900px);
+        }
     }
 </style>
 
@@ -77,10 +123,10 @@
     </div>
 </section>
 
-<!-- CURVY PROMO MESSAGE (STATIC, VISIBLE) -->
-<!-- CURVY PROMO MARQUEE (CSS-ANIMATED, RELIABLE) -->
+<!-- CURVY PROMO MARQUEE -->
 <div class="promo-wave-marquee">
     <div class="promo-wave-track">
+
         <!-- copy #1 -->
         <svg xmlns="http://www.w3.org/2000/svg"
              viewBox="0 0 1200 120"
@@ -98,7 +144,7 @@
             </text>
         </svg>
 
-        <!-- copy #2 (immediately follows for seamless loop) -->
+        <!-- copy #2 -->
         <svg xmlns="http://www.w3.org/2000/svg"
              viewBox="0 0 1200 120"
              preserveAspectRatio="none">
@@ -114,5 +160,6 @@
                 </textPath>
             </text>
         </svg>
+
     </div>
 </div>
