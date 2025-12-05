@@ -21,5 +21,6 @@ namespace Team24_BevosBooks.ViewModels
         public ReportFilterVM Filter { get; set; } = new ReportFilterVM();
         public List<BookSaleRowVM> Rows { get; set; } = new List<BookSaleRowVM>();
         public int RecordCount { get; set; }
+        public string CurrentSort { get; set; } = "recent";
     }
 }

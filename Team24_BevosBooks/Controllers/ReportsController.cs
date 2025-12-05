@@ -62,7 +62,7 @@ namespace Team24_BevosBooks.Controllers
                 CustomerName = od.Order.User.FirstName + " " + od.Order.User.LastName,
                 SellingPrice = od.Price,
                 AverageCost = avgCost.ContainsKey(od.BookID) ? avgCost[od.BookID] : 0m,
-                ProfitMargin = od.Price - (avgCost.ContainsKey(od.BookID) ? avgCost[od.BookID] : 0m),
+                ProfitMargin = (od.Price * od.Quantity) - ((avgCost.ContainsKey(od.BookID) ? avgCost[od.BookID] : 0m) * od.Quantity),
                 OrderDate = od.Order.OrderDate
             }).ToListAsync();
 
@@ -79,8 +79,10 @@ namespace Team24_BevosBooks.Controllers
             var vm = new BooksSoldReportVM
             {
                 Rows = items,
-                RecordCount = items.Count()
+                RecordCount = items.Count(),
+                CurrentSort = sort
             };
+
             return View(vm);
         }
 
