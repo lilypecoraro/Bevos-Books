@@ -253,12 +253,63 @@ namespace Team24_BevosBooks.Controllers
         // ==============================================
         // CHECKOUT (GET + POST)
         // ==============================================
-        // ... (unchanged checkout logic) ...
+        public async Task<IActionResult> Checkout()
+        {
+            var user = await _userManager.GetUserAsync(User);
+            if (user == null) return RedirectToAction("Login", "Account");
+
+            var cart = await GetOrCreateCart(user.Id);
+
+            if (!cart.OrderDetails.Any())
+            {
+                TempData["CartMessage"] = "Your cart is empty.";
+                return RedirectToAction("Cart");
+            }
+
+            // Mark order as completed
+            cart.OrderStatus = "Completed";
+            cart.OrderDate = DateTime.Now;
+
+            var totals = ComputeCartTotals(cart);
+            cart.ShippingFee = totals.shipping;
+
+            await _context.SaveChangesAsync();
+
+            return RedirectToAction("OrderConfirmation", new { id = cart.OrderID });
+        }
 
         // ==============================================
         // ORDER CONFIRMATION + RECOMMENDATIONS
         // ==============================================
-        // ... (unchanged confirmation logic) ...
+        public async Task<IActionResult> OrderConfirmation(int id)
+        {
+            var user = await _userManager.GetUserAsync(User);
+            if (user == null) return RedirectToAction("Login", "Account");
+
+            var order = await _context.Orders
+                .Include(o => o.OrderDetails)
+                    .ThenInclude(od => od.Book)
+                .Include(o => o.OrderDetails)
+                    .ThenInclude(od => od.Card)
+                .FirstOrDefaultAsync(o => o.OrderID == id && o.UserID == user.Id);
+
+            if (order == null)
+            {
+                return NotFound();
+            }
+
+            // Example recommendations logic: pick 3 random active books
+            var recs = await _context.Books
+                .Where(b => b.BookStatus == "Active")
+                .OrderBy(r => Guid.NewGuid())
+                .Take(3)
+                .ToListAsync();
+
+            ViewBag.Recommendations = recs;
+
+            return View(order); // Renders Views/Orders/OrderConfirmation.cshtml
+        }
+
 
         // ==============================================
         // ORDER HISTORY

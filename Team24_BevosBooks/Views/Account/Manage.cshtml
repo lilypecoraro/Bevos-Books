@@ -1,15 +1,18 @@
 ﻿@model Team24_BevosBooks.Models.AppUser
+
 @{
     ViewData["Title"] = "Manage Account";
     var alertClass = (string)(TempData["AlertClass"] ?? "info");
     var message = (string)TempData["Message"];
 }
 
-<h2 class="mt-4 mb-3">Manage Your Profile</h2>
+<h2 class="mt-4 mb-3 text-white">Manage Your Profile</h2>
 
 @if (!string.IsNullOrEmpty(message))
 {
-    <div class="alert alert-@alertClass" role="alert">@message</div>
+    <div class="alert alert-@alertClass text-white bg-dark" role="alert">
+        @message
+    </div>
 }
 
 <form asp-action="Manage" method="post">
