@@ -524,21 +524,62 @@ namespace Team24_BevosBooks.Controllers
             if (order == null)
                 return NotFound();
 
-            // Recommendation logic
+            // Pick one book from the order to base recommendations on
             var firstDetailWithBook = order.OrderDetails.FirstOrDefault(od => od.Book != null);
-
             List<Book> recs = new List<Book>();
 
             if (firstDetailWithBook != null)
             {
-                var firstBook = firstDetailWithBook.Book;
+                var purchasedBook = firstDetailWithBook.Book;
+                var purchasedGenreId = purchasedBook.GenreID;
+                var purchasedAuthor = purchasedBook.Authors;
 
-                recs = await _context.Books
-                    .Where(b => b.GenreID == firstBook.GenreID &&
-                                b.BookStatus == "Active" &&
-                                !order.OrderDetails.Select(od => od.BookID).Contains(b.BookID))
-                    .Take(3)
+                // Exclude books already purchased by this customer
+                var purchasedBookIds = await _context.OrderDetails
+                    .Include(od => od.Order)
+                    .Where(od => od.Order.UserID == user.Id && od.Order.OrderStatus == "Completed")
+                    .Select(od => od.BookID)
+                    .Distinct()
                     .ToListAsync();
+
+                // 1. Try to recommend another book by the same author in the same genre
+                var authorSameGenreBook = await _context.Books
+                    .Where(b => b.Authors == purchasedAuthor &&
+                                b.GenreID == purchasedGenreId &&
+                                b.BookStatus == "Active" &&
+                                !purchasedBookIds.Contains(b.BookID))
+                    .OrderByDescending(b => b.Reviews.Any() ? b.Reviews.Average(r => r.Rating) : 0)
+                    .FirstOrDefaultAsync();
+
+                if (authorSameGenreBook != null)
+                {
+                    recs.Add(authorSameGenreBook);
+                }
+
+                // 2. Fill remaining slots with highly-rated books in the same genre (different authors)
+                var genreBooks = await _context.Books
+                    .Where(b => b.GenreID == purchasedGenreId &&
+                                b.BookStatus == "Active" &&
+                                !purchasedBookIds.Contains(b.BookID) &&
+                                b.Authors != purchasedAuthor)
+                    .OrderByDescending(b => b.Reviews.Any() ? b.Reviews.Average(r => r.Rating) : 0)
+                    .Take(2)
+                    .ToListAsync();
+
+                recs.AddRange(genreBooks);
+
+                // 3. If we still don’t have 3 recs, fill with top-rated books overall
+                if (recs.Count < 3)
+                {
+                    var fallbackBooks = await _context.Books
+                        .Where(b => b.BookStatus == "Active" &&
+                                    !purchasedBookIds.Contains(b.BookID))
+                        .OrderByDescending(b => b.Reviews.Any() ? b.Reviews.Average(r => r.Rating) : 0)
+                        .Take(3 - recs.Count)
+                        .ToListAsync();
+
+                    recs.AddRange(fallbackBooks);
+                }
             }
 
             ViewBag.Recommendations = recs;
@@ -555,6 +596,8 @@ namespace Team24_BevosBooks.Controllers
             var user = await _userManager.GetUserAsync(User);
 
             var orders = await _context.Orders
+                .Include(o => o.OrderDetails)
+                    .ThenInclude(od => od.Book)   // <-- add this line
                 .Include(o => o.OrderDetails)
                     .ThenInclude(od => od.Card)
                 .Where(o => o.UserID == user.Id &&

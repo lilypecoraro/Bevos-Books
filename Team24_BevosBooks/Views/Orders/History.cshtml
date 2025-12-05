@@ -4,25 +4,16 @@
     ViewData["Title"] = "Order History";
 }
 
-<style>
-    /* Force black font on actual list items */
-    .books-column li,
-    .quantity-column li {
-        color: black !important;
-    }
-</style>
-
-
-<h2 class="mt-3 mb-4">Your Order History</h2>
+<h2 class="mt-3 mb-4 text-dark">Your Order History</h2>
 
 @if (!Model.Any())
 {
-    <div class="alert alert-info">You have not placed any orders yet.</div>
+    <div class="alert alert-info text-dark">You have not placed any orders yet.</div>
     <a asp-controller="Books" asp-action="Index" class="btn btn-primary">Browse Books</a>
     return;
 }
 
-<table class="table table-bordered table-striped">
+<table class="table table-bordered table-striped bg-white text-dark">
     <thead class="table-dark">
         <tr>
             <th>Order Number</th>
@@ -43,31 +34,27 @@
 
             var cardNumber = order.OrderDetails.FirstOrDefault(od => od.Card != null)?.Card.CardNumber;
             string maskedCard = !string.IsNullOrWhiteSpace(cardNumber) && cardNumber.Length >= 4
-            ? $"**** **** **** {cardNumber[^4..]}"
-            : "(n/a)";
+                ? $"**** **** **** {cardNumber[^4..]}"
+                : "(n/a)";
 
-            <tr>
+            <tr class="text-dark bg-white">
                 <td>@order.OrderID</td>
                 <td>@order.OrderDate.ToShortDateString()</td>
 
-                <!-- BOOK TITLES → styled via CSS block -->
-                <td class="books-column">
-                    <ul class="mb-0 ps-3">
-                        @foreach (var od in order.OrderDetails)
-                        {
-                            <li>@od.Book?.Title</li>
-                        }
-                    </ul>
+                <!-- BOOK TITLES -->
+                <td class="books-column text-dark bg-white">
+                    @foreach (var od in order.OrderDetails)
+                    {
+                        <div class="text-dark">@od.Book?.Title</div>
+                    }
                 </td>
 
-                <!-- QUANTITIES → styled via CSS block -->
-                <td class="quantity-column">
-                    <ul class="mb-0 ps-3">
-                        @foreach (var od in order.OrderDetails)
-                        {
-                            <li>@od.Quantity</li>
-                        }
-                    </ul>
+                <!-- QUANTITIES -->
+                <td class="quantity-column text-dark bg-white">
+                    @foreach (var od in order.OrderDetails)
+                    {
+                        <div class="text-dark">@od.Quantity</div>
+                    }
                 </td>
 
                 <td>@order.ShippingFee.ToString("c")</td>

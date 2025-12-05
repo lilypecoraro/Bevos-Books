@@ -1,116 +1,75 @@
 ﻿@model Team24_BevosBooks.Models.Order
+@using Team24_BevosBooks.Models
 
 @{
     ViewData["Title"] = "Order Confirmation";
+    var recs = ViewBag.Recommendations as List<Book>;
 }
 
-<h2 class="mt-3 mb-4 confirm-title">Thank you! Your order has been placed.</h2>
+<div class="container mt-4">
+    <div class="row">
+        <div class="col-md-8">
+            <h2 class="text-dark">Order Confirmation</h2>
+            <p class="lead text-dark">Thank you for your purchase, @User.Identity.Name!</p>
 
-<div class="order-confirm-page">
+            <div class="card mb-4">
+                <div class="card-header bg-light text-dark">
+                    <strong>Order #@Model.OrderID</strong> — placed on @Model.OrderDate.ToString("g")
+                </div>
+                <div class="card-body bg-white text-dark">
+                    <h5 class="card-title text-dark">Items</h5>
+                    <ul class="list-group list-group-flush">
+                        @foreach (var od in Model.OrderDetails)
+                        {
+                            <li class="list-group-item d-flex justify-content-between align-items-center text-dark bg-white">
+                                <span class="text-dark">
+                                    <a asp-controller="Books" asp-action="Details" asp-route-id="@od.BookID" class="text-dark">
+                                        @od.Book.Title
+                                    </a>
+                                    — @od.Quantity × @od.Price.ToString("c")
+                                </span>
+                                <span class="badge bg-light text-dark">@((od.Price * od.Quantity).ToString("c"))</span>
+                            </li>
+                        }
+                    </ul>
 
-    <div class="card mb-4">
-        <div class="card-header">
-            <h5>Order Summary</h5>
-        </div>
-        <div class="card-body">
-
-            <p><strong>Order Number:</strong> @Model.OrderID</p>
-            <p><strong>Order Date:</strong> @Model.OrderDate.ToShortDateString()</p>
-
-            <table class="table table-bordered mt-3">
-                <thead class="table-light">
-                    <tr>
-                        <th>Book</th>
-                        <th>Price</th>
-                        <th>Qty</th>
-                        <th>Subtotal</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    @foreach (var detail in Model.OrderDetails)
-                    {
-                        <tr>
-                            <td>@detail.Book.Title</td>
-                            <td>@detail.Price.ToString("c")</td>
-                            <td>@detail.Quantity</td>
-                            <td>@((detail.Price * detail.Quantity).ToString("c"))</td>
-                        </tr>
-                    }
-                </tbody>
-            </table>
-
-            <hr />
-
-            @{
-                decimal subtotal = Model.OrderDetails.Sum(od => od.Quantity * od.Price);
-                decimal total = subtotal + Model.ShippingFee;
-            }
-
-            <p><strong>Shipping:</strong> @Model.ShippingFee.ToString("c")</p>
-            <p><strong>Subtotal:</strong> @subtotal.ToString("c")</p>
-            <p class="fs-4"><strong>Total:</strong> @total.ToString("c")</p>
-
-        </div>
-    </div>
-
-    <!-- Recommendations -->
-    @if (ViewBag.Recommendations != null)
-    {
-        <h3 class="recommendations-title">You may also like:</h3>
-        <div class="row">
-            @foreach (var book in (List<Team24_BevosBooks.Models.Book>)ViewBag.Recommendations)
-            {
-                <div class="col-md-4 mb-3">
-                    <div class="card h-100">
-                        <div class="card-body">
-                            <h5>@book.Title</h5>
-                            <p>@book.Authors</p>
-                            <p class="text-muted">@book.Price.ToString("c")</p>
-                            <a asp-controller="Books" asp-action="Details" asp-route-id="@book.BookID"
-                               class="btn btn-primary btn-sm">View Book</a>
-                        </div>
+                    <div class="mt-3 text-dark" style="color:black;">
+                        <p><strong>Subtotal:</strong> <span style="color:black;">@(Model.OrderDetails.Sum(od => od.Price * od.Quantity).ToString("c"))</span></p>
+                        <p><strong>Shipping:</strong> <span style="color:black;">@Model.ShippingFee.ToString("c")</span></p>
+                        <p><strong>Total:</strong> <span style="color:black;">@((Model.OrderDetails.Sum(od => od.Price * od.Quantity) + Model.ShippingFee).ToString("c"))</span></p>
                     </div>
+                </div>
+            </div>
+
+            <a asp-controller="Orders" asp-action="History" class="btn btn-outline-primary">View Order History</a>
+            <a asp-controller="Books" asp-action="HomeCatalog" class="btn btn-primary">Continue Shopping</a>
+        </div>
+
+        <div class="col-md-4">
+            @if (recs != null && recs.Any())
+            {
+                <h4 class="text-dark">You may also like:</h4>
+                <div class="list-group">
+                    @foreach (var book in recs)
+                    {
+                        <a asp-controller="Books" asp-action="Details" asp-route-id="@book.BookID" class="list-group-item list-group-item-action text-dark bg-white">
+                            <div class="d-flex w-100 justify-content-between">
+                                <h5 class="mb-1 text-dark">@book.Title</h5>
+                                <small class="text-dark">by @book.Authors</small>
+                            </div>
+                            @if (book.Reviews.Any())
+                            {
+                                var avgRating = book.Reviews.Average(r => (double?)r.Rating) ?? 0.0;
+                                <small class="text-dark">Rating: @($"{avgRating:0.0}") / 5</small>
+                            }
+                            else
+                            {
+                                <small class="text-dark">No ratings yet</small>
+                            }
+                        </a>
+                    }
                 </div>
             }
         </div>
-    }
-
-    <a asp-controller="Orders" asp-action="History" class="btn btn-outline-secondary mt-3">View Order History</a>
-
+    </div>
 </div>
-
-@section Styles {
-    <style>
-        /* Scope all overrides to this page wrapper */
-        .order-confirm-page,
-        .order-confirm-page h3,
-        .order-confirm-page h5,
-        .order-confirm-page p,
-        .order-confirm-page strong,
-        .order-confirm-page table,
-        .order-confirm-page th,
-        .order-confirm-page td {
-            color: #000 !important;
-        }
-
-            .order-confirm-page .card,
-            .order-confirm-page .card-header,
-            .order-confirm-page .card-body {
-                background-color: #ffffff !important;
-            }
-
-            .order-confirm-page .table {
-                background-color: #ffffff !important;
-            }
-
-        /* Keep the main success title white */
-        .confirm-title {
-            color: #ffffff !important;
-        }
-
-        /* Make recommendations title white on dark background */
-        .order-confirm-page .recommendations-title {
-            color: #ffffff !important;
-        }
-    </style>
-}
