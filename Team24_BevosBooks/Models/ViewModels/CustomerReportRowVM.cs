@@ -10,6 +10,7 @@ namespace Team24_BevosBooks.ViewModels
         public decimal Revenue { get; set; }
         public decimal Cost { get; set; }
         public decimal Profit { get; set; }
+        public decimal Margin { get; set; }
     }
 
     public class CustomersReportVM
@@ -20,5 +21,7 @@ namespace Team24_BevosBooks.ViewModels
 
         // NEW: Track current sort option
         public string CurrentSort { get; set; } = "profitDesc";
+       
+
     }
 }

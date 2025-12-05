@@ -6,5 +6,7 @@
         public decimal TotalCost { get; set; }
         public decimal TotalProfit { get; set; }
         public int RecordCount { get; set; }
+        public decimal TotalMargin { get; set; }
+
     }
 }

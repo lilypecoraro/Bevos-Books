@@ -2,6 +2,10 @@
 
 @{
     ViewData["Title"] = "Customers Report";
+    var totalRevenue = Model.Rows.Sum(r => r.Revenue);
+    var totalCost = Model.Rows.Sum(r => r.Cost);
+    var totalProfit = Model.Rows.Sum(r => r.Profit);
+    var totalMargin = totalRevenue > 0 ? totalProfit / totalRevenue : 0m;
 }
 
 <h2>Customers Report</h2>
@@ -30,6 +34,7 @@
             <th>Revenue</th>
             <th>Cost</th>
             <th>Profit</th>
+            <th>Margin</th>
         </tr>
     </thead>
     <tbody>
@@ -41,7 +46,17 @@
                 <td>@r.Revenue.ToString("c")</td>
                 <td>@r.Cost.ToString("c")</td>
                 <td>@r.Profit.ToString("c")</td>
+                <td>@($"{r.Margin:P2}")</td>
             </tr>
         }
     </tbody>
+    <tfoot>
+        <tr class="table-secondary fw-bold">
+            <td colspan="2">Totals</td>
+            <td>@totalRevenue.ToString("c")</td>
+            <td>@totalCost.ToString("c")</td>
+            <td>@totalProfit.ToString("c")</td>
+            <td>@($"{totalMargin:P2}")</td>
+        </tr>
+    </tfoot>
 </table>

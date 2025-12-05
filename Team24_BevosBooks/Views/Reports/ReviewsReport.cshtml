@@ -2,6 +2,8 @@
 
 @{
     ViewData["Title"] = "Approved/Rejected Reviews";
+    var totalApproved = Model.Rows.Sum(r => r.ApprovedCount);
+    var totalRejected = Model.Rows.Sum(r => r.RejectedCount);
 }
 
 <h2>Approved/Rejected Reviews</h2>
@@ -39,4 +41,11 @@
             </tr>
         }
     </tbody>
+    <tfoot>
+        <tr class="table-secondary fw-bold">
+            <td colspan="2">Totals</td>
+            <td>@totalApproved</td>
+            <td>@totalRejected</td>
+        </tr>
+    </tfoot>
 </table>

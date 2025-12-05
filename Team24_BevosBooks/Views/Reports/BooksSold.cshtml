@@ -37,7 +37,7 @@
             <th>Customer</th>
             <th>Selling Price</th>
             <th>Avg Cost</th>
-            <th>Profit Margin</th>
+            <th>Profit</th>
             <th>Order Date</th>
         </tr>
     </thead>
@@ -51,7 +51,7 @@
                 <td>@r.CustomerName</td>
                 <td>@r.SellingPrice.ToString("c")</td>
                 <td>@r.AverageCost.ToString("c")</td>
-                <td>@r.ProfitMargin.ToString("c")</td>
+                <td>@r.ProfitMargin.ToString("c")</td> <!-- absolute profit -->
                 <td>@r.OrderDate.ToShortDateString()</td>
             </tr>
         }

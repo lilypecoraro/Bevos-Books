@@ -37,6 +37,10 @@
             </tr>
         }
     </tbody>
+    <tfoot>
+        <tr class="table-secondary fw-bold">
+            <td colspan="2">Total Inventory Value</td>
+            <td>@Model.TotalInventoryValue.ToString("c")</td>
+        </tr>
+    </tfoot>
 </table>
-
-<p class="mt-3"><strong>Total Inventory Value:</strong> @Model.TotalInventoryValue.ToString("c")</p>

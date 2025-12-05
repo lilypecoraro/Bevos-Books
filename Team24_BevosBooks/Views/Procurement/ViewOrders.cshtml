@@ -6,65 +6,69 @@
 
 <h2>Supplier Orders</h2>
 
-<table class="table table-bordered table-striped align-middle">
+<table class="table table-striped align-middle">
     <thead class="table-dark">
         <tr>
-            <th style="width:10%;">Order ID</th>
-            <th style="width:15%;">Date</th>
-            <th style="width:15%;">Status</th>
-            <th style="width:60%;">Books Ordered</th>
+            <th>Order #</th>
+            <th>Date</th>
+            <th>Status</th>
+            <th>Admin</th>
+            <th>Books</th>
+            <th>Total Revenue</th>
+            <th>Total Cost</th>
+            <th>Profit Margin</th>
         </tr>
     </thead>
     <tbody>
         @foreach (var order in Model)
         {
+            var totalRevenue = order.OrderDetails.Sum(d => d.Price * d.Quantity);
+            var totalCost = order.OrderDetails.Sum(d => d.Cost * d.Quantity);
+            var margin = totalRevenue > 0 ? (totalRevenue - totalCost) / totalRevenue : 0;
+
             <tr>
                 <td>@order.OrderID</td>
-                <td>@order.OrderDate.ToShortDateString()</td>
+                <td>@order.OrderDate.ToString("g")</td>
                 <td>@order.OrderStatus</td>
-                <td>
-                    <table class="table table-bordered table-sm mb-0">
-                        <thead class="table-light">
-                            <tr>
-                                <th style="width:40%;">Book Name</th>
-                                <th style="width:20%;">Amount Ordered</th>
-                                <th style="width:20%;">Order Price</th>
-                                <th style="width:20%;">Check In</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            @foreach (var detail in order.OrderDetails)
-                            {
-                                <tr>
-                                    <td>@detail.Book?.Title</td>
-                                    <td>@detail.Quantity</td>
-                                    <td>@detail.Cost.ToString("c")</td>
-                                    <td>
-                                        @if (order.OrderStatus == "SupplierOrder")
-                                        {
-                                            <form asp-action="CheckIn" method="post" class="d-flex align-items-center gap-2">
-                                                <input type="hidden" name="orderDetailId" value="@detail.OrderDetailID" />
-                                                <input type="number"
-                                                       name="arrivedQty"
-                                                       min="0"
-                                                       max="@detail.Quantity"
-                                                       value="@detail.Quantity"
-                                                       class="form-control form-control-sm"
-                                                       style="width:90px; color:black; background-color:white;" />
-                                                <button type="submit" class="btn btn-secondary btn-sm">Check In</button>
-                                            </form>
-                                        }
-                                        else
-                                        {
-                                            <span class="text-success">Received</span>
-                                        }
-                                    </td>
-                                </tr>
-                            }
-                        </tbody>
-                    </table>
+                <td>@order.User?.UserName</td>
+                <!-- Force black text on this cell -->
+                <td class="book-column">
+                    <ul class="list-unstyled">
+                        @foreach (var detail in order.OrderDetails)
+                        {
+                            <li>
+                                @detail.Book.Title –
+                                Price: @detail.Price.ToString("c"),
+                                Cost: @detail.Cost.ToString("c")
+                            </li>
+                        }
+                    </ul>
                 </td>
+                <td>@totalRevenue.ToString("c")</td>
+                <td>@totalCost.ToString("c")</td>
+                <td>@($"{margin:P2}")</td>
             </tr>
         }
     </tbody>
+    <tfoot>
+        @{
+            var grandRevenue = Model.Sum(o => o.OrderDetails.Sum(d => d.Price * d.Quantity));
+            var grandCost = Model.Sum(o => o.OrderDetails.Sum(d => d.Cost * d.Quantity));
+            var grandProfit = grandRevenue - grandCost;
+            var grandMargin = grandRevenue > 0 ? grandProfit / grandRevenue : 0;
+        }
+        <tr class="table-secondary fw-bold">
+            <td colspan="5">Total Orders: @Model.Count()</td>
+            <td>@grandRevenue.ToString("c")</td>
+            <td>@grandCost.ToString("c")</td>
+            <td>@($"{grandMargin:P2}")</td>
+        </tr>
+    </tfoot>
 </table>
+
+<style>
+    /* ✅ Force black text in the Books column */
+    td.book-column, td.book-column li {
+        color: black !important;
+    }
+</style>

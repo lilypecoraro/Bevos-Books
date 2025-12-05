@@ -53,6 +53,10 @@ namespace Team24_BevosBooks.Controllers
 
             ViewBag.Genres = await _context.Genres.Select(g => g.GenreName).ToListAsync();
             var books = await query.ToListAsync();
+
+            // ✅ No assignment to AvgProfitMargin here.
+            // If you want weighted margins, compute them in the view using OrderDetails.
+
             return View(books);
         }
 

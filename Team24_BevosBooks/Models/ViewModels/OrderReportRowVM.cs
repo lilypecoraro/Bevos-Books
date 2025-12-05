@@ -12,6 +12,7 @@ namespace Team24_BevosBooks.ViewModels
         public decimal OrderRevenue { get; set; }
         public decimal OrderCost { get; set; }
         public decimal OrderProfit { get; set; }
+        public decimal OrderMargin { get; set; }
     }
 
     public class OrdersReportVM
@@ -22,5 +23,7 @@ namespace Team24_BevosBooks.ViewModels
 
         // NEW: Track current sort option
         public string CurrentSort { get; set; } = "recent";
+     
+
     }
 }

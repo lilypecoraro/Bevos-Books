@@ -91,10 +91,8 @@ namespace Team24_BevosBooks.Controllers
         {
             var avgCost = await GetWeightedAverageCostByBook();
 
-            // Step 1: pull the raw data from the database
             var q = await SalesQuery().ToListAsync();
 
-            // Step 2: group and calculate in memory
             var grouped = q
                 .GroupBy(od => od.OrderID)
                 .Select(g => new OrderReportRowVM
@@ -106,11 +104,14 @@ namespace Team24_BevosBooks.Controllers
                     OrderRevenue = g.Sum(x => x.Price * x.Quantity),
                     OrderCost = g.Sum(x => (avgCost.ContainsKey(x.BookID) ? avgCost[x.BookID] : 0m) * x.Quantity),
                     OrderProfit = g.Sum(x => x.Price * x.Quantity) -
-                                  g.Sum(x => (avgCost.ContainsKey(x.BookID) ? avgCost[x.BookID] : 0m) * x.Quantity)
+                                  g.Sum(x => (avgCost.ContainsKey(x.BookID) ? avgCost[x.BookID] : 0m) * x.Quantity),
+                    OrderMargin = g.Sum(x => x.Price * x.Quantity) > 0
+                        ? (g.Sum(x => x.Price * x.Quantity) - g.Sum(x => (avgCost.ContainsKey(x.BookID) ? avgCost[x.BookID] : 0m) * x.Quantity))
+                          / g.Sum(x => x.Price * x.Quantity)
+                        : 0m
                 })
                 .ToList();
 
-            // Step 3: apply sorting
             grouped = sort switch
             {
                 "profitAsc" => grouped.OrderBy(r => r.OrderProfit).ToList(),
@@ -129,16 +130,14 @@ namespace Team24_BevosBooks.Controllers
 
             return View(vm);
         }
+
         // ========= C. Customers Report =========
         [Authorize(Roles = "Admin")]
         public async Task<IActionResult> CustomersReport(string sort = "profitDesc")
         {
             var avgCost = await GetWeightedAverageCostByBook();
-
-            // Step 1: pull raw order details into memory
             var q = await SalesQuery().ToListAsync();
 
-            // Step 2: group and calculate in memory
             var grouped = q
                 .GroupBy(od => od.Order.UserID)
                 .Select(g => new CustomerReportRowVM
@@ -149,11 +148,14 @@ namespace Team24_BevosBooks.Controllers
                     Revenue = g.Sum(x => x.Price * x.Quantity),
                     Cost = g.Sum(x => (avgCost.ContainsKey(x.BookID) ? avgCost[x.BookID] : 0m) * x.Quantity),
                     Profit = g.Sum(x => x.Price * x.Quantity) -
-                             g.Sum(x => (avgCost.ContainsKey(x.BookID) ? avgCost[x.BookID] : 0m) * x.Quantity)
+                             g.Sum(x => (avgCost.ContainsKey(x.BookID) ? avgCost[x.BookID] : 0m) * x.Quantity),
+                    Margin = g.Sum(x => x.Price * x.Quantity) > 0
+                        ? (g.Sum(x => x.Price * x.Quantity) - g.Sum(x => (avgCost.ContainsKey(x.BookID) ? avgCost[x.BookID] : 0m) * x.Quantity))
+                          / g.Sum(x => x.Price * x.Quantity)
+                        : 0m
                 })
                 .ToList();
 
-            // Step 3: apply sorting
             grouped = sort switch
             {
                 "profitAsc" => grouped.OrderBy(r => r.Profit).ToList(),
@@ -173,7 +175,6 @@ namespace Team24_BevosBooks.Controllers
             return View(vm);
         }
 
-
         // ========= D. Totals =========
         public async Task<IActionResult> Totals()
         {
@@ -186,11 +187,17 @@ namespace Team24_BevosBooks.Controllers
                 Cost = (avgCost.ContainsKey(od.BookID) ? avgCost[od.BookID] : 0m) * od.Quantity
             }).ToListAsync();
 
+            var totalRevenue = rows.Sum(x => x.Revenue);
+            var totalCost = rows.Sum(x => x.Cost);
+            var totalProfit = totalRevenue - totalCost;
+            var totalMargin = totalRevenue > 0 ? totalProfit / totalRevenue : 0m;
+
             var vm = new TotalsReportVM
             {
-                TotalRevenue = rows.Sum(x => x.Revenue),
-                TotalCost = rows.Sum(x => x.Cost),
-                TotalProfit = rows.Sum(x => x.Revenue) - rows.Sum(x => x.Cost),
+                TotalRevenue = totalRevenue,
+                TotalCost = totalCost,
+                TotalProfit = totalProfit,
+                TotalMargin = totalMargin,
                 RecordCount = rows.Count()
             };
             return View(vm);
@@ -210,6 +217,7 @@ namespace Team24_BevosBooks.Controllers
                 AverageCost = avgCost.ContainsKey(b.BookID) ? avgCost[b.BookID] : 0m
             }).ToList();
 
+            // Sorting options
             rows = sort switch
             {
                 "qtyAsc" => rows.OrderBy(r => r.InventoryQuantity).ToList(),
@@ -229,8 +237,6 @@ namespace Team24_BevosBooks.Controllers
 
             return View(vm);
         }
-
-
         // ========= F. Reviews Report =========
         public async Task<IActionResult> ReviewsReport(string sort = "empAsc")
         {
@@ -249,6 +255,7 @@ namespace Team24_BevosBooks.Controllers
                 })
                 .ToListAsync();
 
+            // Sorting options
             rows = sort switch
             {
                 "approvedAsc" => rows.OrderBy(r => r.ApprovedCount).ToList(),
@@ -267,6 +274,5 @@ namespace Team24_BevosBooks.Controllers
 
             return View(vm);
         }
-
     }
 }
