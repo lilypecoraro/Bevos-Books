@@ -19,5 +19,8 @@ namespace Team24_BevosBooks.ViewModels
         public ReportFilterVM Filter { get; set; } = new ReportFilterVM();
         public List<OrderReportRowVM> Rows { get; set; } = new List<OrderReportRowVM>();
         public int RecordCount { get; set; }
+
+        // NEW: Track current sort option
+        public string CurrentSort { get; set; } = "recent";
     }
 }

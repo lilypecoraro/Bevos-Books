@@ -104,15 +104,13 @@ namespace Team24_BevosBooks.Controllers
                     CustomerName = g.Max(x => x.Order.User.FirstName + " " + x.Order.User.LastName),
                     TotalQuantity = g.Sum(x => x.Quantity),
                     OrderRevenue = g.Sum(x => x.Price * x.Quantity),
-                    OrderCost = g.Sum(x => (avgCost.ContainsKey(x.BookID) ? avgCost[x.BookID] : 0m) * x.Quantity)
+                    OrderCost = g.Sum(x => (avgCost.ContainsKey(x.BookID) ? avgCost[x.BookID] : 0m) * x.Quantity),
+                    OrderProfit = g.Sum(x => x.Price * x.Quantity) -
+                                  g.Sum(x => (avgCost.ContainsKey(x.BookID) ? avgCost[x.BookID] : 0m) * x.Quantity)
                 })
                 .ToList();
 
-            foreach (var row in grouped)
-            {
-                row.OrderProfit = row.OrderRevenue - row.OrderCost;
-            }
-
+            // Step 3: apply sorting
             grouped = sort switch
             {
                 "profitAsc" => grouped.OrderBy(r => r.OrderProfit).ToList(),
@@ -125,11 +123,12 @@ namespace Team24_BevosBooks.Controllers
             var vm = new OrdersReportVM
             {
                 Rows = grouped,
-                RecordCount = grouped.Count()
+                RecordCount = grouped.Count(),
+                CurrentSort = sort
             };
+
             return View(vm);
         }
-
         // ========= C. Customers Report =========
         public async Task<IActionResult> CustomersReport(string sort = "profitDesc")
         {

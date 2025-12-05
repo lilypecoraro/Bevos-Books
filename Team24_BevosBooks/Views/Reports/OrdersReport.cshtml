@@ -1,19 +1,23 @@
 ﻿@model Team24_BevosBooks.ViewModels.OrdersReportVM
+
 @{
     ViewData["Title"] = "Orders Report";
 }
+
 <h2>Orders Report</h2>
 
 <form method="get" class="mb-3 d-flex gap-2">
-    <input class="form-control" type="date" name="StartDate" />
-    <input class="form-control" type="date" name="EndDate" />
+    <input class="form-control" type="date" name="StartDate" value="@Model.Filter.StartDate?.ToString("yyyy-MM-dd")" />
+    <input class="form-control" type="date" name="EndDate" value="@Model.Filter.EndDate?.ToString("yyyy-MM-dd")" />
+
     <select class="form-select" name="sort">
-        <option value="recent">Most recent</option>
-        <option value="profitAsc">Profit ↑</option>
-        <option value="profitDesc">Profit ↓</option>
-        <option value="priceAsc">Order price ↑</option>
-        <option value="priceDesc">Order price ↓</option>
+        <option value="recent" selected="@(Model.CurrentSort == "recent")">Most recent</option>
+        <option value="profitAsc" selected="@(Model.CurrentSort == "profitAsc")">Profit ↑</option>
+        <option value="profitDesc" selected="@(Model.CurrentSort == "profitDesc")">Profit ↓</option>
+        <option value="priceAsc" selected="@(Model.CurrentSort == "priceAsc")">Order price ↑</option>
+        <option value="priceDesc" selected="@(Model.CurrentSort == "priceDesc")">Order price ↓</option>
     </select>
+
     <button class="btn btn-primary" type="submit">Apply</button>
 </form>
 
