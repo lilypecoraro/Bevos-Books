@@ -1,3 +1,81 @@
+<style>
+ /* FOOTER BASE */
+.bevo-footer {
+    padding: 1.8rem 0;
+    background-color: #111;
+    border-top: 2px solid #f5b338;
+    box-shadow: 0 -3px 18px rgba(245,179,56,0.35); /* orange glow */
+    opacity: 0;
+    animation: footerFade 1.2s ease forwards;
+}
+
+/* FOOTER ANIMATION */
+@@keyframes footerFade {
+    to { opacity: 1; }
+}
+
+.footer-inner {
+    padding: 0.5rem 0;
+}
+
+/* LEFT SIDE TEXT */
+.footer-small {
+    font-size: 0.85rem;
+    opacity: 0.8;
+}
+
+/* LONGHORN ICON */
+.footer-longhorn {
+    height: 34px;
+    opacity: 0.35;
+    filter: brightness(200%);
+}
+
+/* MCCOMBS LOGO (HIGH VISIBILITY) */
+.footer-mccombs {
+    height: 40px;
+    width: auto;
+    opacity: 1;
+    filter: brightness(300%) contrast(120%); /* strongest visibility */
+    mix-blend-mode: screen; /* forces white to pop on dark */
+    transition: 0.25s ease;
+}
+
+.footer-mccombs:hover {
+    filter: brightness(420%) contrast(130%);
+}
+
+/* NAV LINKS */
+.footer-links a {
+    color: #f5b338;
+    text-decoration: none;
+    font-size: 0.95rem;
+    font-weight: 500;
+    transition: 0.2s ease;
+}
+
+.footer-links a:hover {
+    text-shadow: 0 0 6px rgba(245,179,56,0.8);
+}
+
+/* CENTER DOTS */
+.footer-dot {
+    color: #888;
+    margin: 0 6px;
+}
+
+/* RESPONSIVE FIXES */
+@@media (max-width: 768px) {
+    .footer-right, .footer-left {
+        text-align: center !important;
+    }
+}
+    .footer-right .footer-small {
+        color: #ffffff !important;
+        opacity: 0.95;
+    }
+</style>
+
 @using Microsoft.AspNetCore.Identity
 @using Team24_BevosBooks.Models
 @inject SignInManager<AppUser> SignInManager
@@ -154,11 +232,36 @@
         </div>
     }
 
-    <footer class="border-top footer text-muted mt-4">
-        <div class="container">
-            &copy; @(DateTime.Now.Year) - Bevo's Books - Team 24
+<footer class="bevo-footer mt-4">
+    <div class="container footer-inner d-flex flex-column flex-md-row justify-content-between align-items-center">
+
+        <!-- LEFT SECTION -->
+        <div class="footer-left text-muted">
+            © @DateTime.Now.Year — Bevo's Books
+            <br />
+            <span class="footer-small">Built by Team 24 • MIS 333K</span>
         </div>
-    </footer>
+
+        <!-- CENTER (Longhorn Icon + Nav Links) -->
+        <div class="footer-center text-center mt-3 mt-md-0">
+
+            <div class="footer-links">
+                <a asp-controller="Home" asp-action="AboutUs">About Us</a>
+                <span class="footer-dot">•</span>
+                <a href="https://github.com/mis333k-fall2025/Group-24" target="_blank">GitHub</a>
+                <span class="footer-dot">•</span>
+                <a asp-controller="Home" asp-action="AboutUs">Contact Us</a>
+            </div>
+        </div>
+
+        <!-- RIGHT SECTION (McCombs Logo) -->
+        <div class="footer-right text-end mt-3 mt-md-0">
+            <span class="footer-small text-muted">Made at</span>
+            <br />
+            <img src="~/images/mccombs.png" class="footer-mccombs" alt="Texas McCombs">
+        </div>
+    </div>
+</footer>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
     @RenderSection("Scripts", required: false)

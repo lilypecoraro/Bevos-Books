@@ -4,74 +4,233 @@
 }
 
 <style>
-    .about-wrapper {
-        max-width: 800px;
-        margin: 0 auto;
-        padding: 3rem 1.5rem;
-        text-align: center;
-    }
 
-    .about-title {
-        font-family: "VT323", monospace;
-        font-size: clamp(3rem, 6vw, 4rem);
+    .mccombs-logo {
+        width: 200px; /* bigger so it's noticeable */
+        opacity: 1 !important; /* no transparency */
+        filter: brightness(200%); /* forces it to appear bright white */
+        mix-blend-mode: screen; /* makes it glow over dark backgrounds */
+        margin: 1rem auto 0;
+    }
+/* ---------------------------
+   BACKGROUND LONGHORN WATERMARK
+   --------------------------- */
+.longhorn-watermark {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 500px;
+    height: auto;
+    opacity: 0.06; /* super subtle */
+    transform: translate(-50%, -50%);
+    pointer-events: none;
+    z-index: 0;
+}
+
+.about-wrapper {
+    position: relative;
+    z-index: 1;
+}
+
+
+/* ---------------------------
+   HOOK 'EM FOOTER
+   --------------------------- */
+.hookem-footer {
+    margin-top: 3rem;
+    padding-top: 1rem;
+    border-top: 1px solid rgba(255,255,255,0.15);
+}
+
+.hookem-text {
+    color: #f5b338;
+    font-family: "VT323", monospace;
+    font-size: 2rem;
+    letter-spacing: 1px;
+    animation: hookemFade 2s ease-in-out infinite alternate;
+}
+
+@@keyframes hookemFade {
+    0% { opacity: 0.6; text-shadow: 0 0 5px rgba(245,179,56,0.4); }
+    100% { opacity: 1; text-shadow: 0 0 15px rgba(245,179,56,0.8); }
+}
+
+
+/* ---------------------------
+   MAIN ABOUT SECTION
+   --------------------------- */
+.about-wrapper {
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 3rem 1.5rem;
+    text-align: center;
+}
+
+.about-title {
+    font-family: "VT323", monospace;
+    font-size: clamp(3rem, 6vw, 4rem);
+    color: #fff;
+    margin-bottom: 1rem;
+}
+
+.about-text {
+    font-size: 1.1rem;
+    line-height: 1.6;
+    color: rgba(255,255,255,0.9);
+    max-width: 650px;
+    margin: 0 auto 2.5rem auto;
+}
+
+
+/* ---------------------------
+   TEAM GRID + CARD ANIMATION
+   --------------------------- */
+.team-container {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 1.5rem;
+    margin-top: 1.5rem;
+    margin-bottom: 3.5rem; /* extra spacing above thanks */
+}
+
+.team-card {
+    background: rgba(255,255,255,0.12);
+    padding: 1.25rem;
+    border-radius: 10px;
+    border: 1px solid rgba(255,255,255,0.15);
+    text-align: center;
+    opacity: 0;
+    transform: translateY(15px);
+    animation: fadeUp 0.9s ease forwards;
+}
+
+.team-card:nth-child(1) { animation-delay: 0.1s; }
+.team-card:nth-child(2) { animation-delay: 0.25s; }
+.team-card:nth-child(3) { animation-delay: 0.4s; }
+.team-card:nth-child(4) { animation-delay: 0.55s; }
+
+@@keyframes fadeUp {
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.team-photo {
+    width: 100px;
+    height: 100px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 2px solid #f5b338;
+    margin-bottom: 0.75rem;
+}
+
+.team-name {
+    color: #fff;
+    font-weight: 600;
+    margin-bottom: 0.25rem;
+    font-size: 1.05rem;
+}
+
+.team-role {
+    color: #f5b338;
+    font-size: 0.9rem;
+}
+
+
+/* ---------------------------
+   THANK YOU SECTION + MCCOMBS LOGO
+   --------------------------- */
+.thanks-section {
+    margin-top: 3rem;
+    padding: 2.5rem 1.5rem;
+    background: rgba(255,255,255,0.08);
+    border-radius: 12px;
+    border: 1px solid rgba(255,255,255,0.15);
+    text-align: center;
+    opacity: 0;
+    animation: sectionFade 1.4s ease forwards;
+}
+
+@@keyframes sectionFade {
+    to { opacity: 1; }
+}
+
+.thanks-title {
+    font-family: "VT323", monospace;
+    font-size: clamp(2.2rem, 5vw, 3rem);
+    color: #fff;
+    margin-bottom: 1rem;
+}
+
+.thanks-text {
+    color: rgba(255,255,255,0.85);
+    max-width: 650px;
+    margin: 0 auto 1.75rem auto;
+    font-size: 1.05rem;
+    line-height: 1.6;
+}
+
+.thanks-names {
+    display: flex;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 1.25rem;
+    margin-bottom: 1.75rem;
+}
+
+.thanks-name {
+    color: #f5b338;
+    font-weight: 600;
+    font-size: 1rem;
+}
+
+/* McCombs logo styling */
+.mccombs-logo {
+    width: 180px;
+    opacity: 0.9;
+    margin: 0.5rem auto 0;
+
+}
+    /* LINKEDIN BUTTONS */
+    .linkedin-btn {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 6px;
+        padding: 6px 12px;
+        margin-top: 0.6rem;
+        border-radius: 6px;
+        background: rgba(255,255,255,0.14);
+        border: 1px solid rgba(255,255,255,0.22);
         color: #fff;
-        margin-bottom: 1rem;
+        font-size: 0.85rem;
+        text-decoration: none;
+        transition: 0.25s ease;
     }
 
-    .about-text {
-        font-size: 1.1rem;
-        line-height: 1.6;
-        color: rgba(255,255,255,0.9);
-        max-width: 650px;
-        margin: 0 auto 2.5rem auto;
-    }
+        .linkedin-btn:hover {
+            background: rgba(245,179,56,0.25); /* UT orange glow */
+            border-color: #f5b338;
+            color: #f5b338;
+            text-shadow: 0 0 6px rgba(245,179,56,0.8);
+        }
 
-    .team-container {
-        display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-        gap: 1.5rem;
-        margin-top: 1.5rem;
+    /* smaller SVG icon */
+    .linkedin-icon {
+        width: 16px;
+        height: 16px;
+        fill: currentColor; /* inherits text color */
     }
-
-    .team-card {
-        background: rgba(255,255,255,0.12);
-        padding: 1.25rem;
-        border-radius: 10px;
-        border: 1px solid rgba(255,255,255,0.15);
-        text-align: center;
-    }
-
-    .team-photo {
-        width: 100px;
-        height: 100px;
-        border-radius: 50%;
-        object-fit: cover;
-        border: 2px solid #f5b338;
-        margin-bottom: 0.75rem;
-    }
-
-    .team-name {
-        color: #fff;
-        font-weight: 600;
-        margin-bottom: 0.25rem;
-        font-size: 1.05rem;
-    }
-
-    .team-role {
-        color: #f5b338;
-        font-size: 0.9rem;
-    }
-
-    .team-container {
-        display: grid;
-        grid-template-columns: repeat(4, 1fr); /* 4 cards per row on desktop */
-        gap: 1.5rem;
-        margin-top: 1.5rem;
-    }
-
 </style>
 
+
+
+
 <div class="about-wrapper">
+
+    <!-- Longhorn watermark -->
+    <img src="~/images/longhorn.png" class="longhorn-watermark" alt="Longhorn">
 
     <h1 class="about-title">About Our Team</h1>
 
@@ -85,29 +244,78 @@
     <div class="team-container">
 
         <div class="team-card">
-            <img src="~/images/lillian.jpg" class="team-photo" alt="Lillian">
+            <img src="~/images/lily.png" class="team-photo" alt="Lillian">
             <div class="team-name">Lillian Pecoraro</div>
-            <div class="team-role">UI/UX • Identity • Email Integration</div>
+            <div class="team-role">Creative Director</div>
+
+            <a href="https://www.linkedin.com/in/lilypecoraro" target="_blank" class="linkedin-btn">
+                <svg class="linkedin-icon" viewBox="0 0 24 24">
+                    <path d="M4.98 3.5C4.98 4.88 3.86 6 2.5 6S0 4.88 0 3.5 1.12 1 2.5 1s2.48 1.12 2.48 2.5zM.5 8h4V24h-4V8zm7.5 0h3.8v2.2h.1c.53-1 1.84-2.2 3.8-2.2 4.06 0 4.8 2.67 4.8 6.14V24h-4v-7.86c0-1.87-.03-4.28-2.6-4.28-2.6 0-3 2.03-3 4.13V24h-4V8z" />
+                </svg>
+                LinkedIn
+            </a>
         </div>
 
         <div class="team-card">
-            <img src="~/images/skylar.jpg" class="team-photo" alt="Skylar">
-            <div class="team-name">Skylar Nguyen</div>
-            <div class="team-role">Books + Reviews • Controllers</div>
+            <img src="~/images/skyler.png" class="team-photo" alt="Skyler">
+            <div class="team-name">Skyler Nguyen</div>
+            <div class="team-role">Database Architect</div>
+
+            <a href="https://www.linkedin.com/in/skyler-g-nguyen" target="_blank" class="linkedin-btn">
+                <svg class="linkedin-icon" viewBox="0 0 24 24">
+                    <path d="M4.98 3.5C4.98 4.88 3.86 6 2.5 6S0 4.88 0 3.5 1.12 1 2.5 1s2.48 1.12 2.48 2.5zM.5 8h4V24h-4V8zm7.5 0h3.8v2.2h.1c.53-1 1.84-2.2 3.8-2.2 4.06 0 4.8 2.67 4.8 6.14V24h-4v-7.86c0-1.87-.03-4.28-2.6-4.28-2.6 0-3 2.03-3 4.13V24h-4V8z" />
+                </svg>
+                LinkedIn
+            </a>
         </div>
 
         <div class="team-card">
-            <img src="~/images/sean.jpg" class="team-photo" alt="Sean">
+            <img src="~/images/sean.png" class="team-photo" alt="Sean">
             <div class="team-name">Sean Tran</div>
-            <div class="team-role">Orders • Checkout Workflow</div>
+            <div class="team-role">E-Commerce Systems Engineer</div>
+
+            <a href="https://www.linkedin.com/in/sean-nl-tran" target="_blank" class="linkedin-btn">
+                <svg class="linkedin-icon" viewBox="0 0 24 24">
+                    <path d="M4.98 3.5C4.98 4.88 3.86 6 2.5 6S0 4.88 0 3.5 1.12 1 2.5 1s2.48 1.12 2.48 2.5zM.5 8h4V24h-4V8zm7.5 0h3.8v2.2h.1c.53-1 1.84-2.2 3.8-2.2 4.06 0 4.8 2.67 4.8 6.14V24h-4v-7.86c0-1.87-.03-4.28-2.6-4.28-2.6 0-3 2.03-3 4.13V24h-4V8z" />
+                </svg>
+                LinkedIn
+            </a>
         </div>
 
         <div class="team-card">
-            <img src="~/images/sachi.jpg" class="team-photo" alt="Sachi">
+            <img src="~/images/sachi.png" class="team-photo" alt="Sachi">
             <div class="team-name">Sachi Sooda</div>
-            <div class="team-role">Reports • Testing</div>
+            <div class="team-role">Insights Developer</div>
+
+            <a href="https://www.linkedin.com/in/sachisooda" target="_blank" class="linkedin-btn">
+                <svg class="linkedin-icon" viewBox="0 0 24 24">
+                    <path d="M4.98 3.5C4.98 4.88 3.86 6 2.5 6S0 4.88 0 3.5 1.12 1 2.5 1s2.48 1.12 2.48 2.5zM.5 8h4V24h-4V8zm7.5 0h3.8v2.2h.1c.53-1 1.84-2.2 3.8-2.2 4.06 0 4.8 2.67 4.8 6.14V24h-4v-7.86c0-1.87-.03-4.28-2.6-4.28-2.6 0-3 2.03-3 4.13V24h-4V8z" />
+                </svg>
+                LinkedIn
+            </a>
         </div>
 
+    </div>
+
+    <div class="thanks-section">
+        <h2 class="thanks-title">Thank You</h2>
+
+        <p class="thanks-text">
+            We are grateful for the guidance, support, and encouragement from our professor and TAs throughout this project.
+            Bevo’s Books would not have been possible without their help.
+        </p>
+
+        <div class="thanks-names">
+            <div class="thanks-name">Dr. Muhammad Jawad</div>
+            <div class="thanks-name">Seema Patel</div>
+            <div class="thanks-name">Cassandra Guzman</div>
+        </div>
+
+        <img src="~/images/mccombs.png" class="mccombs-logo" alt="McCombs School of Business">
+    </div>
+
+    <div class="hookem-footer">
+        <span class="hookem-text">Hook ’em 🤘</span>
     </div>
 
 </div>
