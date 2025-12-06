@@ -45,11 +45,17 @@ namespace Team24_BevosBooks.Controllers
             // Apply filters
             if (!string.IsNullOrEmpty(searchString))
             {
-                query = query.Where(b =>
-                    b.Title.Contains(searchString) ||
-                    b.Authors.Contains(searchString) ||
-                    b.Genre.GenreName.Contains(searchString) ||
-                    b.BookNumber.ToString().Contains(searchString));
+                // Split search string into individual words
+                var keywords = searchString.Split(' ', StringSplitOptions.RemoveEmptyEntries);
+
+                foreach (var keyword in keywords)
+                {
+                    query = query.Where(b =>
+                        b.Title.Contains(keyword) ||
+                        b.Authors.Contains(keyword) ||
+                        b.Genre.GenreName.Contains(keyword) ||
+                        b.BookNumber.ToString().Contains(keyword));
+                }
             }
 
             if (genreId.HasValue && genreId.Value != 0)
