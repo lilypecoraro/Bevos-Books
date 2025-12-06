@@ -69,10 +69,10 @@ namespace Team24_BevosBooks.Controllers
                 FirstName = rvm.FirstName,
                 LastName = rvm.LastName,
                 PhoneNumber = rvm.PhoneNumber,
-                Address = "",
-                City = "",
-                State = "",
-                ZipCode = "",
+                Address = rvm.Address,   // ✅ use values from the form
+                City = rvm.City,
+                State = rvm.State,
+                ZipCode = rvm.ZipCode,
                 Status = AppUser.UserStatus.Employee
             };
 
@@ -90,6 +90,7 @@ namespace Team24_BevosBooks.Controllers
             return RedirectToAction("ManageEmployees");
         }
 
+
         // ============================================================
         // EDIT EMPLOYEE (Admin only)
         // ============================================================
@@ -104,19 +105,45 @@ namespace Team24_BevosBooks.Controllers
 
         [HttpPost]
         [Authorize(Roles = "Admin")]
+        [ValidateAntiForgeryToken]
         public async Task<IActionResult> EditEmployee(AppUser edited)
         {
+            if (!ModelState.IsValid)
+            {
+                return View(edited);
+            }
+
             var employee = await _userManager.FindByIdAsync(edited.Id);
             if (employee == null) return NotFound();
 
+            // Copy editable fields
             employee.FirstName = edited.FirstName;
             employee.LastName = edited.LastName;
             employee.PhoneNumber = edited.PhoneNumber;
+            employee.Address = edited.Address;
+            employee.City = edited.City;
+            employee.State = edited.State;
+            employee.ZipCode = edited.ZipCode;
 
-            await _userManager.UpdateAsync(employee);
+            // Force status to remain Employee
+            employee.Status = AppUser.UserStatus.Employee;
 
+            var result = await _userManager.UpdateAsync(employee);
+
+            if (!result.Succeeded)
+            {
+                foreach (var error in result.Errors)
+                {
+                    ModelState.AddModelError("", error.Description);
+                }
+                return View(edited);
+            }
+
+            TempData["Message"] = $"Employee {employee.FirstName} {employee.LastName} updated successfully.";
             return RedirectToAction("ManageEmployees");
         }
+
+
 
         // ============================================================
         // MANAGE CUSTOMERS (Admin + Employee)
