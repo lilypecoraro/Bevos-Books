@@ -154,12 +154,21 @@ namespace Team24_BevosBooks.Controllers
         }
 
         // ============================================================
-        // MANAGE PROFILE (GET)
+        // MANAGE ACCOUNT (GET)
         // ============================================================
+        [Authorize]
         public async Task<IActionResult> Manage()
         {
-            AppUser user = await _userManager.GetUserAsync(User);
-            ViewBag.States = GetStates();
+            var user = await _userManager.GetUserAsync(User);
+
+            if (user == null)
+            {
+                TempData["AlertClass"] = "danger";
+                TempData["Message"] = "You must be logged in to manage your account.";
+                return RedirectToAction("Login", "Account");
+            }
+
+            // Do NOT clear TempData here — let messages from POST persist
             return View(user);
         }
 
@@ -173,9 +182,13 @@ namespace Team24_BevosBooks.Controllers
         {
             ViewBag.States = GetStates();
 
-            AppUser user = await _userManager.GetUserAsync(User);
+            var user = await _userManager.GetUserAsync(User);
             if (user == null)
+            {
+                TempData["AlertClass"] = "danger";
+                TempData["Message"] = "You must be logged in to manage your account.";
                 return RedirectToAction("Login", "Account");
+            }
 
             // Remove Identity-only fields so validation passes
             ModelState.Remove(nameof(AppUser.Id));
@@ -184,7 +197,11 @@ namespace Team24_BevosBooks.Controllers
             ModelState.Remove(nameof(AppUser.Status));
 
             if (!ModelState.IsValid)
+            {
+                TempData["AlertClass"] = "danger";
+                TempData["Message"] = "There were validation errors. Please correct them and try again.";
                 return View(user);
+            }
 
             // Update editable fields
             user.FirstName = updatedUser.FirstName;
@@ -202,12 +219,16 @@ namespace Team24_BevosBooks.Controllers
                 foreach (var error in result.Errors)
                     ModelState.AddModelError("", error.Description);
 
+                TempData["AlertClass"] = "danger";
+                TempData["Message"] = "Profile update failed. Please review the errors.";
                 return View(user);
             }
 
+            TempData["AlertClass"] = "success";
             TempData["Message"] = "Profile updated successfully.";
             return RedirectToAction("Manage");
         }
+
 
         // ============================================================
         // CHANGE PASSWORD
