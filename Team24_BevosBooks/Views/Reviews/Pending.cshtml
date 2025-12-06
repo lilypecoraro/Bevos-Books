@@ -9,8 +9,7 @@
             <th>User</th>
             <th>Rating</th>
             <th>Text</th>
-            <th>Date</th>
-            <th></th>
+            <th>Actions</th>
         </tr>
     </thead>
     <tbody>
@@ -24,6 +23,8 @@
                 <td>
                     <a asp-action="Approve" asp-route-id="@r.ReviewID" class="btn btn-success btn-sm">Approve</a>
                     <a asp-action="Reject" asp-route-id="@r.ReviewID" class="btn btn-danger btn-sm">Reject</a>
+                    <!-- NEW: Edit button -->
+                    <a asp-action="Edit" asp-route-id="@r.ReviewID" class="btn btn-warning btn-sm">Edit</a>
                 </td>
             </tr>
         }

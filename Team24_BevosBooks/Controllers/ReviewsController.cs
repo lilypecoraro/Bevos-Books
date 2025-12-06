@@ -175,5 +175,38 @@ namespace Team24_BevosBooks.Controllers
             TempData["Message"] = "Your review was submitted and is pending approval.";
             return RedirectToAction("Details", "Books", new { id = review.BookID });
         }
+        // ============================================================
+        // EDIT REVIEW TEXT (Admin/Employee only)
+        // ============================================================
+        [Authorize(Roles = "Admin,Employee")]
+        [HttpGet]
+        public async Task<IActionResult> Edit(int id)
+        {
+            var review = await _context.Reviews
+                .Include(r => r.Book)
+                .Include(r => r.Reviewer)
+                .FirstOrDefaultAsync(r => r.ReviewID == id);
+
+            if (review == null) return NotFound();
+
+            return View(review);
+        }
+
+        [Authorize(Roles = "Admin,Employee")]
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Edit(int id, Review edited)
+        {
+            var review = await _context.Reviews.FindAsync(id);
+            if (review == null) return NotFound();
+
+            // Only allow editing of text, not rating
+            review.ReviewText = edited.ReviewText;
+
+            await _context.SaveChangesAsync();
+            TempData["Message"] = "Review text updated.";
+            return RedirectToAction(nameof(Pending));
+        }
+
     }
 }
