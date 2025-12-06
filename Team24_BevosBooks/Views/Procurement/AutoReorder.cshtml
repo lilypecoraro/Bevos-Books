@@ -5,42 +5,57 @@
 }
 
 <h2>Automatic Reorder</h2>
+<p>These books are below their reorder point. Adjust quantities or costs before placing orders. You can delete rows you don’t need before submitting.</p>
 
-<p>These books are below their reorder point. Adjust quantities or costs before placing orders.</p>
-
-<form asp-action="AutoReorder" method="post">
-    <table class="table table-striped">
-        <thead>
+<form asp-action="AutoReorder" method="post" id="autoReorderForm">
+    <table class="table table-striped" id="reorderTable">
+        <thead class="table-dark">
             <tr>
                 <th>Select</th>
                 <th>Book Name</th>
                 <th>Inventory</th>
                 <th>Reorder Point</th>
+                <th>Last Supplier Cost</th>
+                <th>Avg Profit Margin</th>
                 <th>Quantity</th>
                 <th>Cost</th>
-                <th>Remove</th>
+                <th>Delete Row</th>
             </tr>
         </thead>
         <tbody>
             @foreach (var book in Model)
             {
+                var lastCost = ViewBag.LastCosts != null && ViewBag.LastCosts.ContainsKey(book.BookID)
+                    ? (decimal)ViewBag.LastCosts[book.BookID]
+                    : 0m;
+
+                var avgMargin = ViewBag.AvgMargins != null && ViewBag.AvgMargins.ContainsKey(book.BookID)
+                    ? (decimal)ViewBag.AvgMargins[book.BookID]
+                    : 0m;
+
                 <tr>
                     <td>
-                        <input type="checkbox" name="bookIds" value="@book.BookID" checked style="color:black; background-color:white;" />
+                        <input type="checkbox" name="bookIds" value="@book.BookID" checked />
                     </td>
                     <td>@book.Title</td>
                     <td>@book.InventoryQuantity</td>
                     <td>@book.ReorderPoint</td>
+                    <td>@(lastCost > 0 ? lastCost.ToString("C") : "N/A")</td>
+                    <td>@(avgMargin > 0 ? avgMargin.ToString("P1") : "N/A")</td>
                     <td>
                         <input type="number" name="qty_@book.BookID" value="5" min="0"
-                               class="form-control form-control-sm" style="color:black; background-color:white; width:90px;" />
+                               class="form-control text-dark" style="width:90px;" />
                     </td>
                     <td>
-                        <input type="number" step="0.01" name="cost_@book.BookID" value="@book.Cost"
-                               class="form-control form-control-sm" style="color:black; background-color:white; width:90px;" />
+                        <input type="number" step="0.01" name="cost_@book.BookID"
+                               value="@(lastCost > 0 ? lastCost.ToString() : "")"
+                               min="0.01"
+                               class="form-control text-dark" style="width:90px;" />
                     </td>
                     <td>
-                        <input type="checkbox" name="removeIds" value="@book.BookID" style="color:black; background-color:white;" />
+                        <button type="button" class="btn btn-danger btn-sm" onclick="this.closest('tr').remove();">
+                            Delete
+                        </button>
                     </td>
                 </tr>
             }

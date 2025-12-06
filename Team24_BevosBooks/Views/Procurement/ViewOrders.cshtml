@@ -2,73 +2,64 @@
 
 @{
     ViewData["Title"] = "Supplier Orders";
+    // ViewBag.ReceivedTotals is a Dictionary<int,int> (OrderDetailID -> cumulative received)
 }
 
 <h2>Supplier Orders</h2>
 
-<table class="table table-striped align-middle">
+<table class="table table-striped">
     <thead class="table-dark">
         <tr>
             <th>Order #</th>
             <th>Date</th>
             <th>Status</th>
-            <th>Admin</th>
-            <th>Books</th>
-            <th>Total Revenue</th>
-            <th>Total Cost</th>
-            <th>Profit Margin</th>
+            <th>Book</th>
+            <th>Ordered</th>
+            <th>Received</th>
+            <th>Outstanding</th>
+            <th>Cost</th>
+            <th>Price</th>
+            <th>Check In</th>
         </tr>
     </thead>
     <tbody>
         @foreach (var order in Model)
         {
-            var totalRevenue = order.OrderDetails.Sum(d => d.Price * d.Quantity);
-            var totalCost = order.OrderDetails.Sum(d => d.Cost * d.Quantity);
-            var margin = totalRevenue > 0 ? (totalRevenue - totalCost) / totalRevenue : 0;
+            foreach (var detail in order.OrderDetails)
+            {
+                var received = (ViewBag.ReceivedTotals != null && ViewBag.ReceivedTotals.ContainsKey(detail.OrderDetailID))
+                    ? (int)ViewBag.ReceivedTotals[detail.OrderDetailID]
+                    : 0;
 
-            <tr>
-                <td>@order.OrderID</td>
-                <td>@order.OrderDate.ToString("g")</td>
-                <td>@order.OrderStatus</td>
-                <td>@order.User?.UserName</td>
-                <!-- Force black text on this cell -->
-                <td class="book-column">
-                    <ul class="list-unstyled">
-                        @foreach (var detail in order.OrderDetails)
+                var outstanding = detail.Quantity - received;
+
+                <tr>
+                    <td>@order.OrderID</td>
+                    <td>@order.OrderDate.ToShortDateString()</td>
+                    <td>@order.OrderStatus</td>
+                    <td>@detail.Book.Title</td>
+                    <td>@detail.Quantity</td>
+                    <td>@received</td>
+                    <td>@outstanding</td>
+                    <td>@detail.Cost.ToString("C")</td>
+                    <td>@detail.Price.ToString("C")</td>
+                    <td>
+                        @if (order.OrderStatus == "SupplierOrder" && outstanding > 0)
                         {
-                            <li>
-                                @detail.Book.Title –
-                                Price: @detail.Price.ToString("c"),
-                                Cost: @detail.Cost.ToString("c")
-                            </li>
+                            <form asp-action="CheckIn" method="post" class="d-flex">
+                                <input type="hidden" name="orderDetailId" value="@detail.OrderDetailID" />
+                                <input type="number" name="arrivedQty" min="0" max="@outstanding"
+                                       class="form-control text-dark me-2" style="width:90px;" />
+                                <button type="submit" class="btn btn-success btn-sm">Check In</button>
+                            </form>
                         }
-                    </ul>
-                </td>
-                <td>@totalRevenue.ToString("c")</td>
-                <td>@totalCost.ToString("c")</td>
-                <td>@($"{margin:P2}")</td>
-            </tr>
+                        else if (outstanding == 0)
+                        {
+                            <span class="text-success">Received</span>
+                        }
+                    </td>
+                </tr>
+            }
         }
     </tbody>
-    <tfoot>
-        @{
-            var grandRevenue = Model.Sum(o => o.OrderDetails.Sum(d => d.Price * d.Quantity));
-            var grandCost = Model.Sum(o => o.OrderDetails.Sum(d => d.Cost * d.Quantity));
-            var grandProfit = grandRevenue - grandCost;
-            var grandMargin = grandRevenue > 0 ? grandProfit / grandRevenue : 0;
-        }
-        <tr class="table-secondary fw-bold">
-            <td colspan="5">Total Orders: @Model.Count()</td>
-            <td>@grandRevenue.ToString("c")</td>
-            <td>@grandCost.ToString("c")</td>
-            <td>@($"{grandMargin:P2}")</td>
-        </tr>
-    </tfoot>
 </table>
-
-<style>
-    /* ✅ Force black text in the Books column */
-    td.book-column, td.book-column li {
-        color: black !important;
-    }
-</style>

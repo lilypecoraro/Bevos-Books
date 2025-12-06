@@ -9,7 +9,6 @@
     /* ============================================================
        BOOK DETAILS PAGE — RIGHT-SIDE CARD (white background)
     =============================================================== */
-
     .book-details-card {
         background: rgba(255,255,255,0.95) !important;
         color: #000 !important;
@@ -17,9 +16,9 @@
         padding: 1.5rem 1.75rem;
         box-shadow: 0 10px 25px rgba(0,0,0,0.35);
         border: 1px solid rgba(0,0,0,0.12);
+        margin-bottom: 2rem;
     }
 
-        /* Ensure ALL text inside card is black */
         .book-details-card * {
             color: #000 !important;
         }
@@ -30,24 +29,9 @@
         color: var(--bevo-brown) !important;
     }
 
-    .book-details-card .btn-primary {
-        background-color: var(--bevo-gold) !important;
-        border-color: var(--bevo-gold) !important;
-        color: #201300 !important;
-        font-weight: 600;
-        padding: 0.65rem 1rem;
-        border-radius: 10px;
-    }
-
-        .book-details-card .btn-primary:hover {
-            background-color: var(--bevo-gold-hover) !important;
-            border-color: var(--bevo-gold-hover) !important;
-        }
-
     /* ============================================================
        LEFT SIDE: TITLES + VALUES
     =============================================================== */
-
     .book-details-left dt {
         font-size: 1.2rem;
         font-weight: 600;
@@ -60,59 +44,53 @@
     }
 
     /* ============================================================
-       CART WARNING BOX
+       REVIEWS SECTION — styled like details card
     =============================================================== */
-
-    .cart-warning-box {
-        background-color: #fff8d9 !important;
-        border: 1px solid #f2d67a !important;
-        padding: 1rem 1.25rem;
-        color: #000 !important;
-        border-radius: 10px;
-        box-shadow: 0 4px 12px rgba(0,0,0,0.25);
-        font-size: 1.05rem;
-        font-weight: 500;
+    .reviews-card {
+        background: rgba(255,255,255,0.95) !important;
+        border-radius: 14px;
+        padding: 1.25rem 1.5rem;
+        box-shadow: 0 6px 18px rgba(0,0,0,0.25);
+        border: 1px solid rgba(0,0,0,0.12);
+        margin-top: 1.5rem;
     }
 
-        .cart-warning-box * {
-            color: #000 !important;
+        .reviews-card h4 {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--bevo-gold);
+            margin-bottom: 1rem;
         }
 
-    /* ============================================================
-       REVIEWS — FORCE ALL MUTED TEXT WHITE
-    =============================================================== */
-
-    .reviews-title {
-        font-family: "VT323", monospace !important;
-        font-size: 2.4rem;
-        letter-spacing: 1px;
-        margin-top: 2rem;
-        color: #ffffff !important;
+    .review-item {
+        border-bottom: 1px solid rgba(0,0,0,0.1);
+        padding: 0.75rem 0;
     }
 
-    /* make muted text white */
-    .no-reviews-message,
-    .list-group-item .text-muted,
-    .reviews-section .text-muted {
-        color: #ffffff !important;
+        .review-item:last-child {
+            border-bottom: none;
+        }
+
+    .review-rating {
+        font-weight: 600;
+        color: var(--bevo-brown);
     }
 
-    /* review list items: subtle glass */
-    .list-group-item {
-        background: rgba(255,255,255,0.1) !important;
-        border: 1px solid rgba(255,255,255,0.15) !important;
-        color: #ffffff !important;
-        backdrop-filter: blur(4px);
+    .review-text {
+        margin: 0.25rem 0;
+    }
+
+    .review-author {
+        font-size: 0.9rem;
+        color: #555;
     }
 </style>
 
 <h2 class="mt-3 mb-3">Book Details</h2>
 
 <div class="row">
-
     <!-- LEFT SIDE -->
     <div class="col-md-8 book-details-left">
-
         <dl class="row">
             <dt class="col-sm-3">Title</dt>
             <dd class="col-sm-9">@Model.Title</dd>
@@ -142,101 +120,41 @@
             <dd class="col-sm-9">@Model.BookStatus</dd>
         </dl>
 
-
-        <!-- =============================== -->
-        <!-- OTHER CARTS FEATURE -->
-        <!-- =============================== -->
-        @if (ViewBag.CartsContaining > 0)
-        {
-            <div class="cart-warning-box mt-3">
-                <strong>@ViewBag.CartsContaining</strong>
-                @(ViewBag.CartsContaining == 1 ? "other customer has" : "other customers have")
-                this book in their cart right now.
-            </div>
-        }
-
-        <hr />
-
-
-        <!-- =============================== -->
-        <!-- WRITE REVIEW BUTTON (moved above reviews) -->
-        <!-- =============================== -->
-
-        <h4 class="reviews-title">Reviews</h4>
-
-        @{
-            var avgRating = reviews.Any()
-                ? Math.Round(reviews.Average(r => (double)r.Rating), 1)
-                : (double?)null;
-        }
-        <p class="mb-2" style="font-size:1.35rem; font-weight:600; color:#fff;">
-            Rating: @(avgRating.HasValue ? avgRating.Value.ToString("0.0") : "N/A")
-        </p>
-
-        @if (User.Identity.IsAuthenticated && User.IsInRole("Customer"))
-        {
-            if (ViewBag.CanReview == true)
-            {
-                <a asp-controller="Reviews"
-                   asp-action="Submit"
-                   asp-route-bookId="@Model.BookID"
-                   class="btn btn-outline-primary mt-3 mb-3">
-                    Write a Review
-                </a>
+        <!-- REVIEWS SECTION -->
+        <div class="reviews-card">
+            <h4>Reviews</h4>
+            @{
+                var avgRating = reviews.Any()
+                    ? Math.Round(reviews.Average(r => (double)r.Rating), 1)
+                    : (double?)null;
             }
-            else if (ViewBag.HasReviewed == true)
+            <p><strong>Average Rating:</strong> @(avgRating.HasValue ? avgRating.Value.ToString("0.0") : "N/A")</p>
+
+            @if (!reviews.Any())
             {
-                <p class="text-muted no-reviews-message mt-2 mb-3">
-                    <em>You have already reviewed this book.</em>
-                </p>
+                <p class="text-muted">No approved reviews yet.</p>
             }
             else
             {
-                <p class="text-muted no-reviews-message mt-2 mb-3">
-                    <em>You can only review books you have purchased.</em>
-                </p>
-            }
-        }
-
-        <!-- =============================== -->
-        <!-- REVIEWS SECTION
-        =============================== -->
-
-        @if (!reviews.Any())
-        {
-            <p class="text-muted no-reviews-message">No approved reviews yet.</p>
-        }
-        else
-        {
-            <ul class="list-group mb-4 reviews-section">
                 @foreach (var r in reviews)
                 {
-                    <li class="list-group-item">
-                        <strong>@r.Rating ★</strong><br />
-                        @r.ReviewText
-                        <br />
-                        <small class="text-muted">
-                            — @r.Reviewer.FirstName @r.Reviewer.LastName
-                        </small>
-                    </li>
+                    <div class="review-item">
+                        <span class="review-rating">@r.Rating ★</span>
+                        <p class="review-text">@r.ReviewText</p>
+                        <p class="review-author">— @r.Reviewer.FirstName @r.Reviewer.LastName</p>
+                    </div>
                 }
-            </ul>
-        }
-
+            }
+        </div>
     </div>
 
-
-    <!-- RIGHT SIDE: ADD TO CART -->
+    <!-- RIGHT SIDE: AVAILABILITY CARD -->
     <div class="col-md-4">
         <div class="book-details-card">
-
             <h5 class="book-details-title">@Model.Title</h5>
-
             <p class="mb-3">
                 <strong>Price:</strong>
-                <span class="book-details-price">@Model.Price.ToString("c")</span>
-                <br />
-
+                <span class="book-details-price">@Model.Price.ToString("c")</span><br />
                 <strong>Availability:</strong>
                 @if (Model.BookStatus == "Discontinued")
                 {
@@ -244,7 +162,7 @@
                 }
                 else if (Model.InventoryQuantity > 0)
                 {
-                    <span class="book-details-status">In Stock</span>
+                    <span class="text-success">In Stock</span>
                 }
                 else
                 {
@@ -252,60 +170,7 @@
                 }
             </p>
 
-            @if (TempData["CartMessage"] != null)
-            {
-                <div class="alert alert-warning text-dark mb-2">
-                    @TempData["CartMessage"]
-                </div>
-            }
-
-
-            @if (Model.BookStatus != "Discontinued" && Model.InventoryQuantity > 0)
-            {
-                if (User.Identity.IsAuthenticated && User.IsInRole("Customer"))
-                {
-                    <a asp-controller="Orders"
-                       asp-action="AddToCart"
-                       asp-route-id="@Model.BookID"
-                       class="btn btn-primary w-100 mb-2">
-                        Add to Cart
-                    </a>
-                }
-                else
-                {
-                    <a asp-controller="Account"
-                       asp-action="Login"
-                       asp-route-returnUrl="@Url.Action("Details", "Books", new { id = Model.BookID })"
-                       class="btn btn-primary w-100 mb-2">
-                        Log in to Add to Cart
-                    </a>
-                }
-            }
-            else
-            {
-                <button class="btn btn-secondary w-100 mb-2" disabled>Not Available</button>
-            }
-
-            <!-- ADMIN BUTTONS -->
-            @if (User.Identity.IsAuthenticated && User.IsInRole("Admin"))
-            {
-                <a asp-controller="Books"
-                   asp-action="Edit"
-                   asp-route-id="@Model.BookID"
-                   class="btn btn-warning w-100 mb-2">
-                    Edit Book
-                </a>
-
-                <a asp-controller="Books"
-                   asp-action="Discontinue"
-                   asp-route-id="@Model.BookID"
-                   class="btn btn-danger w-100 mb-2">
-                    Discontinue Book
-                </a>
-            }
-
             <a asp-action="Index" class="btn btn-link w-100 mt-1">Back to List</a>
-
         </div>
     </div>
 </div>

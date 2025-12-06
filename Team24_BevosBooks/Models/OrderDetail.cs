@@ -29,6 +29,9 @@ namespace Team24_BevosBooks.Models
         [Required, Column(TypeName = "decimal(18,2)")]
         public decimal Cost { get; set; }         // Supplier cost at time of order
 
+        [NotMapped]
+        public int ReceivedQuantity { get; set; }
+
         // Navigation properties
         public Order Order { get; set; }
         public Book Book { get; set; }
