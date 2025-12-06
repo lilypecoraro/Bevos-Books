@@ -271,25 +271,11 @@ namespace Team24_BevosBooks.Controllers
         // DISCONTINUE + EMAIL USERS (FULL COMBINED)
         // =========================================================
         [Authorize(Roles = "Admin")]
-        public async Task<IActionResult> Discontinue(int? id)
-        {
-            if (id == null) return NotFound();
-
-            Book? book = await _context.Books
-                .Include(b => b.Genre)
-                .FirstOrDefaultAsync(b => b.BookID == id);
-
-            if (book == null) return NotFound();
-
-            return View(book);
-        }
-
-        [Authorize(Roles = "Admin")]
         [HttpPost, ActionName("Discontinue")]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DiscontinueConfirmed(int id)
         {
-            Book? book = await _context.Books
+            var book = await _context.Books
                 .Include(b => b.Genre)
                 .FirstOrDefaultAsync(b => b.BookID == id);
 
@@ -300,34 +286,32 @@ namespace Team24_BevosBooks.Controllers
 
             TempData["Message"] = $"Book '{book.Title}' discontinued.";
 
-            // DEBUG
-            System.Diagnostics.Debug.WriteLine($"[DEBUG] Discontinue triggered for: {book.Title}");
-
-            // Email all customers
-            var users = await _context.Users
-                .Where(u => u.Status == AppUser.UserStatus.Customer &&
-                            u.Email != null)
-                .ToListAsync();
-
-            foreach (var user in users)
+            // Kick off email sending in background
+            _ = Task.Run(async () =>
             {
-                System.Diagnostics.Debug.WriteLine($"[DEBUG] Sending email to: {user.Email}");
+                var users = await _context.Users
+                    .Where(u => u.Status == AppUser.UserStatus.Customer && u.Email != null)
+                    .ToListAsync();
 
-                await _emailSender.SendEmailAsync(
-                    user.Email,
-                    "Team 24: Book Discontinued",
-                    EmailTemplate.Wrap($@"
-                        <h2>Book Discontinued</h2>
-                        <p>Hello {user.FirstName},</p>
-                        <p>The book <strong>{book.Title}</strong> by {book.Authors} is now discontinued.</p>
-                        <p>Genre: {book.Genre?.GenreName}</p>
-                        <p>Thank you for being part of Bevo's Books! 🤘</p>
-                    ")
-                );
-            }
+                foreach (var user in users)
+                {
+                    await _emailSender.SendEmailAsync(
+                        user.Email,
+                        "Team 24: Book Discontinued",
+                        EmailTemplate.Wrap($@"
+                    <h2>Book Discontinued</h2>
+                    <p>Hello {user.FirstName},</p>
+                    <p>The book <strong>{book.Title}</strong> by {book.Authors} is now discontinued.</p>
+                    <p>Genre: {book.Genre?.GenreName}</p>
+                    <p>Thank you for being part of Bevo's Books! 🤘</p>
+                ")
+                    );
+                }
+            });
 
             return RedirectToAction(nameof(Index));
         }
+
 
         // =========================================================
         // GENRES DROPDOWN
