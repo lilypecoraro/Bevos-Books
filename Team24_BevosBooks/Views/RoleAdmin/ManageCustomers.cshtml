@@ -6,13 +6,18 @@
 
 <h2 class="mt-4 mb-3">Customer Accounts</h2>
 
+<!-- NEW: Create Customer button -->
+<div class="mb-3">
+    <a asp-action="CreateCustomer" class="btn btn-primary">Add New Customer</a>
+</div>
+
 <table class="table table-striped">
     <thead class="table-dark">
         <tr>
             <th>Name</th>
             <th>Email</th>
             <th>Status</th>
-            <th></th>
+            <th>Actions</th>
         </tr>
     </thead>
 
@@ -24,9 +29,16 @@
                 <td>@cust.Email</td>
                 <td>@cust.Status</td>
                 <td>
+                    <!-- NEW: Edit Customer button -->
+                    <a asp-action="EditCustomer"
+                       asp-route-id="@cust.Id"
+                       class="btn btn-sm btn-warning me-2">
+                        Edit
+                    </a>
+
                     @if (cust.Status != AppUser.UserStatus.Disabled)
                     {
-                        <!-- DISABLE BUTTON WITH CONFIRM -->
+                        <!-- Disable button with confirm -->
                         <a asp-action="Disable"
                            asp-route-id="@cust.Id"
                            class="btn btn-sm btn-danger"
@@ -36,7 +48,7 @@
                     }
                     else
                     {
-                        <!-- ENABLE BUTTON WITH CONFIRM -->
+                        <!-- Enable button with confirm -->
                         <a asp-action="Enable"
                            asp-route-id="@cust.Id"
                            class="btn btn-sm btn-success"

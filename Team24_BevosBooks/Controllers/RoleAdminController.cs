@@ -274,6 +274,103 @@ namespace Team24_BevosBooks.Controllers
 
             return RedirectToAction("ManageEmployees");
         }
+        // ============================================================
+        // CREATE CUSTOMER (Admin + Employee)
+        // ============================================================
+        [Authorize(Roles = "Admin,Employee")]
+        public IActionResult CreateCustomer()
+        {
+            return View();
+        }
+
+        [HttpPost]
+        [Authorize(Roles = "Admin,Employee")]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> CreateCustomer(RegisterViewModel rvm)
+        {
+            if (!ModelState.IsValid) return View(rvm);
+
+            AppUser customer = new AppUser
+            {
+                UserName = rvm.Email,
+                Email = rvm.Email,
+                FirstName = rvm.FirstName,
+                LastName = rvm.LastName,
+                PhoneNumber = rvm.PhoneNumber,
+                Address = rvm.Address,
+                City = rvm.City,
+                State = rvm.State,
+                ZipCode = rvm.ZipCode,
+                Status = AppUser.UserStatus.Customer
+            };
+
+            IdentityResult ir = await _userManager.CreateAsync(customer, rvm.Password);
+
+            if (!ir.Succeeded)
+            {
+                foreach (var error in ir.Errors)
+                    ModelState.AddModelError("", error.Description);
+                return View(rvm);
+            }
+
+            await _userManager.AddToRoleAsync(customer, "Customer");
+
+            TempData["Message"] = $"Customer {customer.FirstName} {customer.LastName} created successfully.";
+            return RedirectToAction("ManageCustomers");
+        }
+
+        // ============================================================
+        // EDIT CUSTOMER (Admin + Employee)
+        // ============================================================
+        [Authorize(Roles = "Admin,Employee")]
+        public async Task<IActionResult> EditCustomer(string id)
+        {
+            AppUser customer = await _userManager.FindByIdAsync(id);
+            if (customer == null) return NotFound();
+
+            return View(customer);
+        }
+
+        [HttpPost]
+        [Authorize(Roles = "Admin,Employee")]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> EditCustomer(AppUser edited)
+        {
+            if (!ModelState.IsValid)
+            {
+                return View(edited);
+            }
+
+            var customer = await _userManager.FindByIdAsync(edited.Id);
+            if (customer == null) return NotFound();
+
+            // Copy editable fields
+            customer.FirstName = edited.FirstName;
+            customer.LastName = edited.LastName;
+            customer.PhoneNumber = edited.PhoneNumber;
+            customer.Address = edited.Address;
+            customer.City = edited.City;
+            customer.State = edited.State;
+            customer.ZipCode = edited.ZipCode;
+
+            // Force status to remain Customer
+            customer.Status = AppUser.UserStatus.Customer;
+
+            var result = await _userManager.UpdateAsync(customer);
+
+            if (!result.Succeeded)
+            {
+                foreach (var error in result.Errors)
+                {
+                    ModelState.AddModelError("", error.Description);
+                }
+                return View(edited);
+            }
+
+            TempData["Message"] = $"Customer {customer.FirstName} {customer.LastName} updated successfully.";
+            return RedirectToAction("ManageCustomers");
+        }
+
 
     }
 }
