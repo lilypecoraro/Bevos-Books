@@ -1,7 +1,19 @@
 ﻿@model Team24_BevosBooks.Models.Review
 
+@{
+    ViewData["Title"] = "Write a Review";
+    string bookTitle = ViewBag.BookTitle as string ?? "(Unknown Title)";
+    string bookAuthors = ViewBag.BookAuthors as string ?? "(Unknown Author)";
+}
 
 <h2>Write a Review</h2>
+
+<!-- Clear context: which book is being reviewed -->
+<div class="alert alert-info bg-white text-dark mb-3">
+    You are writing a review for:
+    <strong class="text-dark">@bookTitle</strong>
+    <span class="text-muted">by @bookAuthors</span>
+</div>
 
 <!-- Shows model-level errors (e.g., purchase requirement / duplicate review) -->
 <div class="mb-3">
@@ -34,4 +46,3 @@
 
     <button type="submit" class="btn btn-primary">Submit Review</button>
 </form>
-

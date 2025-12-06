@@ -93,15 +93,22 @@ namespace Team24_BevosBooks.Controllers
         [HttpGet]
         public async Task<IActionResult> Submit(int bookId)
         {
-            // Validate book exists
-            var bookExists = await _context.Books.AnyAsync(b => b.BookID == bookId);
-            if (!bookExists) return NotFound();
+            // Load book details
+            var book = await _context.Books
+                .AsNoTracking()
+                .FirstOrDefaultAsync(b => b.BookID == bookId);
+
+            if (book == null) return NotFound();
 
             // Prefill model with BookID; ReviewerID set on POST
             var model = new Review
             {
                 BookID = bookId
             };
+
+            // Pass book info to the view
+            ViewBag.BookTitle = book.Title;
+            ViewBag.BookAuthors = book.Authors;
 
             return View(model);
         }
@@ -119,7 +126,7 @@ namespace Team24_BevosBooks.Controllers
             var userId = _userManager.GetUserId(User);
             if (string.IsNullOrEmpty(userId)) return Unauthorized();
 
-            // below allows the review to be submitted -- all of these are still passed into database though (i think)
+            // Ignore nav/server-set properties for validation
             ModelState.Remove(nameof(Review.Book));
             ModelState.Remove(nameof(Review.Reviewer));
             ModelState.Remove(nameof(Review.ReviewerID));
@@ -143,7 +150,17 @@ namespace Team24_BevosBooks.Controllers
 
             if (!ModelState.IsValid)
             {
-                // Return the form with validation messages
+                // Reload book info for the view
+                var book = await _context.Books
+                    .AsNoTracking()
+                    .FirstOrDefaultAsync(b => b.BookID == review.BookID);
+
+                if (book != null)
+                {
+                    ViewBag.BookTitle = book.Title;
+                    ViewBag.BookAuthors = book.Authors;
+                }
+
                 return View(review);
             }
 
