@@ -52,11 +52,11 @@
                 <td>
                     @if (coupon.FreeThreshold.HasValue)
                     {
-                        <span>@coupon.FreeThreshold.Value.ToString("C")</span>
+                        <span class="text-dark">@coupon.FreeThreshold.Value.ToString("C")</span>
                     }
                     else
                     {
-                        <span>-</span>
+                        <span class="text-dark">-</span>
                     }
                 </td>
                 <td>
