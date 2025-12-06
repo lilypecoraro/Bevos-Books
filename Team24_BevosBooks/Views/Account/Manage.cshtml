@@ -2,8 +2,8 @@
 
 @{
     ViewData["Title"] = "Manage Account";
-    var alertClass = (string)(TempData["AlertClass"] ?? "info");
-    var message = (string)TempData["Message"];
+    var alertClass = TempData["AlertClass"] as string;
+    var message = TempData["Message"] as string;
 }
 
 <h2 class="mt-4 mb-3 text-white">Manage Your Profile</h2>
