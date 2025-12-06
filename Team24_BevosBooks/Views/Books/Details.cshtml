@@ -252,6 +252,14 @@
                 }
             </p>
 
+            @if (TempData["CartMessage"] != null)
+            {
+                <div class="alert alert-warning text-dark mb-2">
+                    @TempData["CartMessage"]
+                </div>
+            }
+
+
             @if (Model.BookStatus != "Discontinued" && Model.InventoryQuantity > 0)
             {
                 if (User.Identity.IsAuthenticated && User.IsInRole("Customer"))

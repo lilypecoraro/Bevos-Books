@@ -146,7 +146,7 @@ namespace Team24_BevosBooks.Controllers
         }
 
         // ============================================================
-        // ADD TO CART
+        // ADD TO CART 
         // ============================================================
         [Authorize(Roles = "Customer")]
         public async Task<IActionResult> AddToCart(int id)
@@ -157,6 +157,7 @@ namespace Team24_BevosBooks.Controllers
             var book = await _context.Books.FindAsync(id);
             if (book == null) return NotFound();
 
+            // Check availability
             if (book.InventoryQuantity <= 0 || book.BookStatus == "Discontinued")
             {
                 TempData["CartMessage"] = "This book is not available.";
@@ -171,7 +172,7 @@ namespace Team24_BevosBooks.Controllers
 
             if (existing == null)
             {
-                existing = new OrderDetail
+                var newDetail = new OrderDetail
                 {
                     OrderID = cart.OrderID,
                     Order = cart,
@@ -182,19 +183,21 @@ namespace Team24_BevosBooks.Controllers
                     Cost = book.Cost
                 };
 
-                _context.OrderDetails.Add(existing);
+                _context.OrderDetails.Add(newDetail);
+                await _context.SaveChangesAsync();
+
+                TempData["CartMessage"] = $"'{book.Title}' was added to your cart.";
             }
             else
             {
-                if (existing.Quantity < book.InventoryQuantity)
-                    existing.Quantity++;
-                else
-                    TempData["CartMessage"] = "Cannot exceed stock quantity.";
+                // Do not increment quantity — just show message
+                TempData["CartMessage"] = $"'{book.Title}' is already in your cart.";
             }
 
-            await _context.SaveChangesAsync();
-            return RedirectToAction("Cart");
+            // Redirect back to book details so message shows there
+            return RedirectToAction("Details", "Books", new { id });
         }
+
 
         // ============================================================
         // REMOVE ITEM
