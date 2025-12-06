@@ -1,19 +1,14 @@
 ﻿using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
-//TODO: Update this using statement to include your project name
 using Team24_BevosBooks.Models;
 using System;
 using System.Collections.Generic;
 
-//TODO: Make this namespace match your project name
 namespace Team24_BevosBooks.DAL
 {
-    //NOTE: This class definition references the user class for this project.  
-    //If your User class is called something other than AppUser, you will need
-    //to change it in the line below
-    public class AppDbContext: IdentityDbContext<AppUser>
+    public class AppDbContext : IdentityDbContext<AppUser>
     {
-        public AppDbContext(DbContextOptions<AppDbContext> options) : base(options){ }
+        public AppDbContext(DbContextOptions<AppDbContext> options) : base(options) { }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -33,6 +28,7 @@ namespace Team24_BevosBooks.DAL
                 .HasForeignKey(od => od.BookID)
                 .OnDelete(DeleteBehavior.Restrict); // or DeleteBehavior.NoAction
 
+            // Seed default shipping settings
             modelBuilder.Entity<ShippingSetting>().HasData(
                 new ShippingSetting
                 {
@@ -41,11 +37,9 @@ namespace Team24_BevosBooks.DAL
                     AdditionalBookRate = 1.50m
                 }
             );
-
         }
 
-
-        //TODO: Add Dbsets here.  Products is included as an example.  
+        // DbSets
         public DbSet<Book> Books { get; set; }
         public DbSet<Card> Cards { get; set; }
         public DbSet<Coupon> Coupons { get; set; }
@@ -55,8 +49,5 @@ namespace Team24_BevosBooks.DAL
         public DbSet<Reorder> Reorders { get; set; }
         public DbSet<Review> Reviews { get; set; }
         public DbSet<ShippingSetting> ShippingSettings { get; set; }
-
-
-
     }
 }

@@ -15,12 +15,11 @@
 }
 else
 {
-    <!-- SINGLE FORM WRAPS BOTH COLUMNS -->
     <form asp-action="Checkout" method="post" id="checkoutForm">
         @Html.AntiForgeryToken()
 
-        <!-- Hidden OrderID so POST knows which order -->
-        <input type="hidden" asp-for="Order.OrderID" />
+        <!-- IMPORTANT: DO *NOT* bind Order.OrderID -->
+        @* <input type="hidden" asp-for="Order.OrderID" /> *@
 
         <div class="row checkout-page">
 
@@ -32,6 +31,7 @@ else
                     <div class="card-header">
                         <h5>Select Payment Method</h5>
                     </div>
+
                     <div class="card-body">
                         @if (!Model.Cards.Any())
                         {
@@ -43,6 +43,7 @@ else
                         {
                             <div class="mb-3">
                                 <label class="form-label"><strong>Choose a credit card:</strong></label>
+
                                 <select asp-for="SelectedCardID" class="form-select" required>
                                     <option value="">-- Select Card --</option>
                                     @foreach (var c in Model.Cards)
@@ -51,8 +52,10 @@ else
                                         <option value="@c.CardID">@c.CardType •••• @last4</option>
                                     }
                                 </select>
+
                                 <span asp-validation-for="SelectedCardID" class="text-danger"></span>
                             </div>
+
                             <a asp-controller="Account" asp-action="AddCard"
                                class="btn btn-outline-secondary btn-sm mb-2 add-card-btn">
                                 Add another card
@@ -66,12 +69,20 @@ else
                     <div class="card-header">
                         <h5>Coupon Code</h5>
                     </div>
+
                     <div class="card-body">
                         <div class="input-group">
-                            <input asp-for="CouponCode" class="form-control" placeholder="Enter coupon code" />
-                            <button type="submit" class="btn btn-primary">Apply &amp; Place Order</button>
+                            <input asp-for="CouponCode"
+                                   class="form-control"
+                                   placeholder="Enter coupon code" />
+
+                            <button type="submit" class="btn btn-primary">
+                                Apply &amp; Place Order
+                            </button>
                         </div>
+
                         <span asp-validation-for="CouponCode" class="text-danger"></span>
+
                         @if (ViewBag.CheckoutMessage != null)
                         {
                             <div class="alert alert-info mt-2">@ViewBag.CheckoutMessage</div>
@@ -82,10 +93,12 @@ else
             </div> <!-- END LEFT COLUMN -->
             <!-- RIGHT COLUMN -->
             <div class="col-md-5">
+
                 <div class="card">
                     <div class="card-header">
                         <h5>Order Summary</h5>
                     </div>
+
                     <div class="card-body">
                         <p><strong>Subtotal:</strong> @Model.Subtotal.ToString("c")</p>
                         <p><strong>Shipping:</strong> @Model.Shipping.ToString("c")</p>
@@ -98,6 +111,7 @@ else
                         </button>
                     </div>
                 </div>
+
             </div> <!-- END RIGHT COLUMN -->
 
         </div> <!-- END ROW -->
