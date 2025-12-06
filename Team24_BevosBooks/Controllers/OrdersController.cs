@@ -168,7 +168,7 @@ namespace Team24_BevosBooks.Controllers
 
             var existing = await _context.OrderDetails
                 .FirstOrDefaultAsync(od => od.OrderID == cart.OrderID &&
-                                           od.BookID == id);
+                                       od.BookID == id);
 
             if (existing == null)
             {
@@ -194,8 +194,8 @@ namespace Team24_BevosBooks.Controllers
                 TempData["CartMessage"] = $"'{book.Title}' is already in your cart.";
             }
 
-            // Redirect back to book details so message shows there
-            return RedirectToAction("Details", "Books", new { id });
+            // Redirect to the cart page so the message shows there
+            return RedirectToAction("Cart");
         }
 
 
