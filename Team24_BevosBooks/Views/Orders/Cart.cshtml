@@ -7,7 +7,6 @@
     decimal shipping = ViewBag.Shipping ?? 0m;
     decimal total = ViewBag.Total ?? 0m;
 
-    // Build checkout button class safely
     string checkoutClass = "btn btn-primary";
     if (!Model.OrderDetails.Any())
     {
@@ -19,16 +18,18 @@
 
 @if (TempData["CartMessage"] != null)
 {
-    <div class="alert alert-info text-dark bg-white">@TempData["CartMessage"]</div>
+    <div class="alert alert-info bg-white text-dark">
+        @TempData["CartMessage"]
+    </div>
 }
 
 @if (messages.Any())
 {
-    <div class="alert alert-warning text-dark bg-white">
+    <div class="alert alert-warning bg-white text-dark">
         <ul class="mb-0">
             @foreach (var msg in messages)
             {
-                <li>@msg</li>
+                <li class="text-dark">@msg</li>
             }
         </ul>
     </div>
@@ -36,7 +37,7 @@
 
 @if (!Model.OrderDetails.Any())
 {
-    <div class="alert alert-info text-dark bg-white">
+    <div class="alert alert-info bg-white text-dark">
         Your cart is empty. Browse <a asp-controller="Books" asp-action="Index" class="text-dark">books</a> to get started.
     </div>
 }
@@ -69,9 +70,7 @@ else
                             <button type="submit" class="btn btn-sm cart-update-btn">Update</button>
                         </form>
                     </td>
-
                     <td>@((detail.Quantity * detail.Price).ToString("c"))</td>
-
                     <td>
                         <form asp-action="RemoveItem" method="post">
                             <input type="hidden" name="orderDetailId" value="@detail.OrderDetailID" />
@@ -101,6 +100,15 @@ else
 
 @section Styles {
     <style>
+        /* Force alert boxes to have black text on white background */
+        .alert.bg-white {
+            color: #000 !important;
+        }
+
+            .alert.bg-white li {
+                color: #000 !important;
+            }
+
         /* Quantity input styling */
         .cart-qty-input,
         .cart-qty-input:focus {
@@ -123,11 +131,11 @@ else
                 border-color: #000 !important;
             }
 
-        /* Totals styling - force dark text */
+        /* Totals styling */
         .subtotal-text,
         .shipping-text,
         .total-text {
-            color: #000 !important; /* force black text */
+            color: #000 !important;
         }
 
         .total-text {
