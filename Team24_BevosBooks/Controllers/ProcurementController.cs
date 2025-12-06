@@ -211,5 +211,29 @@ namespace Team24_BevosBooks.Controllers
             await _context.SaveChangesAsync();
             return RedirectToAction("ViewOrders");
         }
+        // ==============================
+        // BOOK DETAILS (Admin Procurement)
+        // ==============================
+        [Authorize(Roles = "Admin")]
+        public async Task<IActionResult> Details(int? id)
+        {
+            if (id == null) return NotFound();
+
+            var book = await _context.Books
+                .Include(b => b.Genre)
+                .Include(b => b.Reviews)
+                    .ThenInclude(r => r.Reviewer)
+                .FirstOrDefaultAsync(b => b.BookID == id);
+
+            if (book == null) return NotFound();
+
+            // Only approved reviews
+            book.Reviews = book.Reviews
+                .Where(r => r.DisputeStatus == "Approved")
+                .ToList();
+
+            return View(book);
+        }
+
     }
 }
