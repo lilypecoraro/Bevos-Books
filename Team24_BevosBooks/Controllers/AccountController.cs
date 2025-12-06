@@ -119,21 +119,28 @@ namespace Team24_BevosBooks.Controllers
             if (!ModelState.IsValid)
                 return View(lvm);
 
+            // Find the user first
+            var user = await _userManager.FindByEmailAsync(lvm.Email);
+            if (user == null)
+            {
+                ModelState.AddModelError("", "Invalid login attempt.");
+                return View(lvm);
+            }
+
+            // ✅ Custom check: disabled accounts
+            if (user.Status == AppUser.UserStatus.Disabled)
+            {
+                ModelState.AddModelError("", "Your account has been disabled. Please contact support.");
+                return View(lvm);
+            }
+
+            // Attempt sign-in only if account is active
             var result = await _signInManager.PasswordSignInAsync(
                 lvm.Email, lvm.Password, lvm.RememberMe, false);
 
             if (!result.Succeeded)
             {
                 ModelState.AddModelError("", "Invalid login attempt.");
-                return View(lvm);
-            }
-
-            AppUser user = await _userManager.Users.FirstAsync(u => u.Email == lvm.Email);
-
-            if (user.Status == AppUser.UserStatus.Disabled)
-            {
-                await _signInManager.SignOutAsync();
-                ModelState.AddModelError("", "Your account has been disabled.");
                 return View(lvm);
             }
 
