@@ -134,8 +134,15 @@ namespace Team24_BevosBooks.Controllers
                 return View(lvm);
             }
 
-            // Attempt sign-in only if account is active
-            var result = await _signInManager.PasswordSignInAsync(
+            // ✅ NEW: fired employees
+            if (user.Status == AppUser.UserStatus.Fired)
+            {
+                ModelState.AddModelError("", "Your employment has been terminated. Please contact an administrator about rehire options.");
+                return View(lvm);
+
+            }
+                // Attempt sign-in only if account is active
+                var result = await _signInManager.PasswordSignInAsync(
                 lvm.Email, lvm.Password, lvm.RememberMe, false);
 
             if (!result.Succeeded)
