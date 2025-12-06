@@ -10,10 +10,12 @@ namespace Team24_BevosBooks.Models
 
         [Required]
         [StringLength(20)]
+        [Display(Name = "Coupon Code")]
         public string CouponCode { get; set; }
 
         [Required]
         [StringLength(20)]
+        [Display(Name = "Coupon Type")]
         public string CouponType { get; set; }  // "FreeShipping" or "PercentOff"
 
         [Column(TypeName = "decimal(5,2)")]
