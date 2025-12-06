@@ -22,14 +22,26 @@
                     <ul class="list-group list-group-flush">
                         @foreach (var od in Model.OrderDetails)
                         {
-                            <li class="list-group-item d-flex justify-content-between align-items-center text-dark bg-white">
-                                <span class="text-dark">
-                                    <a asp-controller="Books" asp-action="Details" asp-route-id="@od.BookID" class="text-dark">
-                                        @od.Book.Title
+                            <li class="list-group-item d-flex flex-column align-items-start text-dark bg-white">
+                                <div class="d-flex justify-content-between w-100">
+                                    <span class="text-dark">
+                                        <a asp-controller="Books" asp-action="Details" asp-route-id="@od.BookID" class="text-dark">
+                                            @od.Book.Title
+                                        </a>
+                                        — @od.Quantity × @od.Price.ToString("c")
+                                    </span>
+                                    <span class="badge bg-light text-dark">@((od.Price * od.Quantity).ToString("c"))</span>
+                                </div>
+
+                                <!-- Write Review button for purchased book -->
+                                <div class="mt-2">
+                                    <a asp-controller="Reviews"
+                                       asp-action="Submit"
+                                       asp-route-bookId="@od.BookID"
+                                       class="btn btn-sm btn-outline-primary">
+                                        Write a Review
                                     </a>
-                                    — @od.Quantity × @od.Price.ToString("c")
-                                </span>
-                                <span class="badge bg-light text-dark">@((od.Price * od.Quantity).ToString("c"))</span>
+                                </div>
                             </li>
                         }
                     </ul>
