@@ -141,7 +141,7 @@ namespace Team24_BevosBooks.Controllers
         }
 
         // ============================================================
-        // ADD TO CART
+        // ADD TO CART (fixed)
         // ============================================================
         [Authorize(Roles = "Customer")]
         public async Task<IActionResult> AddToCart(int id)
@@ -149,7 +149,6 @@ namespace Team24_BevosBooks.Controllers
             var user = await _userManager.GetUserAsync(User);
 
             var book = await _context.Books.FindAsync(id);
-
             if (book == null)
                 return NotFound();
 
@@ -161,30 +160,42 @@ namespace Team24_BevosBooks.Controllers
 
             var cart = await GetOrCreateCart(user.Id);
 
+            // Look for existing item in this cart
             var existing = await _context.OrderDetails
-                .FirstOrDefaultAsync(od => od.OrderID == cart.OrderID &&
-                                           od.BookID == id);
+                .FirstOrDefaultAsync(od => od.OrderID == cart.OrderID && od.BookID == id);
 
             if (existing == null)
             {
-                _context.OrderDetails.Add(new OrderDetail
+                var newDetail = new OrderDetail
                 {
                     OrderID = cart.OrderID,
+                    Order = cart,              // ✅ link navigation property
                     BookID = id,
+                    Book = book,               // ✅ link navigation property
                     Quantity = 1,
                     Price = book.Price,
                     Cost = book.Cost
-                });
+                };
+
+                _context.OrderDetails.Add(newDetail);
             }
             else
             {
                 if (existing.Quantity < book.InventoryQuantity)
+                {
                     existing.Quantity++;
+                }
                 else
+                {
                     TempData["CartMessage"] = "Cannot exceed stock quantity.";
+                }
             }
 
             await _context.SaveChangesAsync();
+
+            // Debug logging (optional)
+            Console.WriteLine($"Cart {cart.OrderID} now has {_context.OrderDetails.Count(od => od.OrderID == cart.OrderID)} items.");
+
             return RedirectToAction("Cart");
         }
 
@@ -275,5 +286,94 @@ namespace Team24_BevosBooks.Controllers
 
             return View(orders);
         }
+
+        // ============================================================
+        // CHECKOUT PAGE (GET)
+        // ============================================================
+        [Authorize(Roles = "Customer")]
+        public async Task<IActionResult> Checkout()
+        {
+            var user = await _userManager.GetUserAsync(User);
+
+            // Get or create the cart for this user
+            var cart = await GetOrCreateCart(user.Id);
+
+            // Reload the cart with OrderDetails and Books included
+            cart = await _context.Orders
+                .Include(o => o.OrderDetails)
+                    .ThenInclude(od => od.Book)
+                .FirstOrDefaultAsync(o => o.OrderID == cart.OrderID);
+
+            // Ensure OrderDetails is not null
+            cart.OrderDetails ??= new List<OrderDetail>();
+
+            // Update cart for discontinued/out-of-stock changes
+            var messages = await UpdateCartForChanges(cart);
+
+            // Compute totals
+            var totals = await ComputeCartTotals(cart);
+
+            // Get saved cards for this user
+            var cards = await _context.Cards
+                .Where(c => c.User.Id == user.Id)
+                .ToListAsync();
+
+            // Build the view model
+            var vm = new CheckoutViewModel
+            {
+                Order = cart,
+                Cards = cards,
+                Subtotal = totals.subtotal,
+                Shipping = totals.shipping,
+                Total = totals.total
+            };
+
+            ViewBag.Messages = messages;
+            return View(vm); // ✅ Pass CheckoutViewModel to the view
+        }
+
+
+        // ============================================================
+        // CHECKOUT (POST) - Place Order
+        // ============================================================
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        [Authorize(Roles = "Customer")]
+        public async Task<IActionResult> Checkout(CheckoutViewModel model)
+        {
+            if (!ModelState.IsValid || model.Order == null)
+            {
+                return View(model);
+            }
+
+            var order = await _context.Orders
+                .Include(o => o.OrderDetails)
+                .FirstOrDefaultAsync(o => o.OrderID == model.Order.OrderID);
+
+            if (order == null) return NotFound();
+
+            // Apply coupon logic if needed
+            if (!string.IsNullOrEmpty(model.CouponCode))
+            {
+                ViewBag.CheckoutMessage = $"Coupon {model.CouponCode} applied!";
+                // TODO: adjust totals here if coupon discounts apply
+            }
+
+            // Mark order as completed
+            order.OrderStatus = "Completed";
+            order.OrderDate = DateTime.Now;
+
+            await _context.SaveChangesAsync();
+
+            // Optionally send confirmation email
+            await _emailSender.SendEmailAsync(
+                User.Identity.Name,
+                "Order Confirmation",
+                $"Your order #{order.OrderID} has been placed successfully."
+            );
+
+            return RedirectToAction("History");
+        }
+
     }
 }

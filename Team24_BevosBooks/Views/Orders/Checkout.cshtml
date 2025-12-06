@@ -6,7 +6,7 @@
 
 <h2 class="mt-3 mb-3">Checkout</h2>
 
-@if (!Model.Order.OrderDetails.Any())
+@if (!Model.Order!.OrderDetails.Any())
 {
     <div class="alert alert-warning">
         Your shopping cart is empty. You cannot check out until items are added.
@@ -19,6 +19,9 @@ else
     <form asp-action="Checkout" method="post" id="checkoutForm">
         @Html.AntiForgeryToken()
 
+        <!-- Hidden OrderID so POST knows which order -->
+        <input type="hidden" asp-for="Order.OrderID" />
+
         <div class="row checkout-page">
 
             <!-- LEFT COLUMN -->
@@ -29,7 +32,6 @@ else
                     <div class="card-header">
                         <h5>Select Payment Method</h5>
                     </div>
-
                     <div class="card-body">
                         @if (!Model.Cards.Any())
                         {
@@ -41,22 +43,16 @@ else
                         {
                             <div class="mb-3">
                                 <label class="form-label"><strong>Choose a credit card:</strong></label>
-
-                                <!-- Binds to SelectedCardID in the POST -->
                                 <select asp-for="SelectedCardID" class="form-select" required>
                                     <option value="">-- Select Card --</option>
-
                                     @foreach (var c in Model.Cards)
                                     {
                                         string last4 = c.CardNumber[^4..];
                                         <option value="@c.CardID">@c.CardType •••• @last4</option>
                                     }
                                 </select>
-
                                 <span asp-validation-for="SelectedCardID" class="text-danger"></span>
                             </div>
-
-                            <!-- Add another card button - black text -->
                             <a asp-controller="Account" asp-action="AddCard"
                                class="btn btn-outline-secondary btn-sm mb-2 add-card-btn">
                                 Add another card
@@ -70,19 +66,12 @@ else
                     <div class="card-header">
                         <h5>Coupon Code</h5>
                     </div>
-
                     <div class="card-body">
                         <div class="input-group">
-                            <!-- Binds to CouponCode in the POST -->
                             <input asp-for="CouponCode" class="form-control" placeholder="Enter coupon code" />
-                            <!-- Same action, same form — coupon applied when order is placed -->
-                            <button type="submit" class="btn btn-primary">
-                                Apply &amp; Place Order
-                            </button>
+                            <button type="submit" class="btn btn-primary">Apply &amp; Place Order</button>
                         </div>
-
                         <span asp-validation-for="CouponCode" class="text-danger"></span>
-
                         @if (ViewBag.CheckoutMessage != null)
                         {
                             <div class="alert alert-info mt-2">@ViewBag.CheckoutMessage</div>
@@ -93,18 +82,15 @@ else
             </div> <!-- END LEFT COLUMN -->
             <!-- RIGHT COLUMN -->
             <div class="col-md-5">
-
                 <div class="card">
                     <div class="card-header">
                         <h5>Order Summary</h5>
                     </div>
-
                     <div class="card-body">
                         <p><strong>Subtotal:</strong> @Model.Subtotal.ToString("c")</p>
                         <p><strong>Shipping:</strong> @Model.Shipping.ToString("c")</p>
                         <p class="fs-4"><strong>Total:</strong> @Model.Total.ToString("c")</p>
 
-                        <!-- This button also posts the same form -->
                         <button type="submit"
                                 class="btn btn-success w-100"
                                 @(Model.Cards.Any() ? "" : "disabled")>
@@ -112,7 +98,6 @@ else
                         </button>
                     </div>
                 </div>
-
             </div> <!-- END RIGHT COLUMN -->
 
         </div> <!-- END ROW -->
@@ -143,7 +128,6 @@ else
                     color: #666 !important;
                 }
 
-        /* Make Add Another Card button text black */
         .add-card-btn {
             color: #000 !important;
             border-color: #000 !important;

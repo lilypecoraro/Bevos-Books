@@ -57,5 +57,6 @@ namespace Team24_BevosBooks.DAL
         public DbSet<ShippingSetting> ShippingSettings { get; set; }
 
 
+
     }
 }
