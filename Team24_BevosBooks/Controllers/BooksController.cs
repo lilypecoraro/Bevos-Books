@@ -34,11 +34,15 @@ namespace Team24_BevosBooks.Controllers
             bool inStockOnly = false,
             string sortOrder = "title")
         {
+            // ⭐ Always set total count of all books in DB
+            ViewBag.TotalCount = await _context.Books.CountAsync();
+
             // Include Reviews so the Index view can compute average ratings
             IQueryable<Book> query = _context.Books
                 .Include(b => b.Genre)
                 .Include(b => b.Reviews);
 
+            // Apply filters
             if (!string.IsNullOrEmpty(searchString))
             {
                 query = query.Where(b =>
@@ -54,6 +58,7 @@ namespace Team24_BevosBooks.Controllers
             if (inStockOnly)
                 query = query.Where(b => b.InventoryQuantity > 0);
 
+            // Apply sorting
             query = sortOrder switch
             {
                 "author" => query.OrderBy(b => b.Authors),
@@ -62,14 +67,12 @@ namespace Team24_BevosBooks.Controllers
                 "priceAsc" => query.OrderBy(b => b.Price),
                 "priceDesc" => query.OrderByDescending(b => b.Price),
 
-                // ⭐ Highest rated (average of approved reviews)
                 "rating" => query.OrderByDescending(b =>
                     b.Reviews.Any(r => r.DisputeStatus == "Approved")
                         ? b.Reviews.Where(r => r.DisputeStatus == "Approved").Average(r => r.Rating)
                         : 0
                 ),
 
-                // ⭐ Popularity (total completed order quantities)
                 "popularity" => query.OrderByDescending(b =>
                     _context.OrderDetails
                         .Where(od => od.BookID == b.BookID && od.Order.OrderStatus == "Completed")
@@ -79,6 +82,7 @@ namespace Team24_BevosBooks.Controllers
                 _ => query.OrderBy(b => b.Title),
             };
 
+            // Populate dropdowns and viewbag values
             ViewBag.GenreID = new SelectList(
                 await _context.Genres.OrderBy(g => g.GenreName).ToListAsync(),
                 "GenreID", "GenreName");
@@ -88,6 +92,7 @@ namespace Team24_BevosBooks.Controllers
             ViewBag.InStockOnly = inStockOnly;
             ViewBag.SortOrder = sortOrder;
 
+            // Return filtered list
             return View(await query.ToListAsync());
         }
 

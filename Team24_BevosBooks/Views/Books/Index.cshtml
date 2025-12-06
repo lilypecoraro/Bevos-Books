@@ -44,7 +44,7 @@
             <button type="submit" class="btn btn-primary w-100">Search</button>
         </div>
         <div class="col-md-2">
-            <!-- New button to reset filters and show all books -->
+            <!-- Button to reset filters and show all books -->
             <a asp-action="Index" class="btn btn-secondary w-100">Show All Books</a>
         </div>
     </div>
@@ -52,7 +52,9 @@
 
 <!-- Record count -->
 <div class="mb-3">
-    <span class="fw-bold">@resultCount of @totalCount books</span>
+    <span class="fw-bold">
+        Showing @resultCount of @totalCount total books
+    </span>
 </div>
 
 <table class="table table-bordered table-striped table-hover bg-white text-dark">
