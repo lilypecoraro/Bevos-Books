@@ -2,144 +2,262 @@
 
 @{
     ViewData["Title"] = "Shopping Cart";
-    var messages = ViewBag.Messages as List<string> ?? new List<string>();
+
+    var messages = ViewBag.Messages as List<string> ?? new();
     decimal subtotal = ViewBag.Subtotal ?? 0m;
     decimal shipping = ViewBag.Shipping ?? 0m;
     decimal total = ViewBag.Total ?? 0m;
 
-    string checkoutClass = "btn btn-primary";
-    if (!Model.OrderDetails.Any())
-    {
-        checkoutClass += " disabled";
-    }
+    string checkoutClass = "btn-checkout";
+    if (!Model.OrderDetails.Any()) checkoutClass += " disabled";
 }
 
-<h2 class="mt-3 mb-3 text-white">Shopping Cart</h2>
+<h1 class="cart-title">Shopping Cart</h1>
 
+<!-- ALERTS -->
 @if (TempData["CartMessage"] != null)
 {
-    <div class="alert alert-info bg-white text-dark">
+    <div class="alert alert-info text-dark bg-white shadow-sm mb-3">
         @TempData["CartMessage"]
     </div>
 }
 
 @if (messages.Any())
 {
-    <div class="alert alert-warning bg-white text-dark">
+    <div class="alert alert-warning text-dark bg-white shadow-sm">
         <ul class="mb-0">
             @foreach (var msg in messages)
             {
-                <li class="text-dark">@msg</li>
+                <li>@msg</li>
             }
         </ul>
     </div>
 }
 
+<!-- EMPTY CART -->
 @if (!Model.OrderDetails.Any())
 {
-    <div class="alert alert-info bg-white text-dark">
-        Your cart is empty. Browse <a asp-controller="Books" asp-action="Index" class="text-dark">books</a> to get started.
+    <div class="alert alert-info bg-white text-dark shadow-sm">
+        Your cart is empty. Browse
+        <a asp-controller="Books" asp-action="Index" class="text-dark fw-bold">books</a>
+        to get started.
     </div>
 }
 else
 {
-    <table class="table table-bordered table-striped table-hover bg-white text-dark">
-        <thead class="table-dark">
-            <tr>
-                <th>Title</th>
-                <th>Price</th>
-                <th style="width:150px;">Quantity</th>
-                <th>Item Total</th>
-                <th></th>
-            </tr>
-        </thead>
-        <tbody>
-            @foreach (var detail in Model.OrderDetails)
-            {
-                <tr>
-                    <td>@detail.Book.Title</td>
-                    <td>@detail.Price.ToString("c")</td>
-                    <td>
-                        <form asp-action="UpdateQuantity" method="post" class="d-flex">
-                            <input type="hidden" name="orderDetailId" value="@detail.OrderDetailID" />
-                            <input type="number"
-                                   name="quantity"
-                                   value="@detail.Quantity"
-                                   min="0"
-                                   class="form-control form-control-sm me-2 cart-qty-input text-dark" />
-                            <button type="submit" class="btn btn-sm cart-update-btn">Update</button>
-                        </form>
-                    </td>
-                    <td>@((detail.Quantity * detail.Price).ToString("c"))</td>
-                    <td>
-                        <form asp-action="RemoveItem" method="post">
-                            <input type="hidden" name="orderDetailId" value="@detail.OrderDetailID" />
-                            <button type="submit" class="btn btn-sm btn-outline-danger">Remove</button>
-                        </form>
-                    </td>
-                </tr>
-            }
-        </tbody>
-    </table>
+    <div class="row g-4">
 
-    <div class="row bg-white p-3">
-        <div class="col-md-6">
-            <a asp-controller="Books" asp-action="Index" class="btn btn-secondary">Continue Shopping</a>
-        </div>
-        <div class="col-md-6 text-end">
-            <p class="subtotal-text"><strong>Subtotal:</strong> @subtotal.ToString("c")</p>
-            <p class="shipping-text"><strong>Shipping:</strong> @shipping.ToString("c")</p>
-            <p class="total-text fs-5"><strong>Total:</strong> @total.ToString("c")</p>
+        <!-- CART TABLE -->
+        <div class="col-md-8">
+            <table class="table cart-table">
+                <thead>
+                    <tr>
+                        <th>Title</th>
+                        <th>Price</th>
+                        <th style="width:150px;">Qty</th>
+                        <th>Total</th>
+                        <th></th>
+                    </tr>
+                </thead>
 
-            <a asp-action="Checkout" class="@checkoutClass">
-                Proceed to Checkout
+                <tbody>
+                    @foreach (var detail in Model.OrderDetails)
+                    {
+                        <tr>
+                            <td>@detail.Book.Title</td>
+
+                            <td>@detail.Price.ToString("c")</td>
+
+                            <td>
+                                <form asp-action="UpdateQuantity" method="post" class="d-flex align-items-center">
+                                    <input type="hidden" name="orderDetailId" value="@detail.OrderDetailID" />
+
+                                    <input type="number"
+                                           name="quantity"
+                                           value="@detail.Quantity"
+                                           min="0"
+                                           class="form-control form-control-sm cart-qty-input me-2" />
+
+                                    <button type="submit" class="btn btn-sm cart-update-btn">
+                                        Update
+                                    </button>
+                                </form>
+                            </td>
+
+                            <td>@((detail.Quantity * detail.Price).ToString("c"))</td>
+
+                            <td>
+                                <form asp-action="RemoveItem" method="post">
+                                    <input type="hidden" name="orderDetailId" value="@detail.OrderDetailID" />
+                                    <button type="submit" class="btn btn-sm btn-outline-danger">
+                                        Remove
+                                    </button>
+                                </form>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+
+            <a asp-controller="Books" asp-action="Index" class="btn-cart">
+                ← Continue Shopping
             </a>
+        </div>
+
+        <!-- SUMMARY CARD -->
+        <div class="col-md-4">
+            <div class="cart-summary">
+                <h3>Order Summary</h3>
+
+                <p><strong>Subtotal:</strong> @subtotal.ToString("c")</p>
+                <p><strong>Shipping:</strong> @shipping.ToString("c")</p>
+
+                <div class="total">Total: @total.ToString("c")</div>
+
+                <a asp-action="Checkout" class="@checkoutClass">Proceed to Checkout</a>
+            </div>
         </div>
     </div>
 }
 
-@section Styles {
-    <style>
-        /* Force alert boxes to have black text on white background */
-        .alert.bg-white {
-            color: #000 !important;
+<!-- ===================================== -->
+<!--               CSS                     -->
+<!-- ===================================== -->
+<style>
+    /* PAGE TITLE */
+    .cart-title {
+        font-family: "VT323", monospace;
+        font-size: 3.2rem;
+        color: #f5b338;
+        text-shadow: 0 0 8px #111;
+        margin-bottom: 1.5rem;
+    }
+
+    /* TABLE CONTAINER */
+    .cart-table {
+        width: 100%;
+        border-radius: 14px;
+        overflow: hidden;
+        background: rgba(17,17,17,0.92);
+        color: #eee;
+        box-shadow: 0 6px 14px rgba(0,0,0,0.45);
+    }
+
+        .cart-table thead {
+            background: #222;
         }
 
-            .alert.bg-white li {
-                color: #000 !important;
-            }
-
-        /* Quantity input styling */
-        .cart-qty-input,
-        .cart-qty-input:focus {
-            color: #000 !important;
-            background-color: #fff !important;
-            border: 1px solid #ccc !important;
+        .cart-table th {
+            font-family: "JetBrains Mono", monospace;
+            color: #f5b338;
+            font-size: 0.95rem;
         }
 
-        /* Update button styling */
-        .cart-update-btn {
-            color: #000 !important;
-            border-color: #000 !important;
-            background-color: rgba(255,255,255,0.85) !important;
-            font-weight: 600 !important;
+        .cart-table td {
+            padding: 0.9rem 1rem;
+            vertical-align: middle;
         }
 
-            .cart-update-btn:hover {
-                background-color: #fff !important;
-                color: #000 !important;
-                border-color: #000 !important;
-            }
+    /* INPUT STYLING */
+    .cart-qty-input {
+        background: #fff !important;
+        border: 1px solid #ccc !important;
+        color: #000 !important;
+        width: 65px;
+    }
 
-        /* Totals styling */
-        .subtotal-text,
-        .shipping-text,
-        .total-text {
-            color: #000 !important;
+    /* UPDATE BUTTON */
+    .cart-update-btn {
+        background: #f5f5f5;
+        color: #111;
+        border: 1px solid #aaa;
+        font-family: "JetBrains Mono", monospace;
+    }
+
+        .cart-update-btn:hover {
+            background: #fff;
         }
 
-        .total-text {
-            font-weight: 700;
+    /* SUMMARY CARD */
+    .cart-summary {
+        background: rgba(255,255,255,0.92);
+        padding: 1.8rem;
+        border-radius: 14px;
+        box-shadow: 0 8px 18px rgba(0,0,0,0.25);
+    }
+
+        .cart-summary h3 {
+            font-family: "JetBrains Mono", monospace;
+            margin-bottom: 1rem;
         }
-    </style>
-}
+
+        .cart-summary p {
+            font-size: 1rem;
+            color: #111;
+        }
+
+        .cart-summary .total {
+            font-size: 1.6rem;
+            font-weight: bold;
+            margin-top: 1rem;
+            color: #000;
+        }
+
+    /* BUTTONS */
+    .btn-cart {
+        display: inline-block;
+        margin-top: 1rem;
+        background: #737373;
+        padding: 0.6rem 1.4rem;
+        border-radius: 10px;
+        color: #fff !important;
+        font-family: "JetBrains Mono", monospace;
+    }
+
+        .btn-cart:hover {
+            background: #5e5e5e;
+        }
+
+    .btn-checkout {
+        display: block;
+        width: 100%;
+        background: #f5b338;
+        color: #111 !important;
+        padding: 0.8rem 1.2rem;
+        font-family: "JetBrains Mono", monospace;
+        font-weight: bold;
+        border-radius: 10px;
+        margin-top: 1.5rem;
+        text-align: center;
+    }
+
+        .btn-checkout:hover {
+            background: #e3a021;
+        }
+
+        .btn-checkout.disabled {
+            opacity: 0.5;
+            pointer-events: none;
+        }
+    /* FORCE ALL TEXT INSIDE ORDER SUMMARY TO BE BLACK */
+    .cart-summary,
+    .cart-summary * {
+        color: #000 !important;
+    }
+    /* UPDATE BUTTON — THEMED YELLOW */
+    .cart-update-btn {
+        background-color: #f5b338 !important;
+        color: #111 !important;
+        border: none !important;
+        font-weight: 600;
+        padding: 0.35rem 0.75rem;
+        border-radius: 6px;
+        transition: 0.15s ease-in-out;
+    }
+
+        .cart-update-btn:hover {
+            background-color: #e3a021 !important;
+            color: #111 !important;
+            border: none !important;
+        }
+</style>
