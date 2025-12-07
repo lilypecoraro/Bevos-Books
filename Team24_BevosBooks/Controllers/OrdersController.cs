@@ -584,7 +584,7 @@ namespace Team24_BevosBooks.Controllers
                     .ToListAsync();
             }
 
-            ViewBag.Recommendations = recs;
+            ViewBag.AssignedRecommendations = recs;
 
             return View(order);
         }

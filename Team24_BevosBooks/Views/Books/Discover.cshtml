@@ -1,0 +1,236 @@
+﻿<style>
+    /* ===========================
+       PAGE TITLES — Cozy Typewriter
+    ============================ */
+    .discover-title {
+        font-family: "VT323", monospace;
+        font-size: 3.6rem;
+        letter-spacing: 2px;
+        color: #f5b338;
+        margin-bottom: 1.8rem;
+        text-shadow: 0 0 12px rgba(0,0,0,0.7), 0 0 4px #693330;
+    }
+
+    .discover-section-title {
+        font-family: "VT323", monospace;
+        font-size: 2.2rem;
+        color: #f0e6d6; /* warm parchment white */
+        margin-bottom: 1.2rem;
+        text-shadow: 0 0 10px rgba(0,0,0,0.7);
+    }
+
+    .discover-page-wrap {
+        padding: 5rem 3vw 3rem;
+    }
+
+    /* ===========================
+       HORIZONTAL CAROUSEL
+       — smooth, warm, bookstore
+    ============================ */
+    .discover-slider {
+        display: flex;
+        gap: 1.5rem;
+        overflow-x: auto;
+        padding: 0.5rem 0 1.8rem;
+        scroll-snap-type: x mandatory;
+        scrollbar-width: thin;
+    }
+
+        .discover-slider::-webkit-scrollbar {
+            height: 6px;
+        }
+
+        .discover-slider::-webkit-scrollbar-thumb {
+            background: #f5b338;
+            border-radius: 6px;
+        }
+
+        /* ===========================
+       CARD STYLE — Cozy Bookstore
+       deep warm brown, soft glow
+    ============================ */
+        .discover-slider .discover-card {
+            flex: 0 0 250px;
+            max-width: 250px;
+            background-color: rgba(17, 17, 17, 0.88); /* deep warm-black */
+            border-radius: 16px;
+            border: 1px solid rgba(245, 179, 56, 0.25); /* soft gold edge */
+            padding: 1.1rem 1.2rem;
+            color: #f0e6d6 !important;
+            box-shadow: 0 8px 18px rgba(0, 0, 0, 0.55), 0 0 15px rgba(245, 179, 56, 0.08);
+            backdrop-filter: blur(3px);
+            scroll-snap-align: start;
+            transition: all 0.22s ease;
+        }
+
+            /* Hover Glow */
+            .discover-slider .discover-card:hover {
+                transform: translateY(-6px);
+                border-color: #f5b338;
+                box-shadow: 0 10px 24px rgba(0, 0, 0, 0.7), 0 0 18px rgba(245, 179, 56, 0.22);
+            }
+
+    /* ===========================
+       TEXT INSIDE CARDS
+    ============================ */
+    .discover-card .discover-book-title {
+        font-family: "JetBrains Mono", monospace;
+        font-size: 1.05rem;
+        font-weight: 600;
+        margin-bottom: 0.35rem;
+        color: #fff !important;
+        min-height: 40px;
+    }
+
+    .discover-card p.text-muted {
+        font-size: 0.8rem;
+        margin-bottom: 0.35rem;
+        color: #cbb7a8 !important; /* warm parchment tone */
+    }
+
+    /* ⭐ RATING CHIP */
+    .discover-badge {
+        background-color: #f5b338 !important;
+        color: #111111 !important;
+        padding: 0.26rem 0.65rem;
+        border-radius: 999px;
+        font-size: 0.75rem;
+        font-family: "JetBrains Mono", monospace;
+        margin-top: 0.3rem;
+        box-shadow: 0 0 8px rgba(245,179,56,0.4);
+    }
+
+    .discover-card .fw-bold {
+        font-size: 1rem;
+        margin-top: 0.7rem;
+        margin-bottom: 0.7rem;
+        color: #f0e6d6;
+    }
+
+    /* ===========================
+       BUTTONS — warm cozy gold
+    ============================ */
+    .discover-card .discover-btn {
+        border-color: #f5b338 !important;
+        color: #f5b338 !important;
+        background-color: rgba(255,255,255,0.08);
+        border-radius: 12px;
+        padding: 0.5rem 0.9rem;
+        font-size: 0.9rem;
+        transition: 0.18s ease-out;
+    }
+
+        .discover-card .discover-btn:hover {
+            background-color: #f5b338 !important;
+            color: #111111 !important;
+            box-shadow: 0 0 14px rgba(245,179,56,0.4);
+        }
+
+    section.discover-section {
+        margin-bottom: 3rem;
+    }
+</style>
+@using Team24_BevosBooks.Models
+@using Microsoft.EntityFrameworkCore
+@inject Team24_BevosBooks.DAL.AppDbContext _context
+
+@{
+    ViewData["Title"] = "Discover";
+
+    var bestsellers = ViewBag.Bestsellers as List<Book> ?? new();
+    var sections = ViewBag.GenreSections as Dictionary<string, List<Book>> ?? new();
+    var recs = ViewBag.Recommendations as List<Book> ?? new();
+    var lastViewed = ViewBag.LastViewedBook as Book;
+}
+
+<h1 class="discover-title text-center mb-5">Discover Your Next Read</h1>
+
+<!-- ============================= -->
+<!-- ⭐ SECTION 1: Because You Viewed -->
+<!-- ============================= -->
+@if (recs.Any())
+{
+    <section>
+        <h3 class="discover-section-title">
+            Because you viewed <span style="color:#f5b338;">@lastViewed?.Title</span>
+        </h3>
+
+        <div class="discover-slider">
+            @foreach (var b in recs.Take(8))
+            {
+                @await Html.PartialAsync("_DiscoverBookCard", b)
+            }
+        </div>
+    </section>
+}
+else
+{
+    <!-- ⭐ Popular Picks fallback -->
+    <section>
+        <h3 class="discover-section-title">Popular Picks To Get You Started</h3>
+
+        <div class="discover-slider">
+            @foreach (var b in bestsellers.Take(8))
+            {
+                @await Html.PartialAsync("_DiscoverBookCard", b)
+            }
+        </div>
+    </section>
+}
+
+<!-- ============================= -->
+<!-- ⭐ SECTION 2: Highly Rated -->
+<!-- ============================= -->
+<section>
+    <h3 class="discover-section-title">Highly Rated</h3>
+
+    @{
+        var topRated = _context.Books
+            .Include(b => b.Reviews)
+            .Where(b => b.Reviews.Any(r => r.DisputeStatus == "Approved"))
+            .OrderByDescending(b =>
+                b.Reviews
+                    .Where(r => r.DisputeStatus == "Approved")
+                    .Average(r => r.Rating))
+            .Take(8)
+            .ToList();
+    }
+
+    <div class="discover-slider">
+        @foreach (var b in topRated)
+        {
+            @await Html.PartialAsync("_DiscoverBookCard", b)
+        }
+    </div>
+</section>
+
+<!-- ============================= -->
+<!-- ⭐ SECTION 3: New Arrivals -->
+<!-- ============================= -->
+<section>
+    <h3 class="discover-section-title">New Arrivals</h3>
+
+    <div class="discover-slider">
+        @foreach (var b in bestsellers.OrderByDescending(b => b.PublishDate).Take(8))
+        {
+            @await Html.PartialAsync("_DiscoverBookCard", b)
+        }
+    </div>
+</section>
+
+<!-- ============================= -->
+<!-- ⭐ SECTION 4: Genre Spotlights -->
+<!-- ============================= -->
+@foreach (var g in sections.Take(2))
+{
+    <section>
+        <h3 class="discover-section-title">@g.Key Spotlight</h3>
+
+        <div class="discover-slider">
+            @foreach (var b in g.Value.Take(8))
+            {
+                @await Html.PartialAsync("_DiscoverBookCard", b)
+            }
+        </div>
+    </section>
+}

@@ -3,7 +3,7 @@
 
 @{
     ViewData["Title"] = "Order Confirmation";
-    var recs = ViewBag.Recommendations as List<Book>;
+    var recs = ViewBag.AssignedRecommendations as List<Book>;
 }
 
 <div class="container mt-4">
@@ -56,7 +56,7 @@
             </div>
 
             <a asp-controller="Orders" asp-action="History" class="btn btn-outline-primary">View Order History</a>
-            <a asp-controller="Books" asp-action="HomeCatalog" class="btn btn-primary">Continue Shopping</a>
+            <a asp-controller="Books" asp-action="Discover" class="btn btn-primary">Continue Shopping</a>
         </div>
 
         <div class="col-md-4">
