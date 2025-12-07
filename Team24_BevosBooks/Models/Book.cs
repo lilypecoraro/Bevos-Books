@@ -11,6 +11,7 @@ namespace Team24_BevosBooks.Models
         public int BookID { get; set; }   // PK
 
         [ForeignKey("Genre")]
+        [Display(Name = "Genre")]
         public int GenreID { get; set; }  // FK
 
         [Required]
@@ -29,12 +30,15 @@ namespace Team24_BevosBooks.Models
         public decimal Cost { get; set; }    // Supplier cost
 
         [DataType(DataType.Date)]
+        [Display(Name = "Publish Date")]
         public DateTime PublishDate { get; set; }
 
         [Required]
+        [Display(Name = "Inventory Quantity")]
         public int InventoryQuantity { get; set; }
 
         [Required]
+        [Display(Name = "Reorder Point")]
         public int ReorderPoint { get; set; }
 
         [Required, StringLength(200)]
