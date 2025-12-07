@@ -76,17 +76,40 @@ else
                                    class="form-control"
                                    placeholder="Enter coupon code" />
 
-                            <button type="submit" class="btn btn-primary">
-                                Apply &amp; Place Order
+                            <button formaction="/Orders/ApplyCoupon"
+                                    formmethod="post"
+                                    class="btn btn-primary">
+                                Apply Coupon
                             </button>
+
                         </div>
 
                         <span asp-validation-for="CouponCode" class="text-danger"></span>
 
+                        
+
                         @if (ViewBag.CheckoutMessage != null)
                         {
-                            <div class="alert alert-info mt-2">@ViewBag.CheckoutMessage</div>
+                            <div class="checkout-alert checkout-alert-success">
+                                @ViewBag.CheckoutMessage
+                            </div>
+
                         }
+
+                        @if (ViewBag.CheckoutError != null)
+                        {
+                            <div class="checkout-alert checkout-alert-error">
+                                @ViewBag.CheckoutError
+                            </div>
+                        }
+
+                        @if (ViewBag.CheckoutMessage != null)
+                        {
+                            <div class="checkout-alert checkout-alert-info">
+                                @ViewBag.CheckoutMessage
+                            </div>
+                        }
+
                     </div>
                 </div>
 
@@ -100,16 +123,57 @@ else
                     </div>
 
                     <div class="card-body">
-                        <p><strong>Subtotal:</strong> @Model.Subtotal.ToString("c")</p>
-                        <p><strong>Shipping:</strong> @Model.Shipping.ToString("c")</p>
-                        <p class="fs-4"><strong>Total:</strong> @Model.Total.ToString("c")</p>
+
+                        <!-- ORIGINAL SUBTOTAL -->
+                        @if (Model.Discount > 0)
+                        {
+                            <p>
+                                <strong>Original Subtotal:</strong>
+                                @Model.OriginalSubtotal.ToString("c")
+                            </p>
+
+                            <!-- DISCOUNT AMOUNT -->
+                            <p class="text-success">
+                                <strong>Discount:</strong>
+                                -@Model.Discount.ToString("c")
+                            </p>
+
+                            <!-- DISCOUNTED SUBTOTAL -->
+                            <p>
+                                <strong>Discounted Subtotal:</strong>
+                                @Model.DiscountedSubtotal.ToString("c")
+                            </p>
+                        }
+                        else
+                        {
+                            <p>
+                                <strong>Subtotal:</strong>
+                                @Model.Subtotal.ToString("c")
+                            </p>
+                        }
+
+                        <!-- SHIPPING -->
+                        <p>
+                            <strong>Shipping:</strong>
+                            @Model.Shipping.ToString("c")
+                        </p>
+
+                        <hr />
+
+                        <!-- TOTAL -->
+                        <p class="fs-4">
+                            <strong>Total:</strong>
+                            @Model.Total.ToString("c")
+                        </p>
 
                         <button type="submit"
                                 class="btn btn-success w-100"
                                 @(Model.Cards.Any() ? "" : "disabled")>
                             Place Order
                         </button>
+
                     </div>
+
                 </div>
 
             </div> <!-- END RIGHT COLUMN -->
@@ -154,5 +218,34 @@ else
                 color: #000 !important;
                 border-color: #000 !important;
             }
+
+        .checkout-alert {
+            font-size: 1rem !important;
+            font-weight: 600 !important;
+            padding: 14px 18px !important;
+            border-radius: 8px !important;
+            margin-top: 12px !important;
+        }
+
+        /* Success message styling */
+        .checkout-alert-success {
+            background-color: #d4edda !important; /* soft green */
+            border: 1px solid #8fd19e !important;
+            color: #155724 !important; /* readable dark green */
+        }
+
+        /* Error message styling */
+        .checkout-alert-error {
+            background-color: #f8d7da !important; /* soft red */
+            border: 1px solid #e4aeb1 !important;
+            color: #721c24 !important;
+        }
+
+        /* Info (duplicate success?) */
+        .checkout-alert-info {
+            background-color: #d1ecf1 !important; /* light blue */
+            border: 1px solid #9fd3dc !important;
+            color: #0c5460 !important;
+        }
     </style>
 }
