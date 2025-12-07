@@ -7,6 +7,7 @@ using System.Linq;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using System.Collections.Generic;
 using Team24_BevosBooks.DAL;
+using Microsoft.AspNetCore.Authorization;
 
 namespace Team24_BevosBooks.Controllers
 {
@@ -24,8 +25,12 @@ namespace Team24_BevosBooks.Controllers
         // ==============================
         // MANUAL REORDER
         // ==============================
+        [Authorize]
         public async Task<IActionResult> ManualReorder(string? searchString, int? genreId, bool inStockOnly = false, string sortOrder = "title")
         {
+            if (!User.IsInRole("Admin"))
+                return View("AccessDenied");
+            
             IQueryable<Book> query = _context.Books
                 .Include(b => b.Genre)
                 .Include(b => b.Reviews)
@@ -95,8 +100,12 @@ namespace Team24_BevosBooks.Controllers
         }
 
         [HttpPost]
+        [Authorize]
         public async Task<IActionResult> ManualReorder(List<int> bookIds)
         {
+            if (!User.IsInRole("Admin"))
+                return View("AccessDenied");
+            
             if (bookIds == null || bookIds.Count == 0)
                 return RedirectToAction("ManualReorder");
 
@@ -139,8 +148,13 @@ namespace Team24_BevosBooks.Controllers
         // ==============================
         // AUTO REORDER
         // ==============================
+
+        [Authorize]
         public async Task<IActionResult> AutoReorder()
         {
+            if (!User.IsInRole("Admin"))
+                return View("AccessDenied");
+            
             var books = await _context.Books.Where(b => b.BookStatus == "Active").ToListAsync();
 
             var pendingOrders = await _context.OrderDetails
@@ -173,8 +187,12 @@ namespace Team24_BevosBooks.Controllers
         }
 
         [HttpPost]
+        [Authorize]
         public async Task<IActionResult> AutoReorder(List<int> bookIds)
         {
+            if (!User.IsInRole("Admin"))
+                return View("AccessDenied");
+            
             if (bookIds == null || bookIds.Count == 0)
                 return RedirectToAction("AutoReorder");
 
@@ -217,8 +235,13 @@ namespace Team24_BevosBooks.Controllers
         // ==============================
         // VIEW ORDERS
         // ==============================
+        [Authorize]
         public async Task<IActionResult> ViewOrders()
         {
+            if (!User.IsInRole("Admin"))
+                return View("AccessDenied");
+
+
             var orders = await _context.Orders
                 .Include(o => o.OrderDetails)
                     .ThenInclude(od => od.Book)
@@ -289,8 +312,12 @@ namespace Team24_BevosBooks.Controllers
         // ==============================
         // BOOK DETAILS (Admin Procurement)
         // ==============================
+        [Authorize]
         public async Task<IActionResult> Details(int? id)
         {
+            if (!User.IsInRole("Admin"))
+                return View("AccessDenied");
+
             if (id == null) return NotFound();
 
             var book = await _context.Books
