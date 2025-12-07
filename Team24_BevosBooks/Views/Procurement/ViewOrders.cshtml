@@ -1,4 +1,22 @@
-﻿@model IEnumerable<Team24_BevosBooks.Models.Order>
+﻿<style>
+    /* Ensure Check In field renders with black text, black border, white box */
+    input[name="arrivedQty"] {
+        background-color: #fff !important; /* white background */
+        color: #000 !important; /* black text */
+        -webkit-text-fill-color: #000 !important; /* Safari fix */
+        border: 1px solid #000 !important; /* black border */
+    }
+
+        /* Placeholder color also black */
+        input[name="arrivedQty"]::placeholder {
+            color: #000 !important;
+            opacity: 1;
+        }
+</style>
+
+
+
+@model IEnumerable<Team24_BevosBooks.Models.Order>
 
 @{
     ViewData["Title"] = "Supplier Orders";
