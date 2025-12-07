@@ -7,6 +7,8 @@ using Microsoft.AspNetCore.Identity.UI.Services;
 using Team24_BevosBooks.DAL;
 using Team24_BevosBooks.Models;
 using Team24_BevosBooks.Services;
+using Microsoft.AspNetCore.Http;
+using Team24_BevosBooks.Extensions;   // ⭐ REQUIRED FOR Session.Get<T>() / Session.Set<T>()
 
 namespace Team24_BevosBooks.Controllers
 {
@@ -34,18 +36,14 @@ namespace Team24_BevosBooks.Controllers
             bool inStockOnly = false,
             string sortOrder = "title")
         {
-            // ⭐ Always set total count of all books in DB
             ViewBag.TotalCount = await _context.Books.CountAsync();
 
-            // Include Reviews so the Index view can compute average ratings
             IQueryable<Book> query = _context.Books
                 .Include(b => b.Genre)
                 .Include(b => b.Reviews);
 
-            // Apply filters
             if (!string.IsNullOrEmpty(searchString))
             {
-                // Split search string into individual words
                 var keywords = searchString.Split(' ', StringSplitOptions.RemoveEmptyEntries);
 
                 foreach (var keyword in keywords)
@@ -64,7 +62,6 @@ namespace Team24_BevosBooks.Controllers
             if (inStockOnly)
                 query = query.Where(b => b.InventoryQuantity > 0);
 
-            // Apply sorting
             query = sortOrder switch
             {
                 "author" => query.OrderBy(b => b.Authors),
@@ -81,14 +78,14 @@ namespace Team24_BevosBooks.Controllers
 
                 "popularity" => query.OrderByDescending(b =>
                     _context.OrderDetails
-                        .Where(od => od.BookID == b.BookID && od.Order.OrderStatus == "Completed")
+                        .Where(od => od.BookID == b.BookID &&
+                                     od.Order.OrderStatus == "Completed")
                         .Sum(od => (int?)od.Quantity) ?? 0
                 ),
 
                 _ => query.OrderBy(b => b.Title),
             };
 
-            // Populate dropdowns and viewbag values
             ViewBag.GenreID = new SelectList(
                 await _context.Genres.OrderBy(g => g.GenreName).ToListAsync(),
                 "GenreID", "GenreName");
@@ -98,7 +95,6 @@ namespace Team24_BevosBooks.Controllers
             ViewBag.InStockOnly = inStockOnly;
             ViewBag.SortOrder = sortOrder;
 
-            // Return filtered list
             return View(await query.ToListAsync());
         }
 
@@ -117,14 +113,12 @@ namespace Team24_BevosBooks.Controllers
 
             if (book == null) return NotFound();
 
-            // Approved reviews only
             book.Reviews = book.Reviews
                 .Where(r => r.DisputeStatus == "Approved")
                 .ToList();
 
             var userId = _userManager.GetUserId(User);
 
-            // Count other carts containing this book
             int cartsContaining = await _context.OrderDetails
                 .Where(od => od.BookID == id)
                 .Where(od => od.Order.OrderStatus == "InCart")
@@ -148,6 +142,19 @@ namespace Team24_BevosBooks.Controllers
 
             ViewBag.CanReview = purchased && !hasReviewed;
             ViewBag.HasReviewed = hasReviewed;
+
+            // ⭐ TRACK RECENTLY VIEWED USING SESSION EXTENSIONS
+            List<int> viewed = HttpContext.Session.Get<List<int>>("RecentlyViewed") ?? new List<int>();
+
+            if (!viewed.Contains(book.BookID))
+            {
+                viewed.Add(book.BookID);
+
+                if (viewed.Count > 12)
+                    viewed.RemoveAt(0);
+
+                HttpContext.Session.Set("RecentlyViewed", viewed);
+            }
 
             return View(book);
         }
@@ -179,15 +186,12 @@ namespace Team24_BevosBooks.Controllers
             // Set server-side fields
             book.BookStatus = "Active";
 
-            // Ignore nav/server-set properties for validation
             ModelState.Remove(nameof(Book.BookStatus));
             ModelState.Remove(nameof(Book.Genre));
             ModelState.Remove(nameof(Book.Reviews));
 
-            // Auto-assign BookNumber if not provided (0)
             if (book.BookNumber == 0)
             {
-                // Find current max BookNumber; start at 222301 if no books or lower
                 int currentMax = await _context.Books.AnyAsync()
                     ? await _context.Books.MaxAsync(b => b.BookNumber)
                     : 0;
@@ -196,7 +200,6 @@ namespace Team24_BevosBooks.Controllers
                 book.BookNumber = nextNumber;
             }
 
-            // Business rules
             if (await _context.Books.AnyAsync(b => b.BookNumber == book.BookNumber))
                 ModelState.AddModelError("", "Book Number already exists.");
 
@@ -220,8 +223,7 @@ namespace Team24_BevosBooks.Controllers
         }
 
 
-        // =========================================================
-        // EDIT (GET)
+        // EDIT Stashed changes
         // =========================================================
         [Authorize] // allow request to reach the action and redirect if not properly authorized
         public async Task<IActionResult> Edit(int? id)
@@ -258,7 +260,6 @@ namespace Team24_BevosBooks.Controllers
 
             if (originalBook == null) return NotFound();
 
-            // Combined safe model-state cleanup
             ModelState.Remove(nameof(Book.Genre));
             ModelState.Remove(nameof(Book.Reviews));
             ModelState.Remove(nameof(Book.BookNumber));
@@ -276,7 +277,6 @@ namespace Team24_BevosBooks.Controllers
                 return View(editedBook);
             }
 
-            // Preserve non-user-editable values
             editedBook.BookNumber = originalBook.BookNumber;
             editedBook.Cost = originalBook.Cost;
 
@@ -288,7 +288,7 @@ namespace Team24_BevosBooks.Controllers
         }
 
         // =========================================================
-        // DISCONTINUE + EMAIL USERS (FULL COMBINED)
+        // DISCONTINUE
         // =========================================================
         [Authorize(Roles = "Admin")] // this is fine as is because this doesn't lead to a page -- Sean
         [HttpPost]
@@ -307,7 +307,6 @@ namespace Team24_BevosBooks.Controllers
                 return RedirectToAction("Index");
             }
 
-            // CASE 1: Book is Active → Discontinue it + send email
             if (book.BookStatus != "Discontinued")
             {
                 book.BookStatus = "Discontinued";
@@ -316,7 +315,6 @@ namespace Team24_BevosBooks.Controllers
                 TempData["Message"] = $"Book '{book.Title}' has been discontinued.";
                 TempData["MessageType"] = "warning";
 
-                // Background email sending
                 _ = Task.Run(async () =>
                 {
                     var users = await _context.Users
@@ -329,17 +327,15 @@ namespace Team24_BevosBooks.Controllers
                             user.Email,
                             "Team 24: Book Discontinued",
                             EmailTemplate.Wrap($@"
-                        <h2>Book Discontinued</h2>
-                        <p>Hello {user.FirstName},</p>
-                        <p>The book <strong>{book.Title}</strong> by {book.Authors} is now discontinued.</p>
-                        <p>Genre: {book.Genre?.GenreName}</p>
-                        <p>Thank you for being part of Bevo's Books! 🤘</p>
-                    ")
-                        );
+                                <h2>Book Discontinued</h2>
+                                <p>Hello {user.FirstName},</p>
+                                <p>The book <strong>{book.Title}</strong> by {book.Authors} is now discontinued.</p>
+                                <p>Genre: {book.Genre?.GenreName}</p>
+                                <p>Thank you for being part of Bevo's Books! 🤘</p>
+                            "));
                     }
                 });
             }
-            // CASE 2: Book is Discontinued → Reactivate it (no email needed)
             else
             {
                 book.BookStatus = "Active";
@@ -352,10 +348,8 @@ namespace Team24_BevosBooks.Controllers
             return RedirectToAction("Details", new { id = book.BookID });
         }
 
-
-
         // =========================================================
-        // GENRES DROPDOWN
+        // GENRES
         // =========================================================
         private async Task PopulateGenresDropDownList(object? selectedGenre = null)
         {
@@ -365,13 +359,34 @@ namespace Team24_BevosBooks.Controllers
         }
 
         // =========================================================
-        // HOMECATALOG
+        // DISCOVER
         // =========================================================
-        public async Task<IActionResult> HomeCatalog()
+        public async Task<IActionResult> Discover()
         {
+            // ⭐ GET RECENTLY VIEWED FIRST — VERY IMPORTANT
+            var viewed = HttpContext.Session.Get<List<int>>("RecentlyViewed");
+
+            if (viewed != null && viewed.Any())
+            {
+                int lastId = viewed.Last();
+                var last = await _context.Books
+                    .Include(b => b.Genre)
+                    .FirstOrDefaultAsync(b => b.BookID == lastId);
+
+                ViewBag.LastViewedBook = last;
+            }
+            else
+            {
+                ViewBag.LastViewedBook = null;
+            }
+
+            // ⭐ PERSONALIZED RECOMMENDATIONS
+            var recs = await GetDiscoverRecommendations();
+            ViewBag.Recommendations = recs;
+
+            // ⭐ BESTSELLERS
             var bestsellers = await _context.Books
                 .Include(b => b.Genre)
-                .Where(b => b.BookStatus == "Active")
                 .OrderByDescending(b =>
                     _context.OrderDetails
                         .Where(od => od.BookID == b.BookID &&
@@ -379,17 +394,19 @@ namespace Team24_BevosBooks.Controllers
                         .Sum(od => (int?)od.Quantity) ?? 0)
                 .Take(6)
                 .ToListAsync();
+            ViewBag.Bestsellers = bestsellers;
 
+            // ⭐ GENRE SPOTLIGHTS
             var spotlightGenres = await _context.Genres
                 .OrderBy(g => g.GenreName)
                 .Take(3)
                 .ToListAsync();
 
-            var genreSections = new Dictionary<string, List<Book>>();
+            var sections = new Dictionary<string, List<Book>>();
 
             foreach (var genre in spotlightGenres)
             {
-                genreSections.Add(
+                sections.Add(
                     genre.GenreName,
                     await _context.Books
                         .Where(b => b.GenreID == genre.GenreID &&
@@ -400,10 +417,43 @@ namespace Team24_BevosBooks.Controllers
                 );
             }
 
-            ViewBag.Bestsellers = bestsellers;
-            ViewBag.GenreSections = genreSections;
+            ViewBag.GenreSections = sections;
 
             return View();
+        }
+        // =========================================================
+        // DISCOVER RECOMMENDATIONS
+        // =========================================================
+        private async Task<List<Book>> GetDiscoverRecommendations()
+        {
+            var viewed = HttpContext.Session.Get<List<int>>("RecentlyViewed");
+
+            if (viewed == null || viewed.Count == 0)
+                return new List<Book>();
+
+            var viewedBooks = await _context.Books
+                .Include(b => b.Genre)
+                .Where(b => viewed.Contains(b.BookID))
+                .ToListAsync();
+
+            var genreIds = viewedBooks
+                .Select(b => b.GenreID)
+                .Distinct()
+                .ToList();
+
+            var recs = await _context.Books
+    .Include(b => b.Reviews)   // ⭐ REQUIRED so EF can access Reviews
+    .Where(b => genreIds.Contains(b.GenreID) && !viewed.Contains(b.BookID))
+    .OrderByDescending(b =>
+        b.Reviews.Any(r => r.DisputeStatus == "Approved")
+            ? b.Reviews
+                .Where(r => r.DisputeStatus == "Approved")
+                .Average(r => r.Rating)
+            : 0
+    )
+    .Take(8)
+    .ToListAsync();
+            return recs;
         }
     }
 }
