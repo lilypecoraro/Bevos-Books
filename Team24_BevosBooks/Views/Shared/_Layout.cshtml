@@ -119,6 +119,21 @@
             <div class="collapse navbar-collapse" id="navMenu">
                 <ul class="navbar-nav me-auto mb-2 mb-lg-0">
 
+                    <!-- ABOUT US -->
+                    @if (!User.Identity.IsAuthenticated || User.IsInRole("Customer"))
+                        {
+                        <li class="nav-item">
+                            <a class="nav-link" asp-controller="Home" asp-action="AboutUs">About Us</a>
+                        </li>
+                        }
+
+                    <!-- DISCOVER (visible if Customer OR not logged in) -->
+                    @if (!User.Identity.IsAuthenticated || User.IsInRole("Customer"))
+                    {
+                        <li class="nav-item">
+                            <a class="nav-link" asp-controller="Books" asp-action="Discover">Discover</a>
+                        </li>
+                    }
                     <!-- BOOKS -->
                     <li class="nav-item dropdown">
                         <a class="nav-link dropdown-toggle" href="#" id="booksDropdown" role="button" data-bs-toggle="dropdown">
@@ -136,15 +151,6 @@
                         </ul>
                     </li>
 
-                    <!-- DISCOVER -->
-                    <li class="nav-item">
-                        <a class="nav-link" asp-controller="Books" asp-action="Discover">Discover</a>
-                    </li>
-
-                    <!-- ABOUT US -->
-                    <li class="nav-item">
-                        <a class="nav-link" asp-controller="Home" asp-action="AboutUs">About Us</a>
-                    </li>
 
                     <!-- CUSTOMER NAV -->
                     @if (User.IsInRole("Customer"))
