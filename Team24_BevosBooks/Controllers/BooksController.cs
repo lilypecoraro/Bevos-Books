@@ -212,11 +212,15 @@ namespace Team24_BevosBooks.Controllers
 
 
         // =========================================================
-        // EDIT (MERGED)
+        // EDIT (GET)
         // =========================================================
-        [Authorize(Roles = "Admin")]
+        [Authorize] // allow request to reach the action
         public async Task<IActionResult> Edit(int? id)
         {
+            // Redirect anyone who is not an Admin
+            if (!User.IsInRole("Admin"))
+                return View("AccessDenied");
+
             if (id == null) return NotFound();
 
             Book? book = await _context.Books.FindAsync(id);
@@ -226,11 +230,18 @@ namespace Team24_BevosBooks.Controllers
             return View(book);
         }
 
-        [Authorize(Roles = "Admin")]
+        // =========================================================
+        // EDIT (POST)
+        // =========================================================
+        [Authorize] // allow request to reach the action
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Edit(int id, Book editedBook)
         {
+            // Redirect anyone who is not an Admin
+            if (!User.IsInRole("Admin"))
+                return View("AccessDenied");
+
             if (id != editedBook.BookID) return NotFound();
 
             Book? originalBook = await _context.Books.AsNoTracking()
