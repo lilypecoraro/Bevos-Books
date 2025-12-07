@@ -155,18 +155,27 @@ namespace Team24_BevosBooks.Controllers
         // =========================================================
         // CREATE
         // =========================================================
-        [Authorize(Roles = "Admin")]
+        [Authorize] // needs to be this way so request can hit the action and redirect if not properly authorized
         public async Task<IActionResult> Create()
         {
+
+            if (!User.IsInRole("Admin"))
+                return View("AccessDenied");
+
             await PopulateGenresDropDownList();
             return View();
+            
+           
         }
 
-        [Authorize(Roles = "Admin")]
+        [Authorize] // needs to be this way so request can hit the action and redirect if not properly authorized
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create(Book book)
         {
+            if (!User.IsInRole("Admin"))
+                return View("AccessDenied");
+            
             // Set server-side fields
             book.BookStatus = "Active";
 
@@ -214,7 +223,7 @@ namespace Team24_BevosBooks.Controllers
         // =========================================================
         // EDIT (GET)
         // =========================================================
-        [Authorize] // allow request to reach the action
+        [Authorize] // allow request to reach the action and redirect if not properly authorized
         public async Task<IActionResult> Edit(int? id)
         {
             // Redirect anyone who is not an Admin
@@ -233,7 +242,7 @@ namespace Team24_BevosBooks.Controllers
         // =========================================================
         // EDIT (POST)
         // =========================================================
-        [Authorize] // allow request to reach the action
+        [Authorize] // allow request to reach the action and redirect if not properly authorized
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Edit(int id, Book editedBook)
@@ -281,7 +290,7 @@ namespace Team24_BevosBooks.Controllers
         // =========================================================
         // DISCONTINUE + EMAIL USERS (FULL COMBINED)
         // =========================================================
-        [Authorize(Roles = "Admin")]
+        [Authorize(Roles = "Admin")] // this is fine as is because this doesn't lead to a page -- Sean
         [HttpPost]
         [ActionName("Discontinue")]
         [ValidateAntiForgeryToken]
