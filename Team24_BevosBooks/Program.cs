@@ -11,22 +11,33 @@ var builder = WebApplication.CreateBuilder(args);
 // MVC
 builder.Services.AddControllersWithViews();
 
+// ⭐ Correct session setup — MUST be before builder.Build()
+builder.Services.AddDistributedMemoryCache();
+
+builder.Services.AddSession(options =>
+{
+    options.IdleTimeout = TimeSpan.FromMinutes(30);
+    options.Cookie.HttpOnly = true;
+    options.Cookie.IsEssential = true;
+});
+
 // Email sender (SMTP)
 builder.Services.AddTransient<IEmailSender, SmtpEmailSender>();
 
 // Database connection
-string connectionString = "Server=tcp:fa25skylernguyen.database.windows.net,1433;Initial Catalog=fa25team24bevosbooks;Persist Security Info=False;User ID=MISAdmin;Password=Password123;MultipleActiveResultSets=True;Encrypt=True;TrustServerCertificate=False;Connection Timeout=30;";
+string connectionString =
+    "Server=tcp:fa25skylernguyen.database.windows.net,1433;Initial Catalog=fa25team24bevosbooks;Persist Security Info=False;User ID=MISAdmin;Password=Password123;MultipleActiveResultSets=True;Encrypt=True;TrustServerCertificate=False;Connection Timeout=30;";
 builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseSqlServer(connectionString));
 
 // Identity
 builder.Services.AddDefaultIdentity<AppUser>(options =>
 {
-    options.SignIn.RequireConfirmedAccount = false; // or true if using confirmation
+    options.SignIn.RequireConfirmedAccount = false;
 })
 .AddRoles<IdentityRole>()
 .AddEntityFrameworkStores<AppDbContext>()
-.AddDefaultTokenProviders();   // ✔ REQUIRED FOR EMAIL TOKENS
+.AddDefaultTokenProviders();
 
 // Identity Options
 builder.Services.Configure<IdentityOptions>(options =>
@@ -46,13 +57,13 @@ builder.Services.ConfigureApplicationCookie(options =>
     options.Cookie.HttpOnly = true;
     options.LoginPath = "/Account/Login";
     options.AccessDeniedPath = "/Account/AccessDenied";
-    options.ExpireTimeSpan = TimeSpan.FromMinutes(5);
+    options.ExpireTimeSpan = TimeSpan.FromMinutes(20);
     options.SlidingExpiration = true;
 });
 
 var app = builder.Build();
 
-// Error handling (correct for Azure)
+// Error handling
 if (!app.Environment.IsDevelopment())
 {
     app.UseExceptionHandler("/Home/Error");
@@ -62,17 +73,17 @@ else
     app.UseDeveloperExceptionPage();
 }
 
-// Static files
 app.UseStaticFiles();
 
-// Routing
 app.UseRouting();
 
-// Identity
 app.UseAuthentication();
 app.UseAuthorization();
 
-// Culture fix for macOS currency
+// ⭐ ONLY ONCE — AND AFTER Authentication/Authorization
+app.UseSession();
+
+// Culture fix
 app.Use(async (context, next) =>
 {
     CultureInfo.CurrentCulture = CultureInfo.CreateSpecificCulture("en-US");

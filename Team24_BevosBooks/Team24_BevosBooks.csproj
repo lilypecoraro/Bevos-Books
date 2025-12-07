@@ -18,11 +18,13 @@
     <None Remove="Views\Shared\" />
     <None Remove="Services\" />
     <None Remove="Views\EmailTest\" />
+    <None Remove="Extensions\" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="wwwroot\lib\" />
     <Folder Include="Services\" />
     <Folder Include="Views\EmailTest\" />
+    <Folder Include="Extensions\" />
   </ItemGroup>
   <ItemGroup>
     <Content Remove="wwwroot\" />

@@ -1,0 +1,38 @@
+﻿@model Team24_BevosBooks.Models.Book
+
+<div class="discover-card">
+    <h5 class="discover-book-title">@Model.Title</h5>
+    <p class="text-muted">@Model.Authors</p>
+
+    @* ⭐ RATING BADGE *@
+    @{
+        var approved = Model.Reviews?
+            .Where(r => r.DisputeStatus == "Approved")
+            .ToList();
+
+        decimal? avg = null;
+
+        if (approved != null && approved.Any())
+        {
+            avg = (decimal)approved.Average(r => Convert.ToDouble(r.Rating));
+        }
+    }
+
+    @if (avg.HasValue)
+    {
+        <span class="badge discover-badge">⭐ @avg.Value.ToString("0.0")</span>
+    }
+    else
+    {
+        <span class="badge discover-badge">⭐ –</span>
+    }
+
+    <p class="fw-bold mt-3">@Model.Price.ToString("c")</p>
+
+    <a asp-controller="Books"
+       asp-action="Details"
+       asp-route-id="@Model.BookID"
+       class="btn btn-outline-primary w-100 discover-btn">
+        View Book
+    </a>
+</div>
