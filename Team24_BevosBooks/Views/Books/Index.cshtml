@@ -82,7 +82,12 @@
                 <td>@book.Authors</td>
                 <td>@book.BookNumber</td>
                 <td>
-                    @(book.InventoryQuantity > 0 ? "In Stock" : "Out of Stock")
+                    @(
+                                    book.BookStatus == "Discontinued"
+                                    ? "Discontinued"
+                                    : (book.InventoryQuantity > 0 ? "In Stock" : "Out of Stock")
+                                    )
+
                 </td>
                 <td>
                     @(avgRating > 0 ? $"{avgRating:0.0}" : "No Ratings")

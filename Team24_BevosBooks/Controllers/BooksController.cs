@@ -271,46 +271,67 @@ namespace Team24_BevosBooks.Controllers
         // DISCONTINUE + EMAIL USERS (FULL COMBINED)
         // =========================================================
         [Authorize(Roles = "Admin")]
-        [HttpPost, ActionName("Discontinue")]
+        [HttpPost]
+        [ActionName("Discontinue")]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> DiscontinueConfirmed(int id)
+        public async Task<IActionResult> DiscontinueToggle(int id)
         {
             var book = await _context.Books
                 .Include(b => b.Genre)
                 .FirstOrDefaultAsync(b => b.BookID == id);
 
-            if (book == null) return NotFound();
-
-            book.BookStatus = "Discontinued";
-            await _context.SaveChangesAsync();
-
-            TempData["Message"] = $"Book '{book.Title}' discontinued.";
-
-            // Kick off email sending in background
-            _ = Task.Run(async () =>
+            if (book == null)
             {
-                var users = await _context.Users
-                    .Where(u => u.Status == AppUser.UserStatus.Customer && u.Email != null)
-                    .ToListAsync();
+                TempData["Message"] = "Book not found.";
+                TempData["MessageType"] = "danger";
+                return RedirectToAction("Index");
+            }
 
-                foreach (var user in users)
+            // CASE 1: Book is Active → Discontinue it + send email
+            if (book.BookStatus != "Discontinued")
+            {
+                book.BookStatus = "Discontinued";
+                await _context.SaveChangesAsync();
+
+                TempData["Message"] = $"Book '{book.Title}' has been discontinued.";
+                TempData["MessageType"] = "warning";
+
+                // Background email sending
+                _ = Task.Run(async () =>
                 {
-                    await _emailSender.SendEmailAsync(
-                        user.Email,
-                        "Team 24: Book Discontinued",
-                        EmailTemplate.Wrap($@"
-                    <h2>Book Discontinued</h2>
-                    <p>Hello {user.FirstName},</p>
-                    <p>The book <strong>{book.Title}</strong> by {book.Authors} is now discontinued.</p>
-                    <p>Genre: {book.Genre?.GenreName}</p>
-                    <p>Thank you for being part of Bevo's Books! 🤘</p>
-                ")
-                    );
-                }
-            });
+                    var users = await _context.Users
+                        .Where(u => u.Status == AppUser.UserStatus.Customer && u.Email != null)
+                        .ToListAsync();
 
-            return RedirectToAction(nameof(Index));
+                    foreach (var user in users)
+                    {
+                        await _emailSender.SendEmailAsync(
+                            user.Email,
+                            "Team 24: Book Discontinued",
+                            EmailTemplate.Wrap($@"
+                        <h2>Book Discontinued</h2>
+                        <p>Hello {user.FirstName},</p>
+                        <p>The book <strong>{book.Title}</strong> by {book.Authors} is now discontinued.</p>
+                        <p>Genre: {book.Genre?.GenreName}</p>
+                        <p>Thank you for being part of Bevo's Books! 🤘</p>
+                    ")
+                        );
+                    }
+                });
+            }
+            // CASE 2: Book is Discontinued → Reactivate it (no email needed)
+            else
+            {
+                book.BookStatus = "Active";
+                await _context.SaveChangesAsync();
+
+                TempData["Message"] = $"Book '{book.Title}' is now available again.";
+                TempData["MessageType"] = "success";
+            }
+
+            return RedirectToAction("Details", new { id = book.BookID });
         }
+
 
 
         // =========================================================

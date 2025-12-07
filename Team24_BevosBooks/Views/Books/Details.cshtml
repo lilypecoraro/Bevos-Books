@@ -298,26 +298,36 @@
             }
 
             
-            @if (User.Identity.IsAuthenticated && (User.IsInRole("Admin")))
-            {
-                <form asp-controller="Books"
-                      asp-action="Discontinue"
-                      method="post"
-                      class="w-100">
-                    @Html.AntiForgeryToken()
-                    <input type="hidden" name="id" value="@Model.BookID" />
-                    <button type="submit"
-                            class="btn btn-danger w-100 mb-2"
-                            onclick="return confirm('Mark this book as Discontinued?');">
-                        Discontinue Book
-                    </button>
-                </form>
-            }
+            @if (User.Identity.IsAuthenticated && User.IsInRole("Admin"))
+{
+    <form asp-controller="Books"
+          asp-action="Discontinue"
+          method="post"
+          class="w-100">
+        @Html.AntiForgeryToken()
+        <input type="hidden" name="id" value="@Model.BookID" />
 
-            @if (Model.BookStatus == "Discontinued")
-            {
-                <button class="btn btn-secondary w-100 mb-2" disabled>Not Available</button>
-            }
+        @if (Model.BookStatus == "Discontinued")
+        {
+            <!-- RECONTINUE BUTTON -->
+            <button type="submit"
+                    class="btn btn-success w-100 mb-2"
+                    onclick="return confirm('Make this book available again?');">
+                Recontinue Book
+            </button>
+        }
+        else
+        {
+            <!-- DISCONTINUE BUTTON -->
+            <button type="submit"
+                    class="btn btn-danger w-100 mb-2"
+                    onclick="return confirm('Mark this book as discontinued?');">
+                Discontinue Book
+            </button>
+        }
+    </form>
+}
+
 
             
 
