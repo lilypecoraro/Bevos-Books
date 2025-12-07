@@ -14,7 +14,7 @@
     .discover-section-title {
         font-family: "VT323", monospace;
         font-size: 2.2rem;
-        color: #f0e6d6; /* warm parchment white */
+        color: #f0e6d6;
         margin-bottom: 1.2rem;
         text-shadow: 0 0 10px rgba(0,0,0,0.7);
     }
@@ -25,7 +25,6 @@
 
     /* ===========================
        HORIZONTAL CAROUSEL
-       — smooth, warm, bookstore
     ============================ */
     .discover-slider {
         display: flex;
@@ -34,6 +33,8 @@
         padding: 0.5rem 0 1.8rem;
         scroll-snap-type: x mandatory;
         scrollbar-width: thin;
+        /* ⭐ NEW SPACING SO NEXT SECTION ISN'T GLUED TO SLIDER */
+        margin-bottom: 2.5rem;
     }
 
         .discover-slider::-webkit-scrollbar {
@@ -47,14 +48,13 @@
 
         /* ===========================
        CARD STYLE — Cozy Bookstore
-       deep warm brown, soft glow
     ============================ */
         .discover-slider .discover-card {
             flex: 0 0 250px;
             max-width: 250px;
-            background-color: rgba(17, 17, 17, 0.88); /* deep warm-black */
+            background-color: rgba(17, 17, 17, 0.88);
             border-radius: 16px;
-            border: 1px solid rgba(245, 179, 56, 0.25); /* soft gold edge */
+            border: 1px solid rgba(245, 179, 56, 0.25);
             padding: 1.1rem 1.2rem;
             color: #f0e6d6 !important;
             box-shadow: 0 8px 18px rgba(0, 0, 0, 0.55), 0 0 15px rgba(245, 179, 56, 0.08);
@@ -63,7 +63,6 @@
             transition: all 0.22s ease;
         }
 
-            /* Hover Glow */
             .discover-slider .discover-card:hover {
                 transform: translateY(-6px);
                 border-color: #f5b338;
@@ -85,7 +84,7 @@
     .discover-card p.text-muted {
         font-size: 0.8rem;
         margin-bottom: 0.35rem;
-        color: #cbb7a8 !important; /* warm parchment tone */
+        color: #cbb7a8 !important;
     }
 
     /* ⭐ RATING CHIP */
@@ -108,7 +107,7 @@
     }
 
     /* ===========================
-       BUTTONS — warm cozy gold
+       BUTTONS
     ============================ */
     .discover-card .discover-btn {
         border-color: #f5b338 !important;
@@ -125,11 +124,9 @@
             color: #111111 !important;
             box-shadow: 0 0 14px rgba(245,179,56,0.4);
         }
-
-    section.discover-section {
-        margin-bottom: 3rem;
-    }
 </style>
+
+
 @using Team24_BevosBooks.Models
 @using Microsoft.EntityFrameworkCore
 @inject Team24_BevosBooks.DAL.AppDbContext _context
@@ -145,9 +142,8 @@
 
 <h1 class="discover-title text-center mb-5">Discover Your Next Read</h1>
 
-<!-- ============================= -->
-<!-- ⭐ SECTION 1: Because You Viewed -->
-<!-- ============================= -->
+
+<!-- ⭐ SECTION 1 — Because You Viewed -->
 @if (recs.Any())
 {
     <section>
@@ -165,7 +161,7 @@
 }
 else
 {
-    <!-- ⭐ Popular Picks fallback -->
+    <!-- Fallback: Popular Picks -->
     <section>
         <h3 class="discover-section-title">Popular Picks To Get You Started</h3>
 
@@ -178,9 +174,8 @@ else
     </section>
 }
 
-<!-- ============================= -->
-<!-- ⭐ SECTION 2: Highly Rated -->
-<!-- ============================= -->
+
+<!-- ⭐ SECTION 2 — Highly Rated -->
 <section>
     <h3 class="discover-section-title">Highly Rated</h3>
 
@@ -204,9 +199,8 @@ else
     </div>
 </section>
 
-<!-- ============================= -->
-<!-- ⭐ SECTION 3: New Arrivals -->
-<!-- ============================= -->
+
+<!-- ⭐ SECTION 3 — New Arrivals -->
 <section>
     <h3 class="discover-section-title">New Arrivals</h3>
 
@@ -218,9 +212,8 @@ else
     </div>
 </section>
 
-<!-- ============================= -->
-<!-- ⭐ SECTION 4: Genre Spotlights -->
-<!-- ============================= -->
+
+<!-- ⭐ SECTION 4 — Genre Spotlights -->
 @foreach (var g in sections.Take(2))
 {
     <section>
