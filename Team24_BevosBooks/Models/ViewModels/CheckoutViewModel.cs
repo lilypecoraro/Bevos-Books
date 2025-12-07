@@ -18,6 +18,10 @@ namespace Team24_BevosBooks.Models.ViewModels
         // Totals
         public decimal Subtotal { get; set; }
         public decimal Shipping { get; set; }
+        public decimal Discount { get; set; }
         public decimal Total { get; set; }
+        public decimal OriginalSubtotal { get; set; }
+        public decimal DiscountedSubtotal { get; set; }
+
     }
 }

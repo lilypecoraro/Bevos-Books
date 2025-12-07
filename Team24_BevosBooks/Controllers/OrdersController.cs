@@ -338,7 +338,144 @@ namespace Team24_BevosBooks.Controllers
                 ViewBag.CheckoutMessage = TempData["CheckoutMessage"];
             }
 
+            // If coupon was applied, override totals
+            if (TempData.ContainsKey("AppliedCoupon"))
+            {
+                vm.CouponCode = TempData["AppliedCoupon"]?.ToString();
+
+                vm.OriginalSubtotal = decimal.Parse(TempData["OriginalSubtotal"]!.ToString());
+                vm.Discount = decimal.Parse(TempData["DiscountAmount"]!.ToString());
+                vm.DiscountedSubtotal = decimal.Parse(TempData["DiscountedSubtotal"]!.ToString());
+
+                vm.Shipping = decimal.Parse(TempData["DiscountedShipping"]!.ToString());
+                vm.Total = decimal.Parse(TempData["DiscountedTotal"]!.ToString());
+
+                ViewBag.CheckoutMessage = TempData["CheckoutMessage"];
+            }
+
+
+            if (TempData.ContainsKey("CheckoutError"))
+            {
+                ViewBag.CheckoutError = TempData["CheckoutError"];
+            }
+
             return View(vm);
+        }
+
+        // ============================================================
+        // APPLY COUPON (POST) — DOES NOT CHECK OUT
+        // ============================================================
+        [Authorize(Roles = "Customer")]
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> ApplyCoupon(CheckoutViewModel model)
+        {
+            var user = await _userManager.GetUserAsync(User);
+            if (user == null) return RedirectToAction("Login", "Account");
+
+            var cart = await _context.Orders
+                .Include(o => o.OrderDetails)
+                    .ThenInclude(od => od.Book)
+                .FirstOrDefaultAsync(o => o.UserID == user.Id && o.OrderStatus == "InCart");
+
+            if (cart == null || !cart.OrderDetails.Any())
+            {
+                TempData["CheckoutError"] = "Your cart is empty.";
+                return RedirectToAction("Checkout");
+            }
+
+            // Reset coupon state
+            foreach (var od in cart.OrderDetails)
+            {
+                od.Price = od.Book.Price;
+                od.CouponID = null;
+            }
+
+            if (string.IsNullOrWhiteSpace(model.CouponCode))
+            {
+                TempData["CheckoutError"] = "Please enter a coupon code.";
+                await _context.SaveChangesAsync();
+                return RedirectToAction("Checkout");
+            }
+
+            string code = model.CouponCode.Trim().ToUpper();
+
+            var coupon = await _context.Coupons
+                .FirstOrDefaultAsync(c => c.CouponCode == code && c.Status == "Enabled");
+
+            if (coupon == null)
+            {
+                TempData["CheckoutError"] = "Invalid or disabled coupon.";
+                return RedirectToAction("Checkout");
+            }
+
+            // Check if customer already used it
+            bool alreadyUsed = await _context.OrderDetails
+                .Include(od => od.Order)
+                .AnyAsync(od => od.Order.UserID == user.Id &&
+                                od.Order.OrderStatus == "Completed" &&
+                                od.CouponID == coupon.CouponID);
+
+            if (alreadyUsed)
+            {
+                TempData["CheckoutError"] = "You have already used this coupon.";
+                return RedirectToAction("Checkout");
+            }
+
+            // Apply coupon
+            bool freeShipping = false;
+
+            if (coupon.CouponType == "PercentOff")
+            {
+                foreach (var od in cart.OrderDetails)
+                {
+                    decimal discount = od.Price * (coupon.DiscountPercent!.Value / 100m);
+                    od.Price -= discount;
+                    od.CouponID = coupon.CouponID;
+                }
+            }
+            else if (coupon.CouponType == "FreeShipping")
+            {
+                decimal subtotal = cart.OrderDetails.Sum(od => od.Price * od.Quantity);
+                if (coupon.FreeThreshold == null || subtotal >= coupon.FreeThreshold)
+                {
+                    freeShipping = true;
+                    foreach (var od in cart.OrderDetails)
+                    {
+                        od.CouponID = coupon.CouponID;
+                    }
+                }
+                else
+                {
+                    TempData["CheckoutError"] =
+                        $"This coupon requires a minimum subtotal of {coupon.FreeThreshold:c}.";
+                    return RedirectToAction("Checkout");
+                }
+            }
+
+            await _context.SaveChangesAsync();
+
+            // Recompute totals
+            var totals = await ComputeCartTotals(cart, freeShipping);
+
+            decimal originalSubtotal = cart.OrderDetails
+                .Sum(od => od.Book.Price * od.Quantity);
+
+            decimal discountAmount = originalSubtotal - totals.subtotal;
+
+            TempData["AppliedCoupon"] = code;
+            TempData["OriginalSubtotal"] = originalSubtotal.ToString();
+            TempData["DiscountedSubtotal"] = totals.subtotal.ToString();
+            TempData["DiscountAmount"] = discountAmount.ToString();
+            TempData["DiscountedShipping"] = totals.shipping.ToString();
+            TempData["DiscountedTotal"] = totals.total.ToString();
+            TempData["CheckoutMessage"] = $"Coupon '{code}' applied successfully!";
+
+
+
+            TempData["CheckoutMessage"] = $"Coupon '{code}' applied successfully!";
+
+            return RedirectToAction("Checkout");
         }
 
         // ============================================================
@@ -463,6 +600,11 @@ namespace Team24_BevosBooks.Controllers
 
             var totals = await ComputeCartTotals(cart, freeShipping);
             model.Subtotal = cart.OrderDetails.Sum(od => od.Price * od.Quantity);
+            decimal originalBeforeCheckout = cart.OrderDetails
+    .Sum(od => od.Book.Price * od.Quantity);
+
+            model.Discount = originalBeforeCheckout - model.Subtotal;
+
             model.Shipping = totals.shipping;
             model.Total = totals.total;
 
