@@ -329,9 +329,12 @@ namespace Team24_BevosBooks.Controllers
         // ============================================================
         // MY CARDS
         // ============================================================
-        [Authorize(Roles = "Customer")]
+        [Authorize] // have to let the request hit the action -- employees/admin don't have their own CCs
         public async Task<IActionResult> MyCards()
         {
+            if (!User.IsInRole("Customer"))
+                return View("AccessDeniedEmployee");
+            
             var user = await _userManager.GetUserAsync(User);
             if (user == null)
                 return RedirectToAction("Login", "Account");
@@ -347,11 +350,14 @@ namespace Team24_BevosBooks.Controllers
         // ============================================================
         // REMOVE CARD
         // ============================================================
-        [Authorize(Roles = "Customer")]
+        [Authorize]
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> RemoveCard(int id)
         {
+            if (!User.IsInRole("Customer"))
+                return View("AccessDeniedEmployee");
+            
             var user = await _userManager.GetUserAsync(User);
             if (user == null)
                 return RedirectToAction("Login", "Account");
