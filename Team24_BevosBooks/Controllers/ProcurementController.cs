@@ -222,7 +222,7 @@ namespace Team24_BevosBooks.Controllers
             var orders = await _context.Orders
                 .Include(o => o.OrderDetails)
                     .ThenInclude(od => od.Book)
-                .Where(o => o.OrderStatus == "SupplierOrder" || o.OrderStatus == "Received")
+                .Where(o => o.OrderStatus == "SupplierOrder")
                 .OrderByDescending(o => o.OrderDate)
                 .ToListAsync();
 
