@@ -20,8 +20,12 @@ namespace Team24_BevosBooks.Controllers
         }
 
         // Public list
+        [Authorize]
         public async Task<IActionResult> Index()
         {
+            if (!User.IsInRole("Admin"))
+                return View("AccessDenied");
+            
             var coupons = await _context.Coupons
                 .OrderBy(c => c.CouponCode)
                 .ToListAsync();
@@ -32,7 +36,7 @@ namespace Team24_BevosBooks.Controllers
         // ------------------------------
         // ⭐ SET HOMEPAGE COUPON BUTTON
         // ------------------------------
-        [Authorize(Roles = "Admin")]
+        [Authorize(Roles = "Admin")] // fine as is b/c doesn't redirect to new page
         public IActionResult SetHomeCoupon(int id)
         {
             string jsonPath = Path.Combine(_env.ContentRootPath, "appsettings.json");
@@ -50,17 +54,23 @@ namespace Team24_BevosBooks.Controllers
         }
 
         // Create (admin)
-        [Authorize(Roles = "Admin")]
+        [Authorize] // authorizes in the if statement below so request can touch action
         public IActionResult Create()
         {
+            if (!User.IsInRole("Admin"))
+                return View("AccessDenied");
+            
             return View();
         }
 
-        [Authorize(Roles = "Admin")]
+        [Authorize] // authorizes role in the if statement below so rqeuest can touch action
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create(Coupon coupon)
         {
+            if (!User.IsInRole("Admin"))
+                return View("AccessDenied");
+            
             bool freeShippingAllOrders = Request.Form["FreeShippingAllOrders"] == "on";
 
             coupon.Status = "Enabled";
@@ -117,7 +127,7 @@ namespace Team24_BevosBooks.Controllers
         }
 
         // Enable/Disable
-        [Authorize(Roles = "Admin")]
+        [Authorize(Roles = "Admin")] // fine as is b/c it doesn't redirect to a page
         public async Task<IActionResult> Enable(int? id)
         {
             if (id == null) return NotFound();
@@ -131,7 +141,7 @@ namespace Team24_BevosBooks.Controllers
             return RedirectToAction(nameof(Index));
         }
 
-        [Authorize(Roles = "Admin")]
+        [Authorize(Roles = "Admin")] // fine as is b/c it doesn't redirect to a page
         public async Task<IActionResult> Disable(int? id)
         {
             if (id == null) return NotFound();
@@ -146,8 +156,12 @@ namespace Team24_BevosBooks.Controllers
         }
 
         // Details
+        [Authorize] // forces the user to log in
         public async Task<IActionResult> Details(int? id)
         {
+            if (!User.IsInRole("Admin"))
+                return View("AccessDenied");
+
             if (id == null) return NotFound();
 
             var coupon = await _context.Coupons
