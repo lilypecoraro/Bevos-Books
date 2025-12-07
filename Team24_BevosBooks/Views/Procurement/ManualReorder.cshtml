@@ -1,4 +1,21 @@
-﻿@model IEnumerable<Team24_BevosBooks.Models.Book>
+﻿<style>
+    /* Ensure qty + cost fields render with black text, black border, white box */
+    input[name^="qty_"],
+    input[name^="cost_"] {
+        background-color: #fff !important; /* white box */
+        color: #000 !important; /* black text */
+        -webkit-text-fill-color: #000 !important; /* Safari fix */
+        border: 1px solid #000 !important; /* black border */
+    }
+
+        /* Placeholder color also black */
+        input[name^="qty_"]::placeholder,
+        input[name^="cost_"]::placeholder {
+            color: #000 !important;
+            opacity: 1;
+        }
+</style>
+@model IEnumerable<Team24_BevosBooks.Models.Book>
 
 @{
     ViewData["Title"] = "Manual Reorder";
