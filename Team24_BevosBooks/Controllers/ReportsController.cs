@@ -86,6 +86,7 @@ namespace Team24_BevosBooks.Controllers
             var avgCost = await GetWeightedAverageCostByBook();
             var q = SalesQuery();
 
+
             var items = await q.Select(od => new BookSaleRowVM
             {
                 BookID = od.BookID,
@@ -93,9 +94,22 @@ namespace Team24_BevosBooks.Controllers
                 Quantity = od.Quantity,
                 OrderID = od.OrderID,
                 CustomerName = od.Order.User.FirstName + " " + od.Order.User.LastName,
+
+                // Always show original selling price
                 SellingPrice = od.Price,
+
                 AverageCost = avgCost.ContainsKey(od.BookID) ? avgCost[od.BookID] : 0m,
-                ProfitMargin = (od.Price * od.Quantity) - ((avgCost.ContainsKey(od.BookID) ? avgCost[od.BookID] : 0m) * od.Quantity),
+
+                ProfitMargin = (
+                    (od.Price * od.Quantity) -
+                    ((avgCost.ContainsKey(od.BookID) ? avgCost[od.BookID] : 0m) * od.Quantity)
+                )
+                - (
+                    od.Order.Coupon != null && od.Order.Coupon.CouponType == "PercentOff"
+                        ? ((od.Order.Coupon.DiscountPercent ?? 0m) / 100m) * (od.Price * od.Quantity)
+                        : 0m
+                ),
+
                 OrderDate = od.Order.OrderDate
             }).ToListAsync();
 
