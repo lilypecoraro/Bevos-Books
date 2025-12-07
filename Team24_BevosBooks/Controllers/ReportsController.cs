@@ -20,6 +20,12 @@ namespace Team24_BevosBooks.Controllers
         // Weighted average cost per book from supplier orders (OrderStatus == "Received")
         private async Task<Dictionary<int, decimal>> GetWeightedAverageCostByBook()
         {
+            // 1. Load base cost from the Book model
+            var baseCosts = await _context.Books
+                .Select(b => new { b.BookID, b.Cost })
+                .ToDictionaryAsync(x => x.BookID, x => x.Cost);
+
+            // 2. Load all received supplier orders
             var supplierDetails = await _context.OrderDetails
                 .Include(od => od.Order)
                 .Where(od => od.Order.OrderStatus == "Received")
@@ -32,11 +38,38 @@ namespace Team24_BevosBooks.Controllers
                 })
                 .ToListAsync();
 
-            return supplierDetails.ToDictionary(
-                row => row.BookID,
-                row => row.TotalQty > 0 ? row.TotalCost / row.TotalQty : 0m
-            );
+            // 3. Build weighted averages  
+            var result = new Dictionary<int, decimal>();
+
+            foreach (var book in baseCosts)
+            {
+                var bookID = book.Key;
+                var baseCost = book.Value;
+
+                var supplierRecord = supplierDetails.FirstOrDefault(x => x.BookID == bookID);
+
+                if (supplierRecord == null || supplierRecord.TotalQty == 0)
+                {
+                    // No supplier orders: use seeded cost
+                    result[bookID] = baseCost;
+                }
+                else
+                {
+                    // Weighted average = (baseCost + supplierCosts) / totalQty
+                    // Assume starting inventory = 1 unit of base cost unless you want to track differently
+                    decimal startingCostContribution = baseCost * 1;
+                    decimal startingQty = 1;
+
+                    decimal totalCost = startingCostContribution + supplierRecord.TotalCost;
+                    decimal qty = startingQty + supplierRecord.TotalQty;
+
+                    result[bookID] = totalCost / qty;
+                }
+            }
+
+            return result;
         }
+
 
         // Common sales query (customer orders only)
         private IQueryable<OrderDetail> SalesQuery()
