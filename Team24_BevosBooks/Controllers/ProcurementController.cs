@@ -76,11 +76,40 @@ namespace Team24_BevosBooks.Controllers
             ViewBag.InStockOnly = inStockOnly;
             ViewBag.SortOrder = sortOrder;
 
-            var lastCosts = await _context.OrderDetails
+            // Load all books for fallback cost
+            var bookCosts = await _context.Books
+                .Select(b => new { b.BookID, b.Cost })
+                .ToDictionaryAsync(b => b.BookID, b => b.Cost);
+
+            // Load historical supplier costs
+            var historicalCosts = await _context.OrderDetails
                 .Where(od => od.Order.OrderStatus == "SupplierOrder" || od.Order.OrderStatus == "Received")
                 .GroupBy(od => od.BookID)
-                .Select(g => new { BookID = g.Key, LastCost = g.OrderByDescending(x => x.Order.OrderDate).Select(x => x.Cost).FirstOrDefault() })
+                .Select(g => new {
+                    BookID = g.Key,
+                    LastCost = g.OrderByDescending(x => x.Order.OrderDate)
+                                .Select(x => x.Cost)
+                                .FirstOrDefault()
+                })
                 .ToDictionaryAsync(x => x.BookID, x => x.LastCost);
+
+            // Final merged dictionary
+            var lastCosts = new Dictionary<int, decimal>();
+
+            foreach (var book in bookCosts)
+            {
+                if (historicalCosts.ContainsKey(book.Key) && historicalCosts[book.Key] > 0)
+                {
+                    lastCosts[book.Key] = historicalCosts[book.Key]; // Use real supplier order cost
+                }
+                else
+                {
+                    lastCosts[book.Key] = book.Value; // Use seeded Book.Cost
+                }
+            }
+
+            ViewBag.LastCosts = lastCosts;
+
 
             var avgMargins = await _context.OrderDetails
                 .Where(od => od.Order.OrderStatus == "Completed")
