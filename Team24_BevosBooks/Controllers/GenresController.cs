@@ -18,8 +18,12 @@ namespace Team24_BevosBooks.Controllers
         // ============================================
         // INDEX
         // ============================================
+        [Authorize]
         public async Task<IActionResult> Index()
         {
+            if (!User.IsInRole("Admin"))
+                return View("AccessDenied");
+            
             var genres = await _context.Genres
                 .OrderBy(g => g.GenreName)
                 .ToListAsync();
@@ -30,8 +34,13 @@ namespace Team24_BevosBooks.Controllers
         // ============================================
         // CREATE - GET
         // ============================================
+        [Authorize]
         public IActionResult Create()
         {
+            if (!User.IsInRole("Admin"))
+                return View("AccessDenied");
+
+
             return View();
         }
 
@@ -39,9 +48,13 @@ namespace Team24_BevosBooks.Controllers
         // CREATE - POST
         // ============================================
         [HttpPost]
+        [Authorize]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create([Bind("GenreID,GenreName")] Genre genre)
         {
+            if (!User.IsInRole("Admin"))
+                return View("AccessDenied");
+            
             if (!string.IsNullOrWhiteSpace(genre.GenreName))
             {
                 genre.GenreName = genre.GenreName.Trim();
@@ -76,8 +89,12 @@ namespace Team24_BevosBooks.Controllers
         // ============================================
         // EDIT - GET
         // ============================================
+        [Authorize]
         public async Task<IActionResult> Edit(int? id)
         {
+            if (!User.IsInRole("Admin"))
+                return View("AccessDenied");
+
             if (id == null)
                 return NotFound();
 
@@ -92,9 +109,13 @@ namespace Team24_BevosBooks.Controllers
         // EDIT - POST
         // ============================================
         [HttpPost]
+        [Authorize]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Edit(int id, Genre genre)
         {
+            if (!User.IsInRole("Admin"))
+                return View("AccessDenied");
+            
             if (id != genre.GenreID)
                 return NotFound();
 
