@@ -69,10 +69,12 @@
                         <span class="badge bg-secondary">Disabled</span>
                     }
                 </td>
+
                 @if (isAdmin)
                 {
                     <td>
                         <a asp-action="Details" asp-route-id="@coupon.CouponID" class="btn btn-sm btn-info">Details</a>
+
                         @if (coupon.Status == "Enabled")
                         {
                             <a asp-action="Disable" asp-route-id="@coupon.CouponID"
@@ -88,8 +90,15 @@
                                 Enable
                             </a>
                         }
+
+                        <!-- ⭐ FIXED BUTTON PLACEMENT -->
+                        <a asp-action="SetHomeCoupon" asp-route-id="@coupon.CouponID"
+                           class="btn btn-sm btn-primary mt-1">
+                            Make Homepage Coupon
+                        </a>
                     </td>
                 }
+
             </tr>
         }
     </tbody>

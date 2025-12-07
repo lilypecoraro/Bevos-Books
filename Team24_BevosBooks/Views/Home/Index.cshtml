@@ -3,6 +3,9 @@
 @{
     ViewData["Title"] = "Home";
     ViewData["FullWidth"] = true;
+
+    // Homepage featured coupon (may be null)
+    var promo = ViewBag.HomeCoupon as Team24_BevosBooks.Models.Coupon;
 }
 
 <style>
@@ -56,7 +59,6 @@
         z-index: 999999 !important;
         display: flex;
         justify-content: center;
-        pointer-events: none;
         background: transparent !important;
     }
 
@@ -113,59 +115,77 @@
     </div>
 </section>
 
-<!-- PROMO MARQUEE -->
+
+<!-- ============================================================
+     PROMO MARQUEE (Uses featured homepage coupon OR fallback)
+============================================================ -->
 <div class="promo-wave-marquee">
     <div class="promo-wave-track">
 
         <!-- COPY SET #1 -->
-        @foreach (var promo in ViewBag.Promos as List<Team24_BevosBooks.Models.Coupon>)
-        {
-            <svg xmlns="http://www.w3.org/2000/svg"
-                 viewBox="0 0 1200 120"
-                 preserveAspectRatio="none">
-                <path id="promoWavePath1_@promo.CouponID"
-                      d="M 0 60
-                         C 200 20, 400 100, 600 60
-                         C 800 20, 1000 100, 1200 60"
-                      fill="none" stroke="none" />
+        <svg xmlns="http://www.w3.org/2000/svg"
+             viewBox="0 0 1200 120"
+             preserveAspectRatio="none">
+            <path id="promoWave1"
+                  d="M 0 60
+                     C 200 20, 400 100, 600 60
+                     C 800 20, 1000 100, 1200 60"
+                  fill="none" stroke="none" />
 
-                <text class="promo-wave-text">
-                    <textPath href="#promoWavePath1_@promo.CouponID" text-anchor="start">
-                        ★ Promo: Use code @promo.CouponCode —
+            <text class="promo-wave-text">
+                <textPath href="#promoWave1" text-anchor="start">
+
+                    @if (promo != null)
+                    {
+                        @:★ Promo: Use code @promo.CouponCode —
                         @(promo.CouponType == "PercentOff"
                             ? $"{promo.DiscountPercent}% off your entire order!"
                             : !promo.FreeThreshold.HasValue
                                 ? "Free shipping on all orders!"
-                                : $"Free shipping over ${promo.FreeThreshold}") ★
-                    </textPath>
-                </text>
-            </svg>
-        }
+                                : $"Free shipping over ${promo.FreeThreshold}")
+                                            }
+                                    else
+                                    {
+                                        @:★ No active promotions available at this time ★
+                                    }
 
-        <!-- COPY SET #2 - Required for seamless scroll -->
-        @foreach (var promo in ViewBag.Promos as List<Team24_BevosBooks.Models.Coupon>)
-        {
-            <svg xmlns="http://www.w3.org/2000/svg"
-                 viewBox="0 0 1200 120"
-                 preserveAspectRatio="none">
-                <path id="promoWavePath2_@promo.CouponID"
-                      d="M 0 60
-                         C 200 20, 400 100, 600 60
-                         C 800 20, 1000 100, 1200 60"
-                      fill="none" stroke="none" />
+                </textPath>
+            </text>
+        </svg>
 
-                <text class="promo-wave-text">
-                    <textPath href="#promoWavePath2_@promo.CouponID" text-anchor="start">
-                        ★ Promo: Use code @promo.CouponCode —
+
+        <!-- COPY SET #2 (for seamless infinite scroll) -->
+        <svg xmlns="http://www.w3.org/2000/svg"
+             viewBox="0 0 1200 120"
+             preserveAspectRatio="none">
+            <path id="promoWave2"
+                  d="M 0 60
+                     C 200 20, 400 100, 600 60
+                     C 800 20, 1000 100, 1200 60"
+                  fill="none" stroke="none" />
+
+            <text class="promo-wave-text">
+                <textPath href="#promoWave2" text-anchor="start">
+
+                    @if (promo != null)
+                    {
+                        @:★ Promo: Use code @promo.CouponCode 
                         @(promo.CouponType == "PercentOff"
-                            ? $"{promo.DiscountPercent}% off your entire order!"
+                            ? $"for {promo.DiscountPercent}% off your entire order! ★"
                             : !promo.FreeThreshold.HasValue
-                                ? "Free shipping on all orders!"
-                                : $"Free shipping over ${promo.FreeThreshold}") ★
-                    </textPath>
-                </text>
-            </svg>
-        }
+                                ? "for free shipping on all orders! ★"
+                                : $"for free shipping over ${promo.FreeThreshold} ★")
+                                            }
+                                    else
+                                    {
+                                        @:★ No active promotions available at this time ★
+                                    }
+
+                </textPath>
+            </text>
+        </svg>
 
     </div>
+</div>
+
 </div>

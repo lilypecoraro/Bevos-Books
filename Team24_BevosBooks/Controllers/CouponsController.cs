@@ -9,10 +9,14 @@ namespace Team24_BevosBooks.Controllers
     public class CouponsController : Controller
     {
         private readonly AppDbContext _context;
+        private readonly IConfiguration _config;
+        private readonly IWebHostEnvironment _env;
 
-        public CouponsController(AppDbContext context)
+        public CouponsController(AppDbContext context, IConfiguration config, IWebHostEnvironment env)
         {
             _context = context;
+            _config = config;
+            _env = env;
         }
 
         // Public list
@@ -23,6 +27,26 @@ namespace Team24_BevosBooks.Controllers
                 .ToListAsync();
 
             return View(coupons);
+        }
+
+        // ------------------------------
+        // ⭐ SET HOMEPAGE COUPON BUTTON
+        // ------------------------------
+        [Authorize(Roles = "Admin")]
+        public IActionResult SetHomeCoupon(int id)
+        {
+            string jsonPath = Path.Combine(_env.ContentRootPath, "appsettings.json");
+
+            var json = System.IO.File.ReadAllText(jsonPath);
+            dynamic obj = Newtonsoft.Json.JsonConvert.DeserializeObject(json);
+
+            obj["HomeCouponId"] = id;
+
+            string output = Newtonsoft.Json.JsonConvert.SerializeObject(obj, Newtonsoft.Json.Formatting.Indented);
+            System.IO.File.WriteAllText(jsonPath, output);
+
+            TempData["Message"] = "Homepage coupon updated successfully!";
+            return RedirectToAction(nameof(Index));
         }
 
         // Create (admin)
@@ -37,18 +61,14 @@ namespace Team24_BevosBooks.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create(Coupon coupon)
         {
-            // Read the unbound checkbox
             bool freeShippingAllOrders = Request.Form["FreeShippingAllOrders"] == "on";
 
-            // Set defaults before validation
             coupon.Status = "Enabled";
-            coupon.OrderDetails = new List<OrderDetail>(); // initialize navigation property
+            coupon.OrderDetails = new List<OrderDetail>();
 
-            // Remove from ModelState so validation doesn’t block saving
             ModelState.Remove("Status");
             ModelState.Remove("OrderDetails");
 
-            // Ensure unique code
             if (_context.Coupons.Any(c => c.CouponCode.ToUpper() == coupon.CouponCode.ToUpper()))
             {
                 ModelState.AddModelError("CouponCode", "This coupon code already exists.");
@@ -65,29 +85,24 @@ namespace Team24_BevosBooks.Controllers
                     ModelState.AddModelError("DiscountPercent", "Discount percent cannot exceed 100.");
                 }
 
-                coupon.FreeThreshold = null; // not used for percent off
+                coupon.FreeThreshold = null;
             }
             else if (coupon.CouponType == "FreeShipping")
             {
                 if (freeShippingAllOrders)
                 {
-                    coupon.FreeThreshold = null; // treat as all orders
+                    coupon.FreeThreshold = null;
                 }
                 else if (!coupon.FreeThreshold.HasValue || coupon.FreeThreshold.Value <= 0)
                 {
-                    ModelState.AddModelError("FreeThreshold", "Enter a minimum order amount greater than 0, or tick 'Apply to all orders'.");
+                    ModelState.AddModelError("FreeThreshold", "Enter a minimum order amount greater than 0, or select apply to all orders.");
                 }
 
-                coupon.DiscountPercent = null; // not used for free shipping
-            }
-            else
-            {
-                ModelState.AddModelError("CouponType", "Invalid coupon type. Choose 'PercentOff' or 'FreeShipping'.");
+                coupon.DiscountPercent = null;
             }
 
             if (!ModelState.IsValid)
             {
-                // Preserve checkbox state for re-render
                 ViewBag.FreeShippingAllOrders = freeShippingAllOrders;
                 return View(coupon);
             }
@@ -101,7 +116,7 @@ namespace Team24_BevosBooks.Controllers
             return RedirectToAction(nameof(Index));
         }
 
-        // Enable/Disable (admin)
+        // Enable/Disable
         [Authorize(Roles = "Admin")]
         public async Task<IActionResult> Enable(int? id)
         {
@@ -130,7 +145,7 @@ namespace Team24_BevosBooks.Controllers
             return RedirectToAction(nameof(Index));
         }
 
-        // Details (public)
+        // Details
         public async Task<IActionResult> Details(int? id)
         {
             if (id == null) return NotFound();
@@ -142,6 +157,7 @@ namespace Team24_BevosBooks.Controllers
             if (coupon == null) return NotFound();
 
             ViewBag.UsageCount = coupon.OrderDetails?.Count ?? 0;
+
             return View(coupon);
         }
     }
