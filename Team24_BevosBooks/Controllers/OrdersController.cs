@@ -150,10 +150,18 @@ namespace Team24_BevosBooks.Controllers
             var messages = await UpdateCartForChanges(cart);
             var totals = await ComputeCartTotals(cart);
 
+            // NEW: collect discounted item names
+            var discountedItems = cart.OrderDetails
+                .Where(od => od.Book != null && od.Price < od.Book.Price)
+                .Select(od => od.Book.Title)
+                .Distinct()
+                .ToList();
+
             ViewBag.Messages = messages;
             ViewBag.Subtotal = totals.subtotal;
             ViewBag.Shipping = totals.shipping;
             ViewBag.Total = totals.total;
+            ViewBag.DiscountedItems = discountedItems; // NEW
 
             return View(cart);
         }
@@ -375,6 +383,13 @@ namespace Team24_BevosBooks.Controllers
                 ViewBag.CheckoutError = TempData["CheckoutError"];
             }
 
+            // NEW: collect discounted item names
+            ViewBag.DiscountedItems = cart.OrderDetails
+                .Where(od => od.Book != null && od.Price < od.Book.Price)
+                .Select(od => od.Book.Title)
+                .Distinct()
+                .ToList();
+
             return View(vm);
         }
 
@@ -400,12 +415,14 @@ namespace Team24_BevosBooks.Controllers
                 return RedirectToAction("Checkout");
             }
 
-            // UPDATED: reset to effective (discounted) price and clear coupon
+            // Reset all items to effective (discounted) price and clear coupon
+            decimal effectiveSubtotalBeforeCoupon = 0m;
             foreach (var od in cart.OrderDetails)
             {
                 var effectivePrice = await Pricing.GetEffectivePriceAsync(_context, od.Book);
                 od.Price = effectivePrice;
                 od.CouponID = null;
+                effectiveSubtotalBeforeCoupon += effectivePrice * od.Quantity;
             }
 
             if (string.IsNullOrWhiteSpace(model.CouponCode))
@@ -439,7 +456,7 @@ namespace Team24_BevosBooks.Controllers
                 return RedirectToAction("Checkout");
             }
 
-            // Apply coupon
+            // Apply coupon on top of effective prices
             bool freeShipping = false;
 
             if (coupon.CouponType == "PercentOff")
@@ -472,12 +489,11 @@ namespace Team24_BevosBooks.Controllers
 
             await _context.SaveChangesAsync();
 
-            // Recompute totals
+            // Recompute totals after coupon
             var totals = await ComputeCartTotals(cart, freeShipping);
 
-            decimal originalSubtotal = cart.OrderDetails
-                .Sum(od => od.Book.Price * od.Quantity);
-
+            // Use effective subtotal before coupon as "Original Subtotal"
+            decimal originalSubtotal = effectiveSubtotalBeforeCoupon;
             decimal discountAmount = originalSubtotal - totals.subtotal;
 
             TempData["AppliedCoupon"] = code;
