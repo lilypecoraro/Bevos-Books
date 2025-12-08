@@ -207,6 +207,8 @@
                                 {
                                     <li><a class="dropdown-item" asp-controller="Reviews" asp-action="Manage">Approved / Rejected Reviews</a></li>
                                     <li><a class="dropdown-item" asp-controller="Coupons" asp-action="Index">Manage Coupons</a></li>
+                                    <!-- NEW: Manage Item Discounts -->
+                                    <li><a class="dropdown-item" asp-controller="ItemDiscounts" asp-action="Index">Manage Item Discounts</a></li>
                                 }
                                 <li><hr class="dropdown-divider" /></li>
                                 @if (User.IsInRole("Admin"))
