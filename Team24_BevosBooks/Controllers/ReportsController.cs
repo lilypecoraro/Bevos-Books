@@ -20,12 +20,10 @@ namespace Team24_BevosBooks.Controllers
         // Weighted average cost per book from supplier orders (OrderStatus == "Received")
         private async Task<Dictionary<int, decimal>> GetWeightedAverageCostByBook()
         {
-            // 1. Load base cost from the Book model
             var baseCosts = await _context.Books
                 .Select(b => new { b.BookID, b.Cost })
                 .ToDictionaryAsync(x => x.BookID, x => x.Cost);
 
-            // 2. Load all received supplier orders
             var supplierDetails = await _context.OrderDetails
                 .Include(od => od.Order)
                 .Where(od => od.Order.OrderStatus == "Received")
@@ -38,7 +36,6 @@ namespace Team24_BevosBooks.Controllers
                 })
                 .ToListAsync();
 
-            // 3. Build weighted averages  
             var result = new Dictionary<int, decimal>();
 
             foreach (var book in baseCosts)
@@ -50,13 +47,10 @@ namespace Team24_BevosBooks.Controllers
 
                 if (supplierRecord == null || supplierRecord.TotalQty == 0)
                 {
-                    // No supplier orders: use seeded cost
                     result[bookID] = baseCost;
                 }
                 else
                 {
-                    // Weighted average = (baseCost + supplierCosts) / totalQty
-                    // Assume starting inventory = 1 unit of base cost unless you want to track differently
                     decimal startingCostContribution = baseCost * 1;
                     decimal startingQty = 1;
 
@@ -70,8 +64,6 @@ namespace Team24_BevosBooks.Controllers
             return result;
         }
 
-
-        // Common sales query (customer orders only)
         private IQueryable<OrderDetail> SalesQuery()
         {
             return _context.OrderDetails
@@ -86,6 +78,11 @@ namespace Team24_BevosBooks.Controllers
             DateTime? EndDate,
             decimal? MinPrice,
             decimal? MaxPrice,
+            // NEW FILTERS
+            decimal? MinAvgCost,
+            decimal? MaxAvgCost,
+            decimal? MinProfit,
+            decimal? MaxProfit,
             int? BookId,
             int? CustomerId,
             string sort = "recent")
@@ -93,30 +90,31 @@ namespace Team24_BevosBooks.Controllers
             var avgCost = await GetWeightedAverageCostByBook();
             var q = SalesQuery();
 
-            // FILTERS
+            // Date filters (EndDate inclusive)
             if (StartDate.HasValue)
                 q = q.Where(od => od.Order.OrderDate >= StartDate.Value);
 
             if (EndDate.HasValue)
             {
-                // Inclusive end date: include all orders on EndDate
                 var endExclusive = EndDate.Value.Date.AddDays(1);
                 q = q.Where(od => od.Order.OrderDate < endExclusive);
             }
 
+            // Price filters
             if (MinPrice.HasValue)
                 q = q.Where(od => od.Price >= MinPrice.Value);
 
             if (MaxPrice.HasValue)
                 q = q.Where(od => od.Price <= MaxPrice.Value);
 
+            // ID filters
             if (BookId.HasValue)
                 q = q.Where(od => od.BookID == BookId.Value);
 
             if (CustomerId.HasValue)
                 q = q.Where(od => od.Order.UserID == CustomerId.Value.ToString());
 
-            // BUILD ROWS
+            // Project rows (avg cost and profit computed in memory using the dictionary)
             var items = await q.Select(od => new BookSaleRowVM
             {
                 BookID = od.BookID,
@@ -131,7 +129,20 @@ namespace Team24_BevosBooks.Controllers
                 OrderDate = od.Order.OrderDate
             }).ToListAsync();
 
-            // SORTING
+            // Apply AvgCost and Profit filters on the materialized list (cannot be applied in SQL due to avgCost dict)
+            if (MinAvgCost.HasValue)
+                items = items.Where(i => i.AverageCost >= MinAvgCost.Value).ToList();
+
+            if (MaxAvgCost.HasValue)
+                items = items.Where(i => i.AverageCost <= MaxAvgCost.Value).ToList();
+
+            if (MinProfit.HasValue)
+                items = items.Where(i => i.ProfitMargin >= MinProfit.Value).ToList();
+
+            if (MaxProfit.HasValue)
+                items = items.Where(i => i.ProfitMargin <= MaxProfit.Value).ToList();
+
+            // Sorting
             items = sort switch
             {
                 "profitAsc" => items.OrderBy(i => i.ProfitMargin).ToList(),
@@ -142,7 +153,7 @@ namespace Team24_BevosBooks.Controllers
                 _ => items.OrderByDescending(i => i.OrderDate).ToList()
             };
 
-            // BUILD FILTER FOR VIEW
+            // Build VM including new filters
             var vm = new BooksSoldReportVM
             {
                 Rows = items,
@@ -154,6 +165,11 @@ namespace Team24_BevosBooks.Controllers
                     EndDate = EndDate,
                     MinPrice = MinPrice,
                     MaxPrice = MaxPrice,
+                    // NEW
+                    MinAvgCost = MinAvgCost,
+                    MaxAvgCost = MaxAvgCost,
+                    MinProfit = MinProfit,
+                    MaxProfit = MaxProfit,
                     BookId = BookId,
                     CustomerId = CustomerId
                 }
@@ -162,7 +178,6 @@ namespace Team24_BevosBooks.Controllers
             return View(vm);
         }
 
-
         // ========= B. Orders Report =========
         public async Task<IActionResult> OrdersReport(
             DateTime? StartDate,
@@ -170,8 +185,6 @@ namespace Team24_BevosBooks.Controllers
             string sort = "recent")
         {
             var avgCost = await GetWeightedAverageCostByBook();
-
-            // Apply the same date filtering semantics as BooksSold
             var q = SalesQuery();
 
             if (StartDate.HasValue)
@@ -179,7 +192,6 @@ namespace Team24_BevosBooks.Controllers
 
             if (EndDate.HasValue)
             {
-                // Inclusive end date
                 var endExclusive = EndDate.Value.Date.AddDays(1);
                 q = q.Where(od => od.Order.OrderDate < endExclusive);
             }
@@ -219,7 +231,6 @@ namespace Team24_BevosBooks.Controllers
                 Rows = grouped,
                 RecordCount = grouped.Count(),
                 CurrentSort = sort,
-                // Populate Filter so the view's date inputs bind correctly
                 Filter = new ReportFilterVM
                 {
                     StartDate = StartDate,
