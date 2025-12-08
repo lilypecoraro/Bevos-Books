@@ -8,6 +8,7 @@ namespace Team24_BevosBooks.Models
     public class Order
     {
         [Key]
+        [DatabaseGenerated(DatabaseGeneratedOption.None)]
         public int OrderID { get; set; }
 
         [ForeignKey("User")]

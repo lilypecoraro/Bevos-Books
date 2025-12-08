@@ -135,7 +135,7 @@ namespace Team24_BevosBooks.Controllers
         // -------------------------
         // SEED ORDERS
         // -------------------------
-        public IActionResult SeedOrders()
+        public async Task<IActionResult> SeedOrders()
         {
             try
             {
@@ -148,6 +148,9 @@ namespace Team24_BevosBooks.Controllers
 
             return View("Confirm");
         }
+
+
+
 
 
         // -------------------------
