@@ -211,6 +211,19 @@ namespace Team24_BevosBooks.Controllers
             ModelState.Remove(nameof(AppUser.Email));
             ModelState.Remove(nameof(AppUser.Status));
 
+            // Suppress validation for FirstName/LastName when the account is Employee
+            if (user.Status == AppUser.UserStatus.Employee)
+            {
+                ModelState.Remove(nameof(AppUser.FirstName));
+                ModelState.Remove(nameof(AppUser.LastName));
+
+                // Also clear any existing model errors for those keys if they were added by data annotations
+                if (ModelState.TryGetValue(nameof(AppUser.FirstName), out var firstState))
+                    firstState.Errors.Clear();
+                if (ModelState.TryGetValue(nameof(AppUser.LastName), out var lastState))
+                    lastState.Errors.Clear();
+            }
+
             if (!ModelState.IsValid)
             {
                 TempData["AlertClass"] = "danger";
@@ -219,8 +232,13 @@ namespace Team24_BevosBooks.Controllers
             }
 
             // Update editable fields
-            user.FirstName = updatedUser.FirstName;
-            user.LastName = updatedUser.LastName;
+            if (user.Status != AppUser.UserStatus.Employee)
+            {
+                // Allow name changes for non-employees
+                user.FirstName = updatedUser.FirstName;
+                user.LastName = updatedUser.LastName;
+            }
+            // Always allow contact/address updates
             user.Address = updatedUser.Address;
             user.City = updatedUser.City;
             user.State = updatedUser.State;
