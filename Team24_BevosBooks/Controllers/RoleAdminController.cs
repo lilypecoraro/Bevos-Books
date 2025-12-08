@@ -103,6 +103,8 @@ namespace Team24_BevosBooks.Controllers
             {
                 foreach (var error in ir.Errors)
                     ModelState.AddModelError("", error.Description);
+
+                ViewBag.States = new SelectList(GetStates(), rvm.State);
                 return View(rvm);
             }
 
@@ -297,19 +299,44 @@ namespace Team24_BevosBooks.Controllers
 
             return RedirectToAction("ManageEmployees");
         }
+
+
+        // ============================================================
+        // Create Cusomter (Admin only)
+        // ============================================================
+        [Authorize(Roles = "Admin,Employee")]
+        public IActionResult CreateCustomer()
+        {
+            // Populate dropdowns if needed (e.g., states)
+            ViewBag.States = new SelectList(GetStates());
+            return View();
+        }
+
         [HttpPost]
         [Authorize(Roles = "Admin,Employee")]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> CreateCustomer(RegisterViewModel rvm)
         {
-            if (!ModelState.IsValid) return View(rvm);
+            if (!ModelState.IsValid)
+            {
+                // Repopulate dropdowns if needed
+                ViewBag.States = new SelectList(GetStates(), rvm.State);
+                return View(rvm);
+            }
 
             // ⭐ Determine the next available customer number ⭐
-            int nextCustomerNumber = _context.Users
-                .Where(u => u.CustomerNumber.HasValue)
-                .Select(u => u.CustomerNumber.Value)
-                .DefaultIfEmpty(9000)  // ensures numbers start correctly after seed (9010–9060)
-                .Max() + 1;
+            int nextCustomerNumber;
+            if (_context.Users.Any(u => u.CustomerNumber.HasValue))
+            {
+                nextCustomerNumber = _context.Users
+                    .Where(u => u.CustomerNumber.HasValue)
+                    .Max(u => u.CustomerNumber.Value) + 1;
+            }
+            else
+            {
+                // First customer after reseed should start at 9010
+                nextCustomerNumber = 9010;
+            }
 
             AppUser customer = new AppUser
             {
@@ -334,6 +361,8 @@ namespace Team24_BevosBooks.Controllers
             {
                 foreach (var error in ir.Errors)
                     ModelState.AddModelError("", error.Description);
+
+                ViewBag.States = new SelectList(GetStates(), rvm.State);
                 return View(rvm);
             }
 
@@ -343,6 +372,7 @@ namespace Team24_BevosBooks.Controllers
 
             return RedirectToAction("ManageCustomers");
         }
+
 
 
         // ============================================================
