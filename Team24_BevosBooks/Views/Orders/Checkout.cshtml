@@ -115,15 +115,15 @@ else
 
                 <!-- NEW: discounted items notice -->
                 @if (discountedItems.Any())
-                        @if (discountedItems.Any())
+                {
+                    <div class="alert alert-success text-dark bg-white shadow-sm mb-3" style="color:#000 !important;">
+                        @foreach (var title in discountedItems)
                         {
-                            <div class="alert alert-success text-dark bg-white shadow-sm mb-3" style="color:#000 !important;">
-                                @foreach (var title in discountedItems)
-                                {
-                                    <div style="color:#000 !important;"><strong style="color:#000 !important;">@title</strong> is discounted.</div>
-                                }
-                            </div>
+                            <div style="color:#000 !important;"><strong style="color:#000 !important;">@title</strong> is discounted.</div>
                         }
+                    </div>
+
+                }
 
                 <div class="card">
                     <div class="card-header">
@@ -138,24 +138,23 @@ else
 
                                 <li class="list-group-item d-flex justify-content-between align-items-center">
                                     <div>
-                                        <div class="fw-semibold" style="color:#000 !important;">@od.Book.Title</div>
+                                        <div class="fw-semibold text-dark">@od.Book.Title</div>
                                         <small>
-                                            <span style="color:#000 !important;">@od.Quantity</span>
-                                            <span style="color:#000 !important;">×</span>
+                                            <span class="text-dark">@od.Quantity</span> <span class="text-dark">×</span>
                                             @if (hasItemDiscount)
                                             {
-                                                <span style="color:#000 !important;">
-                                                    <s style="color:#000 !important;">@od.Book.Price.ToString("c")</s>
-                                                    <span class="ms-2 fw-bold" style="color:#000 !important;">@od.Price.ToString("c")</span>
+                                                <span class="text-dark">
+                                                    <s class="text-dark">@od.Book.Price.ToString("c")</s>
+                                                    <span class="ms-2 text-success fw-bold">@od.Price.ToString("c")</span>
                                                 </span>
                                             }
                                             else
                                             {
-                                                <span style="color:#000 !important;">@od.Price.ToString("c")</span>
+                                                <span class="text-dark">@od.Price.ToString("c")</span>
                                             }
                                         </small>
                                     </div>
-                                    <span class="badge bg-light" style="color:#000 !important;">
+                                    <span class="badge bg-light text-dark">
                                         @((od.Price * od.Quantity).ToString("c"))
                                     </span>
                                 </li>

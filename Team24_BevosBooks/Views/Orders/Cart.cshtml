@@ -39,7 +39,7 @@
 <!-- NEW: discounted items notice -->
 @if (discountedItems.Any())
 {
-    <div class="alert alert-success text-dark bg-white shadow-sm mb-3 fw-bold" style="color:#000 !important;">
+    <div class="alert alert-success text-dark bg-white shadow-sm mb-3" style="color:#000 !important;">
         @foreach (var title in discountedItems)
         {
             <div style="color:#000 !important;"><strong style="color:#000 !important;">@title</strong> is discounted.</div>
@@ -79,19 +79,19 @@ else
                         bool hasItemDiscount = detail.Price < detail.Book.Price;
 
                         <tr>
-                            <td><span style="color:#000 !important;">@detail.Book.Title</span></td>
+                            <td>@detail.Book.Title</td>
 
                             <td>
                                 @if (hasItemDiscount)
                                 {
-                                    <span style="color:#000 !important;">
-                                        <s style="color:#000 !important;">@detail.Book.Price.ToString("c")</s>
-                                        <span class="ms-2 fw-bold" style="color:#000 !important;">@detail.Price.ToString("c")</span>
+                                    <span class="text-dark">
+                                        <s class="text-dark">@detail.Book.Price.ToString("c")</s>
+                                        <span class="ms-2 text-success fw-bold">@detail.Price.ToString("c")</span>
                                     </span>
                                 }
                                 else
                                 {
-                                    <span style="color:#000 !important;">@detail.Price.ToString("c")</span>
+                                    @detail.Price.ToString("c")
                                 }
                             </td>
 
@@ -104,13 +104,14 @@ else
                                            value="@detail.Quantity"
                                            min="0"
                                            class="form-control form-control-sm cart-qty-input me-2" />
+
                                     <button type="submit" class="btn btn-sm cart-update-btn">
                                         Update
                                     </button>
                                 </form>
                             </td>
 
-                            <td><span style="color:#000 !important;">@((detail.Quantity * detail.Price).ToString("c"))</span></td>
+                            <td>@((detail.Quantity * detail.Price).ToString("c"))</td>
 
                             <td>
                                 <form asp-action="RemoveItem" method="post">
