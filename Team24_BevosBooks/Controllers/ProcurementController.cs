@@ -87,12 +87,12 @@ namespace Team24_BevosBooks.Controllers
                 .ToDictionaryAsync(b => b.BookID, b => b.Cost);
 
             // Load historical supplier costs
-            var historicalCosts = await _context.OrderDetails
-                .Where(od => od.Order.OrderStatus == "SupplierOrder" || od.Order.OrderStatus == "Received")
-                .GroupBy(od => od.BookID)
+            var historicalCosts = await _context.Reorders
+                .Where(r => r.ReorderStatus == "Ordered" || r.ReorderStatus == "Received")
+                .GroupBy(r => r.BookID)
                 .Select(g => new {
                     BookID = g.Key,
-                    LastCost = g.OrderByDescending(x => x.Order.OrderDate)
+                    LastCost = g.OrderByDescending(x => x.Date)
                                 .Select(x => x.Cost)
                                 .FirstOrDefault()
                 })
@@ -100,32 +100,29 @@ namespace Team24_BevosBooks.Controllers
 
             // Final merged dictionary
             var lastCosts = new Dictionary<int, decimal>();
-
             foreach (var book in bookCosts)
             {
                 if (historicalCosts.ContainsKey(book.Key) && historicalCosts[book.Key] > 0)
                 {
-                    lastCosts[book.Key] = historicalCosts[book.Key]; // Use real supplier order cost
+                    lastCosts[book.Key] = historicalCosts[book.Key];
                 }
                 else
                 {
-                    lastCosts[book.Key] = book.Value; // Use seeded Book.Cost
+                    lastCosts[book.Key] = book.Value;
                 }
             }
 
-            // Calculate profit per unit and margin percentage
+            // Calculate profit per unit
             var avgMargins = books.ToDictionary(
                 b => b.BookID,
                 b =>
                 {
                     var cost = lastCosts.ContainsKey(b.BookID) ? lastCosts[b.BookID] : b.Cost;
-                    if (b.Price <= 0) return 0m;
-                    var profitPerUnit = b.Price - cost;
-                    var marginPercent = (profitPerUnit / b.Price) * 100;
-                    return profitPerUnit; // keep decimal
+                    return b.Price > 0 ? (b.Price - cost) : 0m;
                 });
-            ViewBag.LastCosts = lastCosts;   // supplier/seeded cost
-            ViewBag.AvgMargins = avgMargins; // profit per unit
+
+            ViewBag.LastCosts = lastCosts;
+            ViewBag.AvgMargins = avgMargins;
 
             return View(books);
         }
@@ -140,8 +137,6 @@ namespace Team24_BevosBooks.Controllers
             if (bookIds == null || bookIds.Count == 0)
                 return RedirectToAction("ManualReorder");
 
-            var adminId = _userManager.GetUserId(User);
-
             foreach (var id in bookIds)
             {
                 var book = await _context.Books.FindAsync(id);
@@ -151,25 +146,15 @@ namespace Team24_BevosBooks.Controllers
                 if (!decimal.TryParse(Request.Form[$"cost_{id}"], out var cost)) continue;
                 if (qty < 0 || cost <= 0) continue;
 
-                var order = new Order
+                var reorder = new Reorder
                 {
-                    UserID = adminId,
-                    OrderDate = DateTime.Now,
-                    OrderStatus = "SupplierOrder",
-                    ShippingFee = 0
-                };
-                _context.Orders.Add(order);
-                await _context.SaveChangesAsync();
-
-                var detail = new OrderDetail
-                {
-                    OrderID = order.OrderID,
                     BookID = book.BookID,
                     Quantity = qty,
-                    Price = book.Price,
-                    Cost = cost
+                    Cost = cost,
+                    Date = DateTime.Now,
+                    ReorderStatus = "Ordered"
                 };
-                _context.OrderDetails.Add(detail);
+                _context.Reorders.Add(reorder);
                 await _context.SaveChangesAsync();
             }
 
@@ -179,7 +164,6 @@ namespace Team24_BevosBooks.Controllers
         // ==============================
         // AUTO REORDER
         // ==============================
-
         [Authorize]
         public async Task<IActionResult> AutoReorder()
         {
@@ -188,15 +172,14 @@ namespace Team24_BevosBooks.Controllers
 
             var books = await _context.Books.Where(b => b.BookStatus == "Active").ToListAsync();
 
-            var pendingOrders = await _context.OrderDetails
-                .Include(od => od.Order)
-                .Where(od => od.Order.OrderStatus == "SupplierOrder")
-                .GroupBy(od => od.BookID)
+            var pendingReorders = await _context.Reorders
+                .Where(r => r.ReorderStatus == "Ordered")
+                .GroupBy(r => r.BookID)
                 .Select(g => new { BookID = g.Key, PendingQty = g.Sum(x => x.Quantity) })
                 .ToListAsync();
 
             var result = books.Where(b =>
-                b.InventoryQuantity + (pendingOrders.FirstOrDefault(p => p.BookID == b.BookID)?.PendingQty ?? 0)
+                b.InventoryQuantity + (pendingReorders.FirstOrDefault(p => p.BookID == b.BookID)?.PendingQty ?? 0)
                 < b.ReorderPoint).ToList();
 
             // Load all books for fallback cost
@@ -205,12 +188,12 @@ namespace Team24_BevosBooks.Controllers
                 .ToDictionaryAsync(b => b.BookID, b => b.Cost);
 
             // Load historical supplier costs
-            var historicalCosts = await _context.OrderDetails
-                .Where(od => od.Order.OrderStatus == "SupplierOrder" || od.Order.OrderStatus == "Received")
-                .GroupBy(od => od.BookID)
+            var historicalCosts = await _context.Reorders
+                .Where(r => r.ReorderStatus == "Ordered" || r.ReorderStatus == "Received")
+                .GroupBy(r => r.BookID)
                 .Select(g => new {
                     BookID = g.Key,
-                    LastCost = g.OrderByDescending(x => x.Order.OrderDate)
+                    LastCost = g.OrderByDescending(x => x.Date)
                                 .Select(x => x.Cost)
                                 .FirstOrDefault()
                 })
@@ -222,31 +205,25 @@ namespace Team24_BevosBooks.Controllers
             {
                 if (historicalCosts.ContainsKey(book.Key) && historicalCosts[book.Key] > 0)
                 {
-                    lastCosts[book.Key] = historicalCosts[book.Key]; // Use real supplier order cost
+                    lastCosts[book.Key] = historicalCosts[book.Key];
                 }
                 else
                 {
-                    lastCosts[book.Key] = book.Value; // Use seeded Book.Cost
+                    lastCosts[book.Key] = book.Value;
                 }
             }
 
-
-
-            // Calculate profit per unit and margin percentage
+            // Calculate profit per unit
             var avgMargins = books.ToDictionary(
                 b => b.BookID,
                 b =>
                 {
                     var cost = lastCosts.ContainsKey(b.BookID) ? lastCosts[b.BookID] : b.Cost;
-                    if (b.Price <= 0) return 0m;
-                    var profitPerUnit = b.Price - cost;
-                    var marginPercent = (profitPerUnit / b.Price) * 100;
-                    return profitPerUnit; // keep decimal
+                    return b.Price > 0 ? (b.Price - cost) : 0m;
                 });
-            ViewBag.LastCosts = lastCosts;   // supplier/seeded cost
-            ViewBag.AvgMargins = avgMargins; // profit per unit
 
-
+            ViewBag.LastCosts = lastCosts;
+            ViewBag.AvgMargins = avgMargins;
 
             return View(result);
         }
@@ -261,8 +238,6 @@ namespace Team24_BevosBooks.Controllers
             if (bookIds == null || bookIds.Count == 0)
                 return RedirectToAction("AutoReorder");
 
-            var adminId = _userManager.GetUserId(User);
-
             foreach (var id in bookIds)
             {
                 var book = await _context.Books.FindAsync(id);
@@ -272,25 +247,15 @@ namespace Team24_BevosBooks.Controllers
                 if (!decimal.TryParse(Request.Form[$"cost_{id}"], out var cost)) continue;
                 if (qty < 0 || cost <= 0) continue;
 
-                var order = new Order
+                var reorder = new Reorder
                 {
-                    UserID = adminId,
-                    OrderDate = DateTime.Now,
-                    OrderStatus = "SupplierOrder",
-                    ShippingFee = 0
-                };
-                _context.Orders.Add(order);
-                await _context.SaveChangesAsync();
-
-                var detail = new OrderDetail
-                {
-                    OrderID = order.OrderID,
                     BookID = book.BookID,
                     Quantity = qty,
-                    Price = book.Price,
-                    Cost = cost
+                    Cost = cost,
+                    Date = DateTime.Now,
+                    ReorderStatus = "Ordered"
                 };
-                _context.OrderDetails.Add(detail);
+                _context.Reorders.Add(reorder);
                 await _context.SaveChangesAsync();
             }
 
@@ -298,7 +263,7 @@ namespace Team24_BevosBooks.Controllers
         }
 
         // ==============================
-        // VIEW ORDERS
+        // VIEW REORDERS
         // ==============================
         [Authorize]
         public async Task<IActionResult> ViewOrders()
@@ -306,12 +271,9 @@ namespace Team24_BevosBooks.Controllers
             if (!User.IsInRole("Admin"))
                 return View("AccessDenied");
 
-
-            var orders = await _context.Orders
-                .Include(o => o.OrderDetails)
-                    .ThenInclude(od => od.Book)
-                .Where(o => o.OrderStatus == "SupplierOrder")
-                .OrderByDescending(o => o.OrderDate)
+            var reorders = await _context.Reorders
+                .Include(r => r.Book)
+                .OrderByDescending(r => r.Date)
                 .ToListAsync();
 
             // Load dictionary from TempData (deserialize JSON string)
@@ -319,60 +281,97 @@ namespace Team24_BevosBooks.Controllers
                 ? JsonSerializer.Deserialize<Dictionary<int, int>>(TempData["ReceivedTotals"].ToString())
                 : new Dictionary<int, int>();
 
+            // Compute outstanding balances and remove fulfilled rows
+            var outstandingBalances = new Dictionary<int, int>();
+            var toRemove = new List<Reorder>();
+
+            foreach (var reorder in reorders)
+            {
+                int alreadyReceived = receivedTotals.ContainsKey(reorder.ReorderID)
+                    ? receivedTotals[reorder.ReorderID]
+                    : 0;
+
+                int outstanding = reorder.Quantity - alreadyReceived;
+
+                if (outstanding <= 0)
+                {
+                    reorder.ReorderStatus = "Received";
+                    toRemove.Add(reorder); // mark for deletion
+                }
+                else
+                {
+                    outstandingBalances[reorder.ReorderID] = outstanding;
+                }
+            }
+
+            // Delete fulfilled reorders
+            if (toRemove.Any())
+            {
+                _context.Reorders.RemoveRange(toRemove);
+                await _context.SaveChangesAsync();
+                reorders = reorders.Except(toRemove).ToList();
+            }
+
             // Keep dictionary available for next request
+            TempData["ReceivedTotals"] = JsonSerializer.Serialize(receivedTotals);
             TempData.Keep("ReceivedTotals");
 
             ViewBag.ReceivedTotals = receivedTotals;
+            ViewBag.OutstandingBalances = outstandingBalances;
 
-            return View(orders);
+            return View(reorders);
         }
 
         // ==============================
         // CHECK IN ARRIVALS
         // ==============================
         [HttpPost]
-        public async Task<IActionResult> CheckIn(int orderDetailId, int arrivedQty)
+        public async Task<IActionResult> CheckIn(int reorderId, int arrivedQty)
         {
-            var detail = await _context.OrderDetails
-                .Include(od => od.Book)
-                .Include(od => od.Order)
-                .FirstOrDefaultAsync(od => od.OrderDetailID == orderDetailId);
+            var reorder = await _context.Reorders
+                .Include(r => r.Book)
+                .FirstOrDefaultAsync(r => r.ReorderID == reorderId);
 
-            if (detail == null) return NotFound();
+            if (reorder == null) return NotFound();
 
             if (arrivedQty < 0) arrivedQty = 0;
 
-            // Load dictionary from TempData (deserialize JSON string)
+            // Load dictionary from TempData
             var receivedTotals = TempData["ReceivedTotals"] != null
                 ? JsonSerializer.Deserialize<Dictionary<int, int>>(TempData["ReceivedTotals"].ToString())
                 : new Dictionary<int, int>();
 
-            int alreadyReceived = receivedTotals.ContainsKey(orderDetailId) ? receivedTotals[orderDetailId] : 0;
+            int alreadyReceived = receivedTotals.ContainsKey(reorderId)
+                ? receivedTotals[reorderId]
+                : 0;
 
             // Clamp so we never exceed ordered quantity
-            if (alreadyReceived + arrivedQty > detail.Quantity)
+            if (alreadyReceived + arrivedQty > reorder.Quantity)
             {
-                arrivedQty = detail.Quantity - alreadyReceived;
+                arrivedQty = reorder.Quantity - alreadyReceived;
             }
 
             // Update dictionary
-            receivedTotals[orderDetailId] = alreadyReceived + arrivedQty;
+            receivedTotals[reorderId] = alreadyReceived + arrivedQty;
 
-            // Save dictionary back to TempData (serialize to JSON string)
+            // Save dictionary back to TempData
             TempData["ReceivedTotals"] = JsonSerializer.Serialize(receivedTotals);
 
             // Update inventory
-            detail.Book.InventoryQuantity += arrivedQty;
+            reorder.Book.InventoryQuantity += arrivedQty;
 
-            // If cumulative received equals ordered, mark order as Received
-            if (receivedTotals[orderDetailId] >= detail.Quantity)
+            // If cumulative received equals ordered, mark reorder as Received and delete
+            if (receivedTotals[reorderId] >= reorder.Quantity)
             {
-                detail.Order.OrderStatus = "Received";
+                reorder.ReorderStatus = "Received";
+                _context.Reorders.Remove(reorder);
             }
 
             await _context.SaveChangesAsync();
+
             return RedirectToAction("ViewOrders");
         }
+
 
         // ==============================
         // BOOK DETAILS (Admin Procurement)
@@ -399,17 +398,17 @@ namespace Team24_BevosBooks.Controllers
                 .ToList();
 
             // Compute last supplier cost and avg margin for this book
-            var lastCost = _context.OrderDetails
-                .Where(od => od.BookID == book.BookID &&
-                             (od.Order.OrderStatus == "SupplierOrder" || od.Order.OrderStatus == "Received"))
-                .OrderByDescending(od => od.Order.OrderDate)
-                .Select(od => od.Cost)
+            var lastCost = _context.Reorders
+                .Where(r => r.BookID == book.BookID &&
+                            (r.ReorderStatus == "Ordered" || r.ReorderStatus == "Received"))
+                .OrderByDescending(r => r.Date)
+                .Select(r => r.Cost)
                 .FirstOrDefault();
 
-            var avgMargin = _context.OrderDetails
-                .Where(od => od.BookID == book.BookID && od.Order.OrderStatus == "Ordered")
+            var avgMargin = _context.Reorders
+                .Where(r => r.BookID == book.BookID && r.ReorderStatus == "Ordered")
                 .AsEnumerable()
-                .Select(od => (od.Price - od.Cost) / od.Price)
+                .Select(r => (book.Price - r.Cost) / book.Price)
                 .DefaultIfEmpty(0)
                 .Average();
 
@@ -420,5 +419,3 @@ namespace Team24_BevosBooks.Controllers
         }
     }
 }
-
-

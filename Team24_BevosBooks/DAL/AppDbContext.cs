@@ -28,6 +28,13 @@ namespace Team24_BevosBooks.DAL
                 .HasForeignKey(od => od.BookID)
                 .OnDelete(DeleteBehavior.Restrict); // or DeleteBehavior.NoAction
 
+            modelBuilder.Entity<Reorder>()
+                .HasKey(r => r.ReorderID);
+
+            modelBuilder.Entity<Reorder>()
+                .Property(r => r.ReorderID)
+                .ValueGeneratedOnAdd();
+
             // Seed default shipping settings
             modelBuilder.Entity<ShippingSetting>().HasData(
                 new ShippingSetting

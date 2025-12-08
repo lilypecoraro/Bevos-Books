@@ -1,4 +1,4 @@
-﻿@model Team24_BevosBooks.Models.OrderDetail
+﻿@model Team24_BevosBooks.Models.Reorder
 
 @{
     ViewData["Title"] = "Check In Book Arrival";
@@ -10,7 +10,7 @@
 <p><strong>Ordered Quantity:</strong> @Model.Quantity</p>
 
 <form asp-action="CheckIn" method="post">
-    <input type="hidden" name="orderDetailId" value="@Model.OrderDetailID" />
+    <input type="hidden" name="reorderId" value="@Model.ReorderID" />
     <div class="mb-3">
         <label for="arrivedQty" class="form-label">Arrived Quantity</label>
         <input type="number" id="arrivedQty" name="arrivedQty" min="0" max="@Model.Quantity"
