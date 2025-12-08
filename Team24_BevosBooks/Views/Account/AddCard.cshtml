@@ -37,3 +37,21 @@
         </form>
     </div>
 </div>
+
+@section Styles {
+    <style>
+        /* Force black text for the dropdown on this page */
+        select.form-control[name="CardType"],
+        select[asp-for="CardType"],
+        select.form-control {
+            color: #000 !important;
+            background-color: #fff !important;
+            border: 1px solid #ccc !important;
+        }
+
+        /* Ensure options list renders in black when opened */
+        select.form-control option {
+            color: #000 !important;
+        }
+    </style>
+}
