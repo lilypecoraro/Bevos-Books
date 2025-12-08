@@ -22,7 +22,8 @@ namespace Team24_BevosBooks.Models.ViewModels
         [Display(Name = "Email")]
         public string Email { get; set; }
 
-        [Required(ErrorMessage = "Please enter your phone number."), Phone]
+        [Required(ErrorMessage = "Please enter your phone number.")]
+        [RegularExpression(@"^\d{10}$", ErrorMessage = "Phone number must be exactly 10 digits.")]
         [Display(Name = "Phone Number")]
         public string PhoneNumber { get; set; }
 
