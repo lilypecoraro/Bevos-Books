@@ -183,6 +183,7 @@ namespace Team24_BevosBooks.Controllers
             }
 
             // Do NOT clear TempData here — let messages from POST persist
+            ViewBag.States = GetStates();
             return View(user);
         }
 
