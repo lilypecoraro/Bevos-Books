@@ -752,7 +752,14 @@ namespace Team24_BevosBooks.Controllers
                     : 0m;
 
             // SPEC: If multiple books in cart, only give recommendations for one
-            var firstDetailWithBook = order.OrderDetails.FirstOrDefault(od => od.Book != null);
+            // Choose the book in the cart with the highest rating
+            var firstDetailWithBook = order.OrderDetails
+                .Where(od => od.Book != null)
+                .OrderByDescending(od => od.Book.Reviews != null && od.Book.Reviews.Any(r => r.DisputeStatus == "Approved")
+                    ? od.Book.Reviews.Where(r => r.DisputeStatus == "Approved").Average(r => r.Rating)
+                    : 0) // fall back to 0 if no ratings
+                .FirstOrDefault();
+
             List<Book> recs = new List<Book>();
             if (firstDetailWithBook == null)
             {
