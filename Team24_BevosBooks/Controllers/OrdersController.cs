@@ -606,7 +606,9 @@ namespace Team24_BevosBooks.Controllers
                 else if (coupon.CouponType == "FreeShipping")
                 {
                     decimal before = cart.OrderDetails.Sum(od => od.Price * od.Quantity);
-                    if (before >= coupon.FreeThreshold)
+
+                    // FIX: allow "all orders" free shipping when FreeThreshold is null
+                    if (!coupon.FreeThreshold.HasValue || before >= coupon.FreeThreshold.Value)
                     {
                         freeShipping = true;
                         foreach (var od in cart.OrderDetails)
