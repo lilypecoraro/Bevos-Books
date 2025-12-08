@@ -383,7 +383,7 @@ namespace Team24_BevosBooks.Controllers
         {
             AppUser customer = await _userManager.FindByIdAsync(id);
             if (customer == null) return NotFound();
-
+            ViewBag.States = new SelectList(GetStates(), customer.State);
             return View(customer);
         }
 
@@ -394,6 +394,7 @@ namespace Team24_BevosBooks.Controllers
         {
             if (!ModelState.IsValid)
             {
+                ViewBag.States = new SelectList(GetStates(), edited.State);
                 return View(edited);
             }
 
