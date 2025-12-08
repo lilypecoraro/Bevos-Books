@@ -198,7 +198,6 @@ namespace Team24_BevosBooks.Controllers
 
         // ========= B. Orders Report =========
         [HttpGet]
-        [Route("Reports/OrdersReport")]
         public async Task<IActionResult> OrdersReport(
             DateTime? StartDate,
             DateTime? EndDate,
@@ -208,6 +207,7 @@ namespace Team24_BevosBooks.Controllers
             decimal? MaxProfit,
             decimal? MinRevenue,
             decimal? MaxRevenue,
+            string? CustomerName,
             string sort = "recent")
         {
             var avgCost = await GetWeightedAverageCostByBook();
@@ -220,6 +220,16 @@ namespace Team24_BevosBooks.Controllers
             {
                 var endExclusive = EndDate.Value.Date.AddDays(1);
                 q = q.Where(od => od.Order.OrderDate < endExclusive);
+            }
+
+            // Name-based filter (case-insensitive), modeled after BooksSold
+            if (!string.IsNullOrWhiteSpace(CustomerName))
+            {
+                var customerNameLower = CustomerName.Trim().ToLower();
+                q = q.Where(od =>
+                    (od.Order.User.FirstName + " " + od.Order.User.LastName)
+                        .ToLower()
+                        .Contains(customerNameLower));
             }
 
             var list = await q.ToListAsync();
@@ -284,7 +294,8 @@ namespace Team24_BevosBooks.Controllers
                     MinProfit = MinProfit,
                     MaxProfit = MaxProfit,
                     MinRevenue = MinRevenue,
-                    MaxRevenue = MaxRevenue
+                    MaxRevenue = MaxRevenue,
+                    CustomerName = CustomerName
                 }
             };
 
