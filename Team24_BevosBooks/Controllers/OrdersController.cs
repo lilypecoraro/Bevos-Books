@@ -721,7 +721,6 @@ namespace Team24_BevosBooks.Controllers
 
             return RedirectToAction("OrderConfirmation", new { id = cart.OrderID });
         }
-
         // ============================================================
         // ORDER CONFIRMATION + RECOMMENDATIONS
         // ============================================================
@@ -742,25 +741,128 @@ namespace Team24_BevosBooks.Controllers
             if (order == null)
                 return NotFound();
 
+            // ============================================================
+            // RECOMMENDATIONS LOGIC — enforce specs in hierarchy
+            // ============================================================
+
+            // Helper: compute average approved rating (safe in memory)
+            decimal AvgApproved(Book b) =>
+                b.Reviews != null && b.Reviews.Any(r => r.DisputeStatus == "Approved")
+                    ? (decimal)b.Reviews.Where(r => r.DisputeStatus == "Approved").Average(r => r.Rating)
+                    : 0m;
+
+            // SPEC: If multiple books in cart, only give recommendations for one
             var firstDetailWithBook = order.OrderDetails.FirstOrDefault(od => od.Book != null);
-
             List<Book> recs = new List<Book>();
-
-            if (firstDetailWithBook != null)
+            if (firstDetailWithBook == null)
             {
-                var firstBook = firstDetailWithBook.Book;
-
-                recs = await _context.Books
-                    .Where(b => b.GenreID == firstBook.GenreID &&
-                                b.BookStatus == "Active" &&
-                                !order.OrderDetails.Select(od => od.BookID).Contains(b.BookID))
-                    .Take(3)
-                    .ToListAsync();
+                ViewBag.AssignedRecommendations = recs;
+                return View(order);
             }
 
-            ViewBag.AssignedRecommendations = recs;
+            // SPEC: Do not recommend books already purchased (trumps all)
+            var purchasedBookIds = await _context.Orders
+                .Where(o => o.UserID == order.UserID)
+                .SelectMany(o => o.OrderDetails.Select(od => od.BookID))
+                .Distinct()
+                .ToListAsync();
 
+            var focusBookId = firstDetailWithBook.Book.BookID;
+            var focusBook = await _context.Books
+                .Include(b => b.Reviews)
+                .FirstOrDefaultAsync(b => b.BookID == focusBookId);
+
+            string focusAuthor = focusBook.Authors;
+            int focusGenreId = focusBook.GenreID;
+
+            // SPEC: Author’s other book in same genre (highest rated)
+            var authorCandidates = await _context.Books
+                .Include(b => b.Reviews)
+                .Where(b => b.Authors == focusAuthor
+                         && b.GenreID == focusGenreId
+                         && b.BookID != focusBook.BookID
+                         && b.BookStatus == "Active"
+                         && !purchasedBookIds.Contains(b.BookID))
+                .ToListAsync(); // materialize first
+
+            var authorRec = authorCandidates
+                .OrderByDescending(b => AvgApproved(b))
+                .FirstOrDefault();
+
+            if (authorRec != null)
+            {
+                recs.Add(authorRec);
+            }
+
+            // “Category below”: highly‑rated books of same genre, distinct authors
+            var sameGenrePool = await _context.Books
+                .Include(b => b.Reviews)
+                .Where(b => b.GenreID == focusGenreId
+                         && b.BookStatus == "Active"
+                         && b.BookID != focusBook.BookID
+                         && !purchasedBookIds.Contains(b.BookID))
+                .ToListAsync(); // materialize first
+
+            var highRatedDistinctAuthors = sameGenrePool
+                .Where(b => AvgApproved(b) >= 4.0m)
+                .OrderByDescending(b => AvgApproved(b))
+                .GroupBy(b => b.Authors)
+                .Select(g => g.First())
+                .Take(2)
+                .ToList();
+
+            foreach (var hr in highRatedDistinctAuthors)
+            {
+                if (!recs.Any(r => r.BookID == hr.BookID))
+                    recs.Add(hr);
+            }
+
+            // Fill blanks with low/no‑rated same‑genre books
+            if (recs.Count < 3)
+            {
+                var fillers = sameGenrePool
+                    .OrderByDescending(b => AvgApproved(b))
+                    .Where(b => !recs.Any(r => r.BookID == b.BookID))
+                    .Take(3 - recs.Count)
+                    .ToList();
+
+                recs.AddRange(fillers);
+
+                // Relaxed second pass if still short
+                if (recs.Count < 3)
+                {
+                    var relaxedFillers = sameGenrePool
+                        .OrderByDescending(b => AvgApproved(b))
+                        .Where(b => !recs.Any(r => r.BookID == b.BookID))
+                        .Take(3 - recs.Count)
+                        .ToList();
+
+                    recs.AddRange(relaxedFillers);
+                }
+            }
+
+            // If no genre books, fallback to highest rated overall
+            if (recs.Count == 0 || (recs.Count < 3 && !sameGenrePool.Any()))
+            {
+                var overallCandidates = await _context.Books
+                    .Include(b => b.Reviews)
+                    .Where(b => b.BookStatus == "Active"
+                             && b.BookID != focusBook.BookID
+                             && !purchasedBookIds.Contains(b.BookID))
+                    .ToListAsync(); // materialize first
+
+                var overallFillers = overallCandidates
+                    .OrderByDescending(b => AvgApproved(b))
+                    .Take(3 - recs.Count)
+                    .ToList();
+
+                recs.AddRange(overallFillers);
+            }
+
+            // SPEC: Recommendations should include three books whenever possible
+            ViewBag.AssignedRecommendations = recs.Take(3).ToList();
             return View(order);
         }
+
     }
 }

@@ -1,4 +1,25 @@
-﻿@model Team24_BevosBooks.Models.Order
+﻿<style>
+    /* Force all alert/notification text to be black */
+    .alert,
+    .alert * {
+        color: #000 !important;
+    }
+
+        /* Optional: keep book titles bold inside alerts */
+        .alert strong {
+            font-weight: 700;
+            color: #000 !important;
+        }
+
+        /* Optional: emphasize "Out of Stock" or "Discontinued" in red */
+        .alert .status-out,
+        .alert .status-discontinued {
+            color: #b00020 !important; /* dark red */
+            font-weight: 600;
+        }
+</style>
+
+@model Team24_BevosBooks.Models.Order
 
 @{
     ViewData["Title"] = "Shopping Cart";
