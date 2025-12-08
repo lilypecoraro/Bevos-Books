@@ -312,8 +312,14 @@ namespace Team24_BevosBooks.Controllers
                 return View(cvm);
             }
 
+            // ⭐ Assign next CardID
+            int nextId = _context.Cards.Any()
+                ? _context.Cards.Max(c => c.CardID) + 1
+                : 1001;
+
             Card card = new()
             {
+                CardID = nextId,  // ⭐ FIX
                 CardType = cvm.CardType,
                 CardNumber = cvm.CardNumber,
                 UserID = user.Id,
@@ -325,6 +331,7 @@ namespace Team24_BevosBooks.Controllers
 
             return RedirectToAction("Checkout", "Orders");
         }
+
 
         // ============================================================
         // MY CARDS

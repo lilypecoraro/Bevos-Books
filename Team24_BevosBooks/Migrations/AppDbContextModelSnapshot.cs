@@ -316,10 +316,7 @@ namespace Team24_BevosBooks.Migrations
             modelBuilder.Entity("Team24_BevosBooks.Models.Card", b =>
                 {
                     b.Property<int>("CardID")
-                        .ValueGeneratedOnAdd()
                         .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("CardID"));
 
                     b.Property<string>("CardNumber")
                         .IsRequired()
@@ -397,6 +394,41 @@ namespace Team24_BevosBooks.Migrations
                     b.ToTable("Genres");
                 });
 
+            modelBuilder.Entity("Team24_BevosBooks.Models.ItemDiscount", b =>
+                {
+                    b.Property<int>("ItemDiscountID")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("ItemDiscountID"));
+
+                    b.Property<int>("BookID")
+                        .HasColumnType("int");
+
+                    b.Property<decimal?>("DiscountAmount")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<decimal?>("DiscountPercent")
+                        .HasColumnType("decimal(5,2)");
+
+                    b.Property<DateTime?>("EndDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateTime?>("StartDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("nvarchar(20)");
+
+                    b.HasKey("ItemDiscountID");
+
+                    b.HasIndex("BookID");
+
+                    b.ToTable("ItemDiscounts");
+                });
+
             modelBuilder.Entity("Team24_BevosBooks.Models.Order", b =>
                 {
                     b.Property<int>("OrderID")
@@ -404,6 +436,9 @@ namespace Team24_BevosBooks.Migrations
                         .HasColumnType("int");
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("OrderID"));
+
+                    b.Property<int?>("CouponID")
+                        .HasColumnType("int");
 
                     b.Property<DateTime>("OrderDate")
                         .HasColumnType("datetime2");
@@ -420,6 +455,8 @@ namespace Team24_BevosBooks.Migrations
                         .HasColumnType("nvarchar(450)");
 
                     b.HasKey("OrderID");
+
+                    b.HasIndex("CouponID");
 
                     b.HasIndex("UserID");
 
@@ -519,7 +556,8 @@ namespace Team24_BevosBooks.Migrations
                         .HasMaxLength(20)
                         .HasColumnType("nvarchar(20)");
 
-                    b.Property<int>("Rating")
+                    b.Property<int?>("Rating")
+                        .IsRequired()
                         .HasColumnType("int");
 
                     b.Property<string>("ReviewText")
@@ -540,6 +578,33 @@ namespace Team24_BevosBooks.Migrations
                     b.HasIndex("ReviewerID");
 
                     b.ToTable("Reviews");
+                });
+
+            modelBuilder.Entity("Team24_BevosBooks.Models.ShippingSetting", b =>
+                {
+                    b.Property<int>("SettingID")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("SettingID"));
+
+                    b.Property<decimal>("AdditionalBookRate")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<decimal>("FirstBookRate")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.HasKey("SettingID");
+
+                    b.ToTable("ShippingSettings");
+
+                    b.HasData(
+                        new
+                        {
+                            SettingID = 1,
+                            AdditionalBookRate = 1.50m,
+                            FirstBookRate = 3.50m
+                        });
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>
@@ -615,13 +680,30 @@ namespace Team24_BevosBooks.Migrations
                     b.Navigation("User");
                 });
 
+            modelBuilder.Entity("Team24_BevosBooks.Models.ItemDiscount", b =>
+                {
+                    b.HasOne("Team24_BevosBooks.Models.Book", "Book")
+                        .WithMany()
+                        .HasForeignKey("BookID")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Book");
+                });
+
             modelBuilder.Entity("Team24_BevosBooks.Models.Order", b =>
                 {
+                    b.HasOne("Team24_BevosBooks.Models.Coupon", "Coupon")
+                        .WithMany()
+                        .HasForeignKey("CouponID");
+
                     b.HasOne("Team24_BevosBooks.Models.AppUser", "User")
                         .WithMany()
                         .HasForeignKey("UserID")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+
+                    b.Navigation("Coupon");
 
                     b.Navigation("User");
                 });

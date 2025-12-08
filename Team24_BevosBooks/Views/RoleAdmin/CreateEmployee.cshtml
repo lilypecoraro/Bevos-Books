@@ -48,27 +48,28 @@
 
     <div class="form-group mb-2">
         <label asp-for="State"></label>
-        <input asp-for="State" class="form-control" />
-        <span asp-validation-for="State" class="text-danger"></span>
+        <select asp-for="State" class="form-select" asp-items="ViewBag.States">
+            <option value="">-- Select State --</option>
+        </select>
     </div>
 
-    <div class="form-group mb-2">
-        <label asp-for="ZipCode"></label>
-        <input asp-for="ZipCode" class="form-control" />
-        <span asp-validation-for="ZipCode" class="text-danger"></span>
-    </div>
+        <div class="form-group mb-2">
+            <label asp-for="ZipCode"></label>
+            <input asp-for="ZipCode" class="form-control" />
+            <span asp-validation-for="ZipCode" class="text-danger"></span>
+        </div>
 
-    <div class="form-group mb-3">
-        <label asp-for="Password"></label>
-        <input asp-for="Password" type="password" class="form-control" />
-        <span asp-validation-for="Password" class="text-danger"></span>
-    </div>
+        <div class="form-group mb-3">
+            <label asp-for="Password"></label>
+            <input asp-for="Password" type="password" class="form-control" />
+            <span asp-validation-for="Password" class="text-danger"></span>
+        </div>
 
-    <div class="form-group mb-3">
-        <label asp-for="ConfirmPassword"></label>
-        <input asp-for="ConfirmPassword" type="password" class="form-control" />
-        <span asp-validation-for="ConfirmPassword" class="text-danger"></span>
-    </div>
+        <div class="form-group mb-3">
+            <label asp-for="ConfirmPassword"></label>
+            <input asp-for="ConfirmPassword" type="password" class="form-control" />
+            <span asp-validation-for="ConfirmPassword" class="text-danger"></span>
+        </div>
 
-    <button type="submit" class="btn btn-primary">Create Employee</button>
+        <button type="submit" class="btn btn-primary">Create Employee</button>
 </form>

@@ -89,6 +89,20 @@ namespace Team24_BevosBooks.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "ShippingSettings",
+                columns: table => new
+                {
+                    SettingID = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    FirstBookRate = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
+                    AdditionalBookRate = table.Column<decimal>(type: "decimal(18,2)", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_ShippingSettings", x => x.SettingID);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "AspNetRoleClaims",
                 columns: table => new
                 {
@@ -198,8 +212,7 @@ namespace Team24_BevosBooks.Migrations
                 name: "Cards",
                 columns: table => new
                 {
-                    CardID = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
+                    CardID = table.Column<int>(type: "int", nullable: false),
                     UserID = table.Column<string>(type: "nvarchar(450)", nullable: false),
                     CustomerName = table.Column<string>(type: "nvarchar(80)", maxLength: 80, nullable: false),
                     CardNumber = table.Column<string>(type: "nvarchar(30)", maxLength: 30, nullable: false),
@@ -225,7 +238,8 @@ namespace Team24_BevosBooks.Migrations
                     UserID = table.Column<string>(type: "nvarchar(450)", nullable: false),
                     OrderDate = table.Column<DateTime>(type: "datetime2", nullable: false),
                     ShippingFee = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
-                    OrderStatus = table.Column<string>(type: "nvarchar(max)", nullable: false)
+                    OrderStatus = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    CouponID = table.Column<int>(type: "int", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -236,6 +250,11 @@ namespace Team24_BevosBooks.Migrations
                         principalTable: "AspNetUsers",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_Orders_Coupons_CouponID",
+                        column: x => x.CouponID,
+                        principalTable: "Coupons",
+                        principalColumn: "CouponID");
                 });
 
             migrationBuilder.CreateTable(
@@ -264,6 +283,30 @@ namespace Team24_BevosBooks.Migrations
                         column: x => x.GenreID,
                         principalTable: "Genres",
                         principalColumn: "GenreID",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "ItemDiscounts",
+                columns: table => new
+                {
+                    ItemDiscountID = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    BookID = table.Column<int>(type: "int", nullable: false),
+                    DiscountPercent = table.Column<decimal>(type: "decimal(5,2)", nullable: true),
+                    DiscountAmount = table.Column<decimal>(type: "decimal(18,2)", nullable: true),
+                    Status = table.Column<string>(type: "nvarchar(20)", maxLength: 20, nullable: false),
+                    StartDate = table.Column<DateTime>(type: "datetime2", nullable: true),
+                    EndDate = table.Column<DateTime>(type: "datetime2", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_ItemDiscounts", x => x.ItemDiscountID);
+                    table.ForeignKey(
+                        name: "FK_ItemDiscounts_Books_BookID",
+                        column: x => x.BookID,
+                        principalTable: "Books",
+                        principalColumn: "BookID",
                         onDelete: ReferentialAction.Cascade);
                 });
 
@@ -366,6 +409,11 @@ namespace Team24_BevosBooks.Migrations
                         onDelete: ReferentialAction.Cascade);
                 });
 
+            migrationBuilder.InsertData(
+                table: "ShippingSettings",
+                columns: new[] { "SettingID", "AdditionalBookRate", "FirstBookRate" },
+                values: new object[] { 1, 1.50m, 3.50m });
+
             migrationBuilder.CreateIndex(
                 name: "IX_AspNetRoleClaims_RoleId",
                 table: "AspNetRoleClaims",
@@ -416,6 +464,11 @@ namespace Team24_BevosBooks.Migrations
                 column: "UserID");
 
             migrationBuilder.CreateIndex(
+                name: "IX_ItemDiscounts_BookID",
+                table: "ItemDiscounts",
+                column: "BookID");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_OrderDetails_BookID",
                 table: "OrderDetails",
                 column: "BookID");
@@ -434,6 +487,11 @@ namespace Team24_BevosBooks.Migrations
                 name: "IX_OrderDetails_OrderID",
                 table: "OrderDetails",
                 column: "OrderID");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Orders_CouponID",
+                table: "Orders",
+                column: "CouponID");
 
             migrationBuilder.CreateIndex(
                 name: "IX_Orders_UserID",
@@ -480,6 +538,9 @@ namespace Team24_BevosBooks.Migrations
                 name: "AspNetUserTokens");
 
             migrationBuilder.DropTable(
+                name: "ItemDiscounts");
+
+            migrationBuilder.DropTable(
                 name: "OrderDetails");
 
             migrationBuilder.DropTable(
@@ -489,13 +550,13 @@ namespace Team24_BevosBooks.Migrations
                 name: "Reviews");
 
             migrationBuilder.DropTable(
+                name: "ShippingSettings");
+
+            migrationBuilder.DropTable(
                 name: "AspNetRoles");
 
             migrationBuilder.DropTable(
                 name: "Cards");
-
-            migrationBuilder.DropTable(
-                name: "Coupons");
 
             migrationBuilder.DropTable(
                 name: "Orders");
@@ -505,6 +566,9 @@ namespace Team24_BevosBooks.Migrations
 
             migrationBuilder.DropTable(
                 name: "AspNetUsers");
+
+            migrationBuilder.DropTable(
+                name: "Coupons");
 
             migrationBuilder.DropTable(
                 name: "Genres");

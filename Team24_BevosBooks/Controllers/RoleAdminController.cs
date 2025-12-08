@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using Team24_BevosBooks.DAL;
 using Team24_BevosBooks.Models;
@@ -24,6 +25,20 @@ namespace Team24_BevosBooks.Controllers
             _roleManager = roleManager;
             _context = context;
         }
+
+
+
+        // ============================================================
+        // STATES
+        // ============================================================
+        private List<string> GetStates() => new()
+        {
+            "AL","AK","AZ","AR","CA","CO","CT","DE","FL","GA",
+            "HI","ID","IL","IN","IA","KS","KY","LA","ME","MD",
+            "MA","MI","MN","MS","MO","MT","NE","NV","NH","NJ",
+            "NM","NY","NC","ND","OH","OK","OR","PA","RI","SC",
+            "SD","TN","TX","UT","VT","VA","WA","WV","WI","WY"
+        };
 
         // ============================================================
         // MANAGE EMPLOYEES / ADMINS (Admin only)
@@ -53,6 +68,7 @@ namespace Team24_BevosBooks.Controllers
         [Authorize(Roles = "Admin")]
         public IActionResult CreateEmployee()
         {
+            ViewBag.States = new SelectList(GetStates());
             return View();
         }
 
@@ -60,7 +76,12 @@ namespace Team24_BevosBooks.Controllers
         [Authorize(Roles = "Admin")]
         public async Task<IActionResult> CreateEmployee(RegisterViewModel rvm)
         {
-            if (!ModelState.IsValid) return View(rvm);
+            if (!ModelState.IsValid)
+            {
+                // Repopulate states before returning the view
+                ViewBag.States = new SelectList(GetStates());
+                return View(rvm);
+            }
 
             AppUser employee = new AppUser
             {
@@ -97,9 +118,10 @@ namespace Team24_BevosBooks.Controllers
         [Authorize(Roles = "Admin")]
         public async Task<IActionResult> EditEmployee(string id)
         {
+
             AppUser employee = await _userManager.FindByIdAsync(id);
             if (employee == null) return NotFound();
-
+            ViewBag.States = new SelectList(GetStates());
             return View(employee);
         }
 
@@ -110,6 +132,7 @@ namespace Team24_BevosBooks.Controllers
         {
             if (!ModelState.IsValid)
             {
+                ViewBag.States = new SelectList(GetStates());
                 return View(edited);
             }
 
@@ -274,21 +297,19 @@ namespace Team24_BevosBooks.Controllers
 
             return RedirectToAction("ManageEmployees");
         }
-        // ============================================================
-        // CREATE CUSTOMER (Admin + Employee)
-        // ============================================================
-        [Authorize(Roles = "Admin,Employee")]
-        public IActionResult CreateCustomer()
-        {
-            return View();
-        }
-
         [HttpPost]
         [Authorize(Roles = "Admin,Employee")]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> CreateCustomer(RegisterViewModel rvm)
         {
             if (!ModelState.IsValid) return View(rvm);
+
+            // ⭐ Determine the next available customer number ⭐
+            int nextCustomerNumber = _context.Users
+                .Where(u => u.CustomerNumber.HasValue)
+                .Select(u => u.CustomerNumber.Value)
+                .DefaultIfEmpty(9000)  // ensures numbers start correctly after seed (9010–9060)
+                .Max() + 1;
 
             AppUser customer = new AppUser
             {
@@ -301,7 +322,10 @@ namespace Team24_BevosBooks.Controllers
                 City = rvm.City,
                 State = rvm.State,
                 ZipCode = rvm.ZipCode,
-                Status = AppUser.UserStatus.Customer
+                Status = AppUser.UserStatus.Customer,
+
+                // ⭐ Assign the next sequential customer number ⭐
+                CustomerNumber = nextCustomerNumber
             };
 
             IdentityResult ir = await _userManager.CreateAsync(customer, rvm.Password);
@@ -315,9 +339,11 @@ namespace Team24_BevosBooks.Controllers
 
             await _userManager.AddToRoleAsync(customer, "Customer");
 
-            TempData["Message"] = $"Customer {customer.FirstName} {customer.LastName} created successfully.";
+            TempData["Message"] = $"Customer #{customer.CustomerNumber}: {customer.FirstName} {customer.LastName} created successfully.";
+
             return RedirectToAction("ManageCustomers");
         }
+
 
         // ============================================================
         // EDIT CUSTOMER (Admin + Employee)
