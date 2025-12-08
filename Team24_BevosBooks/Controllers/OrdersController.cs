@@ -281,18 +281,17 @@ namespace Team24_BevosBooks.Controllers
         public async Task<IActionResult> History()
         {
             string userId = _userManager.GetUserId(User);
-
             if (userId == null)
             {
                 return RedirectToAction("Login", "Account");
             }
 
             var orders = await _context.Orders
-                .Where(o => o.UserID == userId)
+                .Where(o => o.UserID == userId && o.OrderStatus == "Ordered") // only completed orders
                 .Include(o => o.OrderDetails)
-                    .ThenInclude(od => od.Book)   // FIX: Load book titles
+                    .ThenInclude(od => od.Book)
                 .Include(o => o.OrderDetails)
-                    .ThenInclude(od => od.Card)   // Load card used (if any)
+                    .ThenInclude(od => od.Card)
                 .OrderByDescending(o => o.OrderDate)
                 .ToListAsync();
 
