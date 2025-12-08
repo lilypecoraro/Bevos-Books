@@ -49,5 +49,6 @@ namespace Team24_BevosBooks.DAL
         public DbSet<Reorder> Reorders { get; set; }
         public DbSet<Review> Reviews { get; set; }
         public DbSet<ShippingSetting> ShippingSettings { get; set; }
+        public DbSet<ItemDiscount> ItemDiscounts { get; set; }
     }
 }
