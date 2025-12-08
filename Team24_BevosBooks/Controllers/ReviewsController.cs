@@ -89,10 +89,14 @@ namespace Team24_BevosBooks.Controllers
         // ===============================
         // WRITE REVIEW
         // ===============================
-        [Authorize(Roles = "Customer")]
+        [Authorize]
         [HttpGet]
         public async Task<IActionResult> Submit(int bookId)
         {
+
+            if (!User.IsInRole("Customer"))
+                return View("AccessDeniedEmployee");
+
             // Load book details
             var book = await _context.Books
                 .AsNoTracking()
@@ -113,11 +117,15 @@ namespace Team24_BevosBooks.Controllers
             return View(model);
         }
 
-        [Authorize(Roles = "Customer")]
+        [Authorize]
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Submit(Review review)
         {
+
+            if (!User.IsInRole("Customer"))
+                return View("AccessDeniedEmployee");
+
             // Basic validation: book must exist
             var bookExists = await _context.Books.AnyAsync(b => b.BookID == review.BookID);
             if (!bookExists) return NotFound();
