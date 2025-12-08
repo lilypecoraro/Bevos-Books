@@ -18,5 +18,8 @@ namespace Team24_BevosBooks.ViewModels
 
         // NEW: Track current sort option
         public string CurrentSort { get; set; } = "title";
+
+        // NEW: Filters used on the Current Inventory page
+        public ReportFilterVM Filter { get; set; } = new ReportFilterVM();
     }
 }

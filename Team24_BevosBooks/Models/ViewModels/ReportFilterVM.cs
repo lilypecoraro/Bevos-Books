@@ -22,5 +22,9 @@ namespace Team24_BevosBooks.ViewModels
         // NEW: per-order revenue filters
         public decimal? MinRevenue { get; set; }
         public decimal? MaxRevenue { get; set; }
+
+        // NEW: Current Inventory – inventory quantity filters
+        public int? MinInventoryQty { get; set; }
+        public int? MaxInventoryQty { get; set; }
     }
 }

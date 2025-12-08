@@ -304,12 +304,44 @@ namespace Team24_BevosBooks.Controllers
 
         // ========= C. Customers Report =========
         [Authorize(Roles = "Admin")]
-        public async Task<IActionResult> CustomersReport(string sort = "profitDesc")
+        public async Task<IActionResult> CustomersReport(
+            DateTime? StartDate,
+            DateTime? EndDate,
+            decimal? MinAvgCost,
+            decimal? MaxAvgCost,
+            decimal? MinProfit,
+            decimal? MaxProfit,
+            decimal? MinRevenue,
+            decimal? MaxRevenue,
+            string? CustomerName,
+            string sort = "profitDesc")
         {
             var avgCost = await GetWeightedAverageCostByBook();
-            var q = await SalesQuery().ToListAsync();
+            var q = SalesQuery();
 
-            var grouped = q
+            // Date range (EndDate inclusive)
+            if (StartDate.HasValue)
+                q = q.Where(od => od.Order.OrderDate >= StartDate.Value);
+
+            if (EndDate.HasValue)
+            {
+                var endExclusive = EndDate.Value.Date.AddDays(1);
+                q = q.Where(od => od.Order.OrderDate < endExclusive);
+            }
+
+            // Name-based filter (case-insensitive), like OrdersReport/BooksSold
+            if (!string.IsNullOrWhiteSpace(CustomerName))
+            {
+                var customerNameLower = CustomerName.Trim().ToLower();
+                q = q.Where(od =>
+                    (od.Order.User.FirstName + " " + od.Order.User.LastName)
+                        .ToLower()
+                        .Contains(customerNameLower));
+            }
+
+            var list = await q.ToListAsync();
+
+            var grouped = list
                 .GroupBy(od => od.Order.UserID)
                 .Select(g => new CustomerReportRowVM
                 {
@@ -327,6 +359,21 @@ namespace Team24_BevosBooks.Controllers
                 })
                 .ToList();
 
+            // Apply numeric filters on the materialized list (same as other reports)
+            if (MinAvgCost.HasValue)
+                grouped = grouped.Where(r => r.Cost >= MinAvgCost.Value).ToList();
+            if (MaxAvgCost.HasValue)
+                grouped = grouped.Where(r => r.Cost <= MaxAvgCost.Value).ToList();
+            if (MinProfit.HasValue)
+                grouped = grouped.Where(r => r.Profit >= MinProfit.Value).ToList();
+            if (MaxProfit.HasValue)
+                grouped = grouped.Where(r => r.Profit <= MaxProfit.Value).ToList();
+            if (MinRevenue.HasValue)
+                grouped = grouped.Where(r => r.Revenue >= MinRevenue.Value).ToList();
+            if (MaxRevenue.HasValue)
+                grouped = grouped.Where(r => r.Revenue <= MaxRevenue.Value).ToList();
+
+            // Sorting
             grouped = sort switch
             {
                 "profitAsc" => grouped.OrderBy(r => r.Profit).ToList(),
@@ -340,7 +387,19 @@ namespace Team24_BevosBooks.Controllers
             {
                 Rows = grouped,
                 RecordCount = grouped.Count(),
-                CurrentSort = sort
+                CurrentSort = sort,
+                Filter = new ReportFilterVM
+                {
+                    StartDate = StartDate,
+                    EndDate = EndDate,
+                    MinAvgCost = MinAvgCost,
+                    MaxAvgCost = MaxAvgCost,
+                    MinProfit = MinProfit,
+                    MaxProfit = MaxProfit,
+                    MinRevenue = MinRevenue,
+                    MaxRevenue = MaxRevenue,
+                    CustomerName = CustomerName
+                }
             };
 
             return View(vm);
@@ -375,7 +434,13 @@ namespace Team24_BevosBooks.Controllers
         }
 
         // ========= E. Current Inventory =========
-        public async Task<IActionResult> CurrentInventory(string sort = "title")
+        [HttpGet] // optional, just explicit
+        public async Task<IActionResult> CurrentInventory(
+            decimal? MinAvgCost,
+            decimal? MaxAvgCost,
+            int? MinInventoryQty,
+            int? MaxInventoryQty,
+            string sort = "title")
         {
             var avgCost = await GetWeightedAverageCostByBook();
             var books = await _context.Books.ToListAsync();
@@ -388,7 +453,17 @@ namespace Team24_BevosBooks.Controllers
                 AverageCost = avgCost.ContainsKey(b.BookID) ? avgCost[b.BookID] : 0m
             }).ToList();
 
-            // Sorting options
+            // Apply filters
+            if (MinAvgCost.HasValue)
+                rows = rows.Where(r => r.AverageCost >= MinAvgCost.Value).ToList();
+            if (MaxAvgCost.HasValue)
+                rows = rows.Where(r => r.AverageCost <= MaxAvgCost.Value).ToList();
+            if (MinInventoryQty.HasValue)
+                rows = rows.Where(r => r.InventoryQuantity >= MinInventoryQty.Value).ToList();
+            if (MaxInventoryQty.HasValue)
+                rows = rows.Where(r => r.InventoryQuantity <= MaxInventoryQty.Value).ToList();
+
+            // Sorting
             rows = sort switch
             {
                 "qtyAsc" => rows.OrderBy(r => r.InventoryQuantity).ToList(),
@@ -403,7 +478,14 @@ namespace Team24_BevosBooks.Controllers
                 Rows = rows,
                 TotalInventoryValue = rows.Sum(r => r.AverageCost * r.InventoryQuantity),
                 RecordCount = rows.Count(),
-                CurrentSort = sort
+                CurrentSort = sort,
+                Filter = new ReportFilterVM
+                {
+                    MinAvgCost = MinAvgCost,
+                    MaxAvgCost = MaxAvgCost,
+                    MinInventoryQty = MinInventoryQty,
+                    MaxInventoryQty = MaxInventoryQty
+                }
             };
 
             return View(vm);
