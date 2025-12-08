@@ -64,7 +64,6 @@ namespace Team24_BevosBooks.Controllers
 
                 _context.Orders.Add(order);
                 await _context.SaveChangesAsync();
-
             }
 
             return order;
@@ -219,7 +218,6 @@ namespace Team24_BevosBooks.Controllers
             return RedirectToAction("Cart");
         }
 
-
         // ============================================================
         // REMOVE ITEM
         // ============================================================
@@ -298,7 +296,6 @@ namespace Team24_BevosBooks.Controllers
             return View(orders);
         }
 
-
         // ============================================================
         // ALL ORDERS (Admin/Employee)
         // ============================================================
@@ -375,7 +372,6 @@ namespace Team24_BevosBooks.Controllers
 
                 ViewBag.CheckoutMessage = TempData["CheckoutMessage"];
             }
-
 
             if (TempData.ContainsKey("CheckoutError"))
             {
@@ -501,10 +497,6 @@ namespace Team24_BevosBooks.Controllers
             TempData["DiscountAmount"] = discountAmount.ToString();
             TempData["DiscountedShipping"] = totals.shipping.ToString();
             TempData["DiscountedTotal"] = totals.total.ToString();
-            TempData["CheckoutMessage"] = $"Coupon '{code}' applied successfully!";
-
-
-
             TempData["CheckoutMessage"] = $"Coupon '{code}' applied successfully!";
 
             return RedirectToAction("Checkout");
@@ -633,7 +625,7 @@ namespace Team24_BevosBooks.Controllers
             var totals = await ComputeCartTotals(cart, freeShipping);
             model.Subtotal = cart.OrderDetails.Sum(od => od.Price * od.Quantity);
             decimal originalBeforeCheckout = cart.OrderDetails
-    .Sum(od => od.Book.Price * od.Quantity);
+                .Sum(od => od.Book.Price * od.Quantity);
 
             model.Discount = originalBeforeCheckout - model.Subtotal;
 
@@ -685,6 +677,39 @@ namespace Team24_BevosBooks.Controllers
 
             await _context.SaveChangesAsync();
 
+            // ============================================================
+            // RECOMMENDATIONS FOR EMAIL
+            // ============================================================
+            var recommendations = await GetRecommendationsAsync(cart);
+
+            string recHtml = "";
+            if (recommendations.Any())
+            {
+                recHtml = "<h3>You May Also Like</h3><ul>";
+
+                foreach (var r in recommendations)
+                {
+                    string genreName = (r.Genre != null)
+                        ? r.Genre.GenreName
+                        : "Unknown Genre";
+
+                    var approvedReviews = r.Reviews?
+                        .Where(rv => rv.DisputeStatus == "Approved")
+                        .ToList() ?? new List<Review>();
+
+                    string ratingPart = approvedReviews.Any()
+                        ? $"Average Rating: {approvedReviews.Average(rv => rv.Rating):0.0}"
+                        : "No ratings yet";
+
+                    recHtml += $@"
+                        <li>
+                            <strong>{r.Title}</strong> — {genreName} — {ratingPart}
+                        </li>";
+                }
+
+                recHtml += "</ul>";
+            }
+
             // ==============================================
             // EMAIL: ORDER CONFIRMATION
             // ==============================================
@@ -709,6 +734,8 @@ namespace Team24_BevosBooks.Controllers
                    <strong>Shipping:</strong> {model.Shipping:C}<br/>
                    <strong>Total:</strong> {model.Total:C}</p>
 
+                {recHtml}
+
                 <p>Thank you for shopping at Bevo's Books! 🤘</p>
                 <p><i>Team 24 — Bevo's Books</i></p>
             ");
@@ -721,51 +748,29 @@ namespace Team24_BevosBooks.Controllers
 
             return RedirectToAction("OrderConfirmation", new { id = cart.OrderID });
         }
+
         // ============================================================
-        // ORDER CONFIRMATION + RECOMMENDATIONS
+        // PRIVATE: GET RECOMMENDATIONS FOR AN ORDER
         // ============================================================
-        [Authorize]
-        public async Task<IActionResult> OrderConfirmation(int id)
+        private async Task<List<Book>> GetRecommendationsAsync(Order order)
         {
-            var user = await _userManager.GetUserAsync(User);
-
-            var order = await _context.Orders
-                .Include(o => o.OrderDetails)
-                    .ThenInclude(od => od.Book)
-                        .ThenInclude(b => b.Genre)
-                .Include(o => o.OrderDetails)
-                    .ThenInclude(od => od.Card)
-                .FirstOrDefaultAsync(o => o.OrderID == id &&
-                                          o.UserID == user.Id);
-
-            if (order == null)
-                return NotFound();
-
-            // ============================================================
-            // RECOMMENDATIONS LOGIC — enforce specs in hierarchy
-            // ============================================================
-
             // Helper: compute average approved rating (safe in memory)
             decimal AvgApproved(Book b) =>
                 b.Reviews != null && b.Reviews.Any(r => r.DisputeStatus == "Approved")
-                    ? (decimal)b.Reviews.Where(r => r.DisputeStatus == "Approved").Average(r => r.Rating)
+                    ? (decimal)b.Reviews
+                        .Where(r => r.DisputeStatus == "Approved")
+                        .Average(r => r.Rating)
                     : 0m;
 
-            // SPEC: If multiple books in cart, only give recommendations for one
-            // Choose the book in the cart with the highest rating
-            var firstDetailWithBook = order.OrderDetails
-                .Where(od => od.Book != null)
-                .OrderByDescending(od => od.Book.Reviews != null && od.Book.Reviews.Any(r => r.DisputeStatus == "Approved")
-                    ? od.Book.Reviews.Where(r => r.DisputeStatus == "Approved").Average(r => r.Rating)
-                    : 0) // fall back to 0 if no ratings
-                .FirstOrDefault();
-
             List<Book> recs = new List<Book>();
-            if (firstDetailWithBook == null)
-            {
-                ViewBag.AssignedRecommendations = recs;
-                return View(order);
-            }
+
+            // SPEC: If multiple books in cart, only give recommendations for one
+            // Just pick the first book in the order that isn't null
+            var focusDetail = order.OrderDetails
+                .FirstOrDefault(od => od.Book != null);
+
+            if (focusDetail == null)
+                return recs;
 
             // SPEC: Do not recommend books already purchased (trumps all)
             var purchasedBookIds = await _context.Orders
@@ -774,10 +779,13 @@ namespace Team24_BevosBooks.Controllers
                 .Distinct()
                 .ToListAsync();
 
-            var focusBookId = firstDetailWithBook.Book.BookID;
+            var focusBookId = focusDetail.Book.BookID;
             var focusBook = await _context.Books
                 .Include(b => b.Reviews)
                 .FirstOrDefaultAsync(b => b.BookID == focusBookId);
+
+            if (focusBook == null)
+                return recs;
 
             string focusAuthor = focusBook.Authors;
             int focusGenreId = focusBook.GenreID;
@@ -785,6 +793,7 @@ namespace Team24_BevosBooks.Controllers
             // SPEC: Author’s other book in same genre (highest rated)
             var authorCandidates = await _context.Books
                 .Include(b => b.Reviews)
+                .Include(b => b.Genre)
                 .Where(b => b.Authors == focusAuthor
                          && b.GenreID == focusGenreId
                          && b.BookID != focusBook.BookID
@@ -801,9 +810,10 @@ namespace Team24_BevosBooks.Controllers
                 recs.Add(authorRec);
             }
 
-            // “Category below”: highly‑rated books of same genre, distinct authors
+            // “Category below”: highly-rated books of same genre, distinct authors
             var sameGenrePool = await _context.Books
                 .Include(b => b.Reviews)
+                .Include(b => b.Genre)
                 .Where(b => b.GenreID == focusGenreId
                          && b.BookStatus == "Active"
                          && b.BookID != focusBook.BookID
@@ -824,7 +834,7 @@ namespace Team24_BevosBooks.Controllers
                     recs.Add(hr);
             }
 
-            // Fill blanks with low/no‑rated same‑genre books
+            // Fill blanks with low/no-rated same-genre books
             if (recs.Count < 3)
             {
                 // First pass: enforce distinct authors
@@ -856,6 +866,7 @@ namespace Team24_BevosBooks.Controllers
             {
                 var overallCandidates = await _context.Books
                     .Include(b => b.Reviews)
+                    .Include(b => b.Genre)
                     .Where(b => b.BookStatus == "Active"
                              && b.BookID != focusBook.BookID
                              && !purchasedBookIds.Contains(b.BookID))
@@ -870,10 +881,33 @@ namespace Team24_BevosBooks.Controllers
             }
 
             // SPEC: Recommendations should include three books whenever possible
-            ViewBag.AssignedRecommendations = recs.Take(3).ToList();
-            return View(order);
+            return recs.Take(3).ToList();
         }
 
+        // ============================================================
+        // ORDER CONFIRMATION + RECOMMENDATIONS
+        // ============================================================
+        [Authorize]
+        public async Task<IActionResult> OrderConfirmation(int id)
+        {
+            var user = await _userManager.GetUserAsync(User);
 
+            var order = await _context.Orders
+                .Include(o => o.OrderDetails)
+                    .ThenInclude(od => od.Book)
+                        .ThenInclude(b => b.Genre)
+                .Include(o => o.OrderDetails)
+                    .ThenInclude(od => od.Card)
+                .FirstOrDefaultAsync(o => o.OrderID == id &&
+                                          o.UserID == user.Id);
+
+            if (order == null)
+                return NotFound();
+
+            var recs = await GetRecommendationsAsync(order);
+            ViewBag.AssignedRecommendations = recs;
+
+            return View(order);
+        }
     }
 }
