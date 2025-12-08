@@ -66,14 +66,18 @@
                 <div class="list-group">
                     @foreach (var book in recs)
                     {
+                        var approved = (book.Reviews ?? new List<Review>())
+                            .Where(r => r.DisputeStatus == "Approved")
+                            .ToList();
+
                         <a asp-controller="Books" asp-action="Details" asp-route-id="@book.BookID" class="list-group-item list-group-item-action text-dark bg-white">
                             <div class="d-flex w-100 justify-content-between">
                                 <h5 class="mb-1 text-dark">@book.Title</h5>
                                 <small class="text-dark">by @book.Authors</small>
                             </div>
-                            @if (book.Reviews.Any())
+                            @if (approved.Any())
                             {
-                                var avgRating = book.Reviews.Average(r => (double?)r.Rating) ?? 0.0;
+                                var avgRating = approved.Average(r => (double)r.Rating!.Value);
                                 <small class="text-dark">Rating: @($"{avgRating:0.0}") / 5</small>
                             }
                             else
