@@ -73,3 +73,17 @@
     <button type="submit" class="btn btn-primary">Create Customer</button>
     <a asp-action="ManageCustomers" class="btn btn-secondary ms-2">Cancel</a>
 </form>
+
+@section Styles {
+    <style>
+        /* Force black text for the State dropdown and its options on this page */
+        select.form-control[name="State"] {
+            color: #000 !important;
+            background-color: #fff !important;
+            border: 1px solid #ccc !important;
+        }
+        select.form-control[name="State"] option {
+            color: #000 !important;
+        }
+    </style>
+}
