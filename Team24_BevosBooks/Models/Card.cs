@@ -6,6 +6,7 @@ namespace Team24_BevosBooks.Models
     public class Card
     {
         [Key]
+        [DatabaseGenerated(DatabaseGeneratedOption.None)]
         [Display(Name = "Card ID")]
         public int CardID { get; set; }
 
