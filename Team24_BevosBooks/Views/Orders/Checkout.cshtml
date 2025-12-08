@@ -50,7 +50,7 @@ else
                                     @foreach (var c in Model.Cards)
                                     {
                                         string last4 = c.CardNumber[^4..];
-                                        <option value="@c.CardID">@c.CardType •••• @last4</option>
+                                        <option value="@c.CardID">@c.CardType **** @last4</option>
                                     }
                                 </select>
 
