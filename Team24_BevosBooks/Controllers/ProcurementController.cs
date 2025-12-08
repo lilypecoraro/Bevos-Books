@@ -8,6 +8,7 @@ using Microsoft.AspNetCore.Mvc.Rendering;
 using System.Collections.Generic;
 using Team24_BevosBooks.DAL;
 using Microsoft.AspNetCore.Authorization;
+using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace Team24_BevosBooks.Controllers
 {
@@ -142,18 +143,31 @@ namespace Team24_BevosBooks.Controllers
                 var book = await _context.Books.FindAsync(id);
                 if (book == null) continue;
 
-                if (!int.TryParse(Request.Form[$"qty_{id}"], out var qty)) continue;
-                if (!decimal.TryParse(Request.Form[$"cost_{id}"], out var cost)) continue;
-                if (qty < 0 || cost <= 0) continue;
-
+                // Build a Reorder object directly from form values
                 var reorder = new Reorder
                 {
                     BookID = book.BookID,
-                    Quantity = qty,
-                    Cost = cost,
                     Date = DateTime.Now,
                     ReorderStatus = "Ordered"
                 };
+
+                // Bind form values
+                if (int.TryParse(Request.Form[$"qty_{id}"], out var qty))
+                    reorder.Quantity = qty;
+
+                if (decimal.TryParse(Request.Form[$"cost_{id}"], out var cost))
+                    reorder.Cost = cost;
+
+                // ✅ Validate using ModelState (same as AutoReorder)
+                if (!TryValidateModel(reorder))
+                {
+                    foreach (var error in ModelState.Values.SelectMany(v => v.Errors))
+                    {
+                        TempData["ErrorMessages"] = (TempData["ErrorMessages"] ?? "") + error.ErrorMessage + "<br/>";
+                    }
+                    return RedirectToAction("ManualReorder");
+                }
+
                 _context.Reorders.Add(reorder);
                 await _context.SaveChangesAsync();
             }
@@ -243,24 +257,39 @@ namespace Team24_BevosBooks.Controllers
                 var book = await _context.Books.FindAsync(id);
                 if (book == null) continue;
 
-                if (!int.TryParse(Request.Form[$"qty_{id}"], out var qty)) continue;
-                if (!decimal.TryParse(Request.Form[$"cost_{id}"], out var cost)) continue;
-                if (qty < 0 || cost <= 0) continue;
-
+                // Build a Reorder object directly from form values
                 var reorder = new Reorder
                 {
                     BookID = book.BookID,
-                    Quantity = qty,
-                    Cost = cost,
                     Date = DateTime.Now,
                     ReorderStatus = "Ordered"
                 };
+
+                // Bind form values
+                if (int.TryParse(Request.Form[$"qty_{id}"], out var qty))
+                    reorder.Quantity = qty;
+
+                if (decimal.TryParse(Request.Form[$"cost_{id}"], out var cost))
+                    reorder.Cost = cost;
+
+                // ✅ Validate using ModelState
+                if (!TryValidateModel(reorder))
+                {
+                    // Collect errors and redisplay AutoReorder view
+                    foreach (var error in ModelState.Values.SelectMany(v => v.Errors))
+                    {
+                        TempData["ErrorMessages"] = (TempData["ErrorMessages"] ?? "") + error.ErrorMessage + "<br/>";
+                    }
+                    return RedirectToAction("AutoReorder");
+                }
+
                 _context.Reorders.Add(reorder);
                 await _context.SaveChangesAsync();
             }
 
             return RedirectToAction("ViewOrders");
         }
+
 
         // ==============================
         // VIEW REORDERS

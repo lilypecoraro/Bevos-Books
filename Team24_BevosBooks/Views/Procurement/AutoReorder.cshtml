@@ -16,6 +16,14 @@
         }
 </style>
 
+@if (TempData["ErrorMessages"] != null)
+{
+    <div class="alert alert-danger">
+        @Html.Raw(TempData["ErrorMessages"])
+    </div>
+}
+
+
 @model IEnumerable<Team24_BevosBooks.Models.Book>
 
 @{
@@ -52,33 +60,36 @@
                     : 0m;
 
                 var marginPercent = book.Price > 0 ? (profit / book.Price) * 100 : 0;
-            <tr>
-                <td>
-                    <input type="checkbox" name="bookIds" value="@book.BookID" checked />
-                </td>
-                <td>@book.Title</td>
-                <td>@book.InventoryQuantity</td>
-                <td>@book.ReorderPoint</td>
-                <td>@(lastCost > 0 ? lastCost.ToString("C") : "N/A")</td>
-                <td>@($"{profit:C} ({marginPercent:F2}%)")</td>   <!-- NEW CELL -->
-                <td>
-                    <input type="number" name="qty_@book.BookID" value="5" min="0"
-                           class="form-control text-dark" style="width:90px;" />
-                </td>
-                <td>
-                    <input type="number" step="0.01" name="cost_@book.BookID"
-                           value="@(lastCost > 0 ? lastCost : book.Cost)"
-                           min="0.01"
-                           class="form-control text-dark" style="width:90px;" />
-                </td>
-                <td>
-                    <button type="button" class="btn btn-danger btn-sm" onclick="this.closest('tr').remove();">
-                        Delete
-                    </button>
-                </td>
-            </tr>
-        }
-            </tbody>
-        </table>
+                <tr>
+                    <td>
+                        <input type="checkbox" name="bookIds" value="@book.BookID" checked />
+                    </td>
+                    <td>@book.Title</td>
+                    <td>@book.InventoryQuantity</td>
+                    <td>@book.ReorderPoint</td>
+                    <td>@(lastCost > 0 ? lastCost.ToString("C") : "N/A")</td>
+                    <td>@($"{profit:C} ({marginPercent:F2}%)")</td>   <!-- NEW CELL -->
+                    <td>
+                        <!-- Change min="0" to min="1" -->
+                    <td>
+                        <input type="number" name="qty_@book.BookID" value="5" min="1"
+                               class="form-control text-dark" style="width:90px;" />
+                    </td>
+                    <td>
+                        <input type="number" step="0.01" name="cost_@book.BookID"
+                               value="@(lastCost > 0 ? lastCost : book.Cost)"
+                               min="0.01"
+                               class="form-control text-dark" style="width:90px;" />
+                    </td>
+
+                    <td>
+                        <button type="button" class="btn btn-danger btn-sm" onclick="this.closest('tr').remove();">
+                            Delete
+                        </button>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
     <button type="submit" class="btn btn-success">Place Automatic Orders</button>
 </form>
