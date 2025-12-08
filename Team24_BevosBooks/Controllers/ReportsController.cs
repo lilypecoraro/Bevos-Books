@@ -77,16 +77,42 @@ namespace Team24_BevosBooks.Controllers
             return _context.OrderDetails
                 .Include(od => od.Order).ThenInclude(o => o.User)
                 .Include(od => od.Book)
-                .Where(od => od.Order.OrderStatus == "Completed");
+                .Where(od => od.Order.OrderStatus == "Ordered");
         }
 
         // ========= A. Books Sold =========
-        public async Task<IActionResult> BooksSold(string sort = "recent")
+        public async Task<IActionResult> BooksSold(
+            DateTime? StartDate,
+            DateTime? EndDate,
+            decimal? MinPrice,
+            decimal? MaxPrice,
+            int? BookId,
+            int? CustomerId,
+            string sort = "recent")
         {
             var avgCost = await GetWeightedAverageCostByBook();
             var q = SalesQuery();
 
+            // FILTERS
+            if (StartDate.HasValue)
+                q = q.Where(od => od.Order.OrderDate >= StartDate.Value);
 
+            if (EndDate.HasValue)
+                q = q.Where(od => od.Order.OrderDate <= EndDate.Value);
+
+            if (MinPrice.HasValue)
+                q = q.Where(od => od.Price >= MinPrice.Value);
+
+            if (MaxPrice.HasValue)
+                q = q.Where(od => od.Price <= MaxPrice.Value);
+
+            if (BookId.HasValue)
+                q = q.Where(od => od.BookID == BookId.Value);
+
+            if (CustomerId.HasValue)
+                q = q.Where(od => od.Order.UserID == CustomerId.Value.ToString());
+
+            // BUILD ROWS
             var items = await q.Select(od => new BookSaleRowVM
             {
                 BookID = od.BookID,
@@ -94,25 +120,14 @@ namespace Team24_BevosBooks.Controllers
                 Quantity = od.Quantity,
                 OrderID = od.OrderID,
                 CustomerName = od.Order.User.FirstName + " " + od.Order.User.LastName,
-
-                // Always show original selling price
                 SellingPrice = od.Price,
-
                 AverageCost = avgCost.ContainsKey(od.BookID) ? avgCost[od.BookID] : 0m,
-
-                ProfitMargin = (
-                    (od.Price * od.Quantity) -
-                    ((avgCost.ContainsKey(od.BookID) ? avgCost[od.BookID] : 0m) * od.Quantity)
-                )
-                - (
-                    od.Order.Coupon != null && od.Order.Coupon.CouponType == "PercentOff"
-                        ? ((od.Order.Coupon.DiscountPercent ?? 0m) / 100m) * (od.Price * od.Quantity)
-                        : 0m
-                ),
-
+                ProfitMargin = (od.Price * od.Quantity)
+                             - ((avgCost.ContainsKey(od.BookID) ? avgCost[od.BookID] : 0m) * od.Quantity),
                 OrderDate = od.Order.OrderDate
             }).ToListAsync();
 
+            // SORTING
             items = sort switch
             {
                 "profitAsc" => items.OrderBy(i => i.ProfitMargin).ToList(),
@@ -123,15 +138,26 @@ namespace Team24_BevosBooks.Controllers
                 _ => items.OrderByDescending(i => i.OrderDate).ToList()
             };
 
+            // BUILD FILTER FOR VIEW
             var vm = new BooksSoldReportVM
             {
                 Rows = items,
                 RecordCount = items.Count(),
-                CurrentSort = sort
+                CurrentSort = sort,
+                Filter = new ReportFilterVM
+                {
+                    StartDate = StartDate,
+                    EndDate = EndDate,
+                    MinPrice = MinPrice,
+                    MaxPrice = MaxPrice,
+                    BookId = BookId,
+                    CustomerId = CustomerId
+                }
             };
 
             return View(vm);
         }
+
 
         // ========= B. Orders Report =========
         public async Task<IActionResult> OrdersReport(string sort = "recent")

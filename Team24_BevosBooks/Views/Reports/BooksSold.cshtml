@@ -4,30 +4,76 @@
     ViewData["Title"] = "Books Sold";
 }
 
-<h2>Books Sold</h2>
+<h2 class="mb-3">Books Sold</h2>
 
-<form method="get" class="mb-3 d-flex gap-2">
-    <input class="form-control" type="date" name="StartDate" value="@Model.Filter.StartDate?.ToString("yyyy-MM-dd")" />
-    <input class="form-control" type="date" name="EndDate" value="@Model.Filter.EndDate?.ToString("yyyy-MM-dd")" />
-    <input class="form-control" type="number" step="0.01" name="MinPrice" value="@Model.Filter.MinPrice" placeholder="Min price" />
-    <input class="form-control" type="number" step="0.01" name="MaxPrice" value="@Model.Filter.MaxPrice" placeholder="Max price" />
-    <input class="form-control" type="number" name="BookId" value="@Model.Filter.BookId" placeholder="Book ID" />
-    <input class="form-control" type="number" name="CustomerId" value="@Model.Filter.CustomerId" placeholder="Customer ID" />
+<!-- FILTER BAR -->
+<form method="get" class="mb-4">
 
-    <select class="form-select" name="sort">
-        <option value="recent" selected="@(Model.CurrentSort == "recent")">Most recent</option>
-        <option value="profitAsc" selected="@(Model.CurrentSort == "profitAsc")">Profit ↑</option>
-        <option value="profitDesc" selected="@(Model.CurrentSort == "profitDesc")">Profit ↓</option>
-        <option value="priceAsc" selected="@(Model.CurrentSort == "priceAsc")">Price ↑</option>
-        <option value="priceDesc" selected="@(Model.CurrentSort == "priceDesc")">Price ↓</option>
-        <option value="popular" selected="@(Model.CurrentSort == "popular")">Most popular</option>
-    </select>
+    <div class="row g-3 align-items-end">
 
-    <button class="btn btn-primary" type="submit">Apply</button>
+        <!-- DATE RANGE -->
+        <div class="col-md-3">
+            <label class="form-label">Start Date</label>
+            <input class="form-control" type="date" name="StartDate"
+                   value="@Model.Filter.StartDate?.ToString("yyyy-MM-dd")" />
+        </div>
+
+        <div class="col-md-3">
+            <label class="form-label">End Date</label>
+            <input class="form-control" type="date" name="EndDate"
+                   value="@Model.Filter.EndDate?.ToString("yyyy-MM-dd")" />
+        </div>
+
+        <!-- PRICE RANGE -->
+        <div class="col-md-2">
+            <label class="form-label">Min Price</label>
+            <input class="form-control" type="number" step="0.01"
+                   name="MinPrice" value="@Model.Filter.MinPrice" placeholder="$0.00" />
+        </div>
+
+        <div class="col-md-2">
+            <label class="form-label">Max Price</label>
+            <input class="form-control" type="number" step="0.01"
+                   name="MaxPrice" value="@Model.Filter.MaxPrice" placeholder="$999" />
+        </div>
+
+        <!-- BOOK / CUSTOMER -->
+        <div class="col-md-2">
+            <label class="form-label">Book ID</label>
+            <input class="form-control" type="number"
+                   name="BookId" value="@Model.Filter.BookId" placeholder="Ex: 222011" />
+        </div>
+
+
+        <!-- SORTING -->
+        <div class="col-md-3">
+            <label class="form-label">Sort By</label>
+            <select class="form-select" name="sort">
+                <option value="recent" selected="@(Model.CurrentSort == "recent")">Most recent</option>
+                <option value="popular" selected="@(Model.CurrentSort == "popular")">Most popular</option>
+                <option value="profitDesc" selected="@(Model.CurrentSort == "profitDesc")">Profit ↓</option>
+                <option value="profitAsc" selected="@(Model.CurrentSort == "profitAsc")">Profit ↑</option>
+                <option value="priceDesc" selected="@(Model.CurrentSort == "priceDesc")">Price ↓</option>
+                <option value="priceAsc" selected="@(Model.CurrentSort == "priceAsc")">Price ↑</option>
+            </select>
+        </div>
+
+        <!-- BUTTONS -->
+        <div class="col-md-2 d-flex gap-2">
+            <button class="btn btn-primary w-100" type="submit">Apply</button>
+
+            <a class="btn btn-secondary w-100"
+               href="@Url.Action("BooksSold", "Reports")">
+                Clear
+            </a>
+        </div>
+
+    </div>
 </form>
 
 <p><strong>Record count:</strong> @Model.RecordCount</p>
 
+<!-- TABLE -->
 <table class="table table-striped">
     <thead>
         <tr>
@@ -51,7 +97,7 @@
                 <td>@r.CustomerName</td>
                 <td>@r.SellingPrice.ToString("c")</td>
                 <td>@r.AverageCost.ToString("c")</td>
-                <td>@r.ProfitMargin.ToString("c")</td> <!-- absolute profit -->
+                <td>@r.ProfitMargin.ToString("c")</td>
                 <td>@r.OrderDate.ToShortDateString()</td>
             </tr>
         }
