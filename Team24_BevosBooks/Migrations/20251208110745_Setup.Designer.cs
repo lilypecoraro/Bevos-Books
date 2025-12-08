@@ -12,7 +12,7 @@ using Team24_BevosBooks.DAL;
 namespace Team24_BevosBooks.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20251208032138_Setup")]
+    [Migration("20251208110745_Setup")]
     partial class Setup
     {
         /// <inheritdoc />
