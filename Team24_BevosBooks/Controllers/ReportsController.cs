@@ -98,7 +98,11 @@ namespace Team24_BevosBooks.Controllers
                 q = q.Where(od => od.Order.OrderDate >= StartDate.Value);
 
             if (EndDate.HasValue)
-                q = q.Where(od => od.Order.OrderDate <= EndDate.Value);
+            {
+                // Inclusive end date: include all orders on EndDate
+                var endExclusive = EndDate.Value.Date.AddDays(1);
+                q = q.Where(od => od.Order.OrderDate < endExclusive);
+            }
 
             if (MinPrice.HasValue)
                 q = q.Where(od => od.Price >= MinPrice.Value);
@@ -160,13 +164,29 @@ namespace Team24_BevosBooks.Controllers
 
 
         // ========= B. Orders Report =========
-        public async Task<IActionResult> OrdersReport(string sort = "recent")
+        public async Task<IActionResult> OrdersReport(
+            DateTime? StartDate,
+            DateTime? EndDate,
+            string sort = "recent")
         {
             var avgCost = await GetWeightedAverageCostByBook();
 
-            var q = await SalesQuery().ToListAsync();
+            // Apply the same date filtering semantics as BooksSold
+            var q = SalesQuery();
 
-            var grouped = q
+            if (StartDate.HasValue)
+                q = q.Where(od => od.Order.OrderDate >= StartDate.Value);
+
+            if (EndDate.HasValue)
+            {
+                // Inclusive end date
+                var endExclusive = EndDate.Value.Date.AddDays(1);
+                q = q.Where(od => od.Order.OrderDate < endExclusive);
+            }
+
+            var list = await q.ToListAsync();
+
+            var grouped = list
                 .GroupBy(od => od.OrderID)
                 .Select(g => new OrderReportRowVM
                 {
@@ -198,7 +218,13 @@ namespace Team24_BevosBooks.Controllers
             {
                 Rows = grouped,
                 RecordCount = grouped.Count(),
-                CurrentSort = sort
+                CurrentSort = sort,
+                // Populate Filter so the view's date inputs bind correctly
+                Filter = new ReportFilterVM
+                {
+                    StartDate = StartDate,
+                    EndDate = EndDate
+                }
             };
 
             return View(vm);
