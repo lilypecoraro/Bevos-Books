@@ -22,6 +22,7 @@
             <th>Date</th>
             <th>Book(s)</th>
             <th>Quantity</th>
+            <th>Subtotal</th>
             <th>Shipping</th>
             <th>Total</th>
             <th>Card Used</th>
@@ -59,6 +60,7 @@
                     }
                 </td>
 
+                <td>@subtotal.ToString("c")</td>
                 <td>@order.ShippingFee.ToString("c")</td>
                 <td>@total.ToString("c")</td>
                 <td>@maskedCard</td>
