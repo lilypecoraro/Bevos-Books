@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace Team24_BevosBooks.ViewModels
 {
@@ -13,6 +14,9 @@ namespace Team24_BevosBooks.ViewModels
         public decimal OrderCost { get; set; }
         public decimal OrderProfit { get; set; }
         public decimal OrderMargin { get; set; }
+
+        // NEW: comma-separated list of distinct book titles in the order
+        public string BookTitles { get; set; } = "";
     }
 
     public class OrdersReportVM

@@ -172,7 +172,7 @@ namespace Team24_BevosBooks.Controllers
                 _ => items.OrderByDescending(i => i.OrderDate).ToList()
             };
 
-            // Build VM including new filters
+            // Build VM including new filters (no TotalProfit assignment)
             var vm = new BooksSoldReportVM
             {
                 Rows = items,
@@ -252,7 +252,9 @@ namespace Team24_BevosBooks.Controllers
                         OrderRevenue = revenue,
                         OrderCost = cost,
                         OrderProfit = profit,
-                        OrderMargin = margin
+                        OrderMargin = margin,
+                        // NEW: distinct titles joined by comma
+                        BookTitles = string.Join(", ", g.Select(x => x.Book.Title).Distinct())
                     };
                 })
                 .ToList();
@@ -343,19 +345,32 @@ namespace Team24_BevosBooks.Controllers
 
             var grouped = list
                 .GroupBy(od => od.Order.UserID)
-                .Select(g => new CustomerReportRowVM
+                .Select(g =>
                 {
-                    CustomerId = g.Key,
-                    CustomerName = g.Max(x => x.Order.User.FirstName + " " + x.Order.User.LastName),
-                    TotalQuantity = g.Sum(x => x.Quantity),
-                    Revenue = g.Sum(x => x.Price * x.Quantity),
-                    Cost = g.Sum(x => (avgCost.ContainsKey(x.BookID) ? avgCost[x.BookID] : 0m) * x.Quantity),
-                    Profit = g.Sum(x => x.Price * x.Quantity) -
-                             g.Sum(x => (avgCost.ContainsKey(x.BookID) ? avgCost[x.BookID] : 0m) * x.Quantity),
-                    Margin = g.Sum(x => x.Price * x.Quantity) > 0
-                        ? (g.Sum(x => x.Price * x.Quantity) - g.Sum(x => (avgCost.ContainsKey(x.BookID) ? avgCost[x.BookID] : 0m) * x.Quantity))
-                          / g.Sum(x => x.Price * x.Quantity)
-                        : 0m
+                    var qty = g.Sum(x => x.Quantity);
+                    var revenue = g.Sum(x => x.Price * x.Quantity);
+                    var cost = g.Sum(x => (avgCost.ContainsKey(x.BookID) ? avgCost[x.BookID] : 0m) * x.Quantity);
+                    var profit = revenue - cost;
+                    var margin = revenue > 0 ? profit / revenue : 0m;
+
+                    return new CustomerReportRowVM
+                    {
+                        CustomerId = g.Key,
+                        CustomerName = g.Max(x => x.Order.User.FirstName + " " + x.Order.User.LastName),
+                        TotalQuantity = qty,
+                        Revenue = revenue,
+                        Cost = cost,
+                        Profit = profit,
+                        Margin = margin,
+
+                        // existing lists
+                        BookTitles = string.Join(", ", g.Select(x => x.Book.Title).Distinct().OrderBy(t => t)),
+                        OrderNumbers = string.Join(", ", g.Select(x => x.OrderID).Distinct().OrderBy(id => id)),
+
+                        // NEW: weighted averages (per-unit)
+                        WeightedAverageRevenue = qty > 0 ? revenue / qty : 0m,
+                        WeightedAverageCost = qty > 0 ? cost / qty : 0m
+                    };
                 })
                 .ToList();
 

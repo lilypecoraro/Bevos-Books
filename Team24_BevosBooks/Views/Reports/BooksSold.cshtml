@@ -111,12 +111,14 @@
             <th>Selling Price</th>
             <th>Avg Cost</th>
             <th>Profit Margin</th>
+            <th>Total Profit</th> <!-- NEW: per-row total -->
             <th>Order Date</th>
         </tr>
     </thead>
     <tbody>
         @foreach (var r in Model.Rows)
         {
+            var rowTotalProfit = r.ProfitMargin * r.Quantity;
             <tr>
                 <td>@r.Title</td>
                 <td>@r.Quantity</td>
@@ -125,6 +127,7 @@
                 <td>@r.SellingPrice.ToString("c")</td>
                 <td>@r.AverageCost.ToString("c")</td>
                 <td>@r.ProfitMargin.ToString("c")</td>
+                <td>@rowTotalProfit.ToString("c")</td> <!-- NEW -->
                 <td>@r.OrderDate.ToShortDateString()</td>
             </tr>
         }

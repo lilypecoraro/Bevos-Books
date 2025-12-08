@@ -26,5 +26,6 @@ namespace Team24_BevosBooks.ViewModels
         public List<BookSaleRowVM> Rows { get; set; } = new List<BookSaleRowVM>();
         public int RecordCount { get; set; }
         public string CurrentSort { get; set; } = "recent";
+        // REMOVED: TotalProfit (per-row total is now shown; no footer total)
     }
 }

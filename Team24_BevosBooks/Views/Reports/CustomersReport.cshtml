@@ -89,11 +89,15 @@
     <thead>
         <tr>
             <th>Customer</th>
+            <th>Order IDs</th>
+            <th>Book Titles</th>
             <th>Total Qty</th>
             <th>Revenue</th>
             <th>Cost</th>
             <th>Profit</th>
             <th>Margin</th>
+            <th>W. Avg Revenue</th>
+            <th>W. Avg Cost</th>
         </tr>
     </thead>
     <tbody>
@@ -101,21 +105,27 @@
         {
             <tr>
                 <td>@r.CustomerName (@r.CustomerId)</td>
+                <td>@r.OrderNumbers</td>
+                <td>@r.BookTitles</td>
                 <td>@r.TotalQuantity</td>
                 <td>@r.Revenue.ToString("c")</td>
                 <td>@r.Cost.ToString("c")</td>
                 <td>@r.Profit.ToString("c")</td>
                 <td>@($"{r.Margin:P2}")</td>
+                <td>@r.WeightedAverageRevenue.ToString("c")</td>
+                <td>@r.WeightedAverageCost.ToString("c")</td>
             </tr>
         }
     </tbody>
     <tfoot>
         <tr class="table-secondary fw-bold">
-            <td colspan="2">Totals</td>
+            <td colspan="4">Totals</td>
             <td>@totalRevenue.ToString("c")</td>
             <td>@totalCost.ToString("c")</td>
             <td>@totalProfit.ToString("c")</td>
             <td>@($"{totalMargin:P2}")</td>
+            <td></td>
+            <td></td>
         </tr>
     </tfoot>
 </table>

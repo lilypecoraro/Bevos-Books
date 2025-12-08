@@ -91,6 +91,7 @@
             <th>Order #</th>
             <th>Date</th>
             <th>Customer</th>
+            <th>Titles</th> <!-- NEW -->
             <th>Total Qty</th>
             <th>Revenue</th>
             <th>Avg Cost</th>
@@ -105,6 +106,7 @@
                 <td>@r.OrderID</td>
                 <td>@r.OrderDate.ToShortDateString()</td>
                 <td>@r.CustomerName</td>
+                <td>@r.BookTitles</td> <!-- NEW -->
                 <td>@r.TotalQuantity</td>
                 <td>@r.OrderRevenue.ToString("c")</td>
                 <td>@r.OrderCost.ToString("c")</td>
@@ -115,7 +117,7 @@
     </tbody>
     <tfoot>
         <tr class="table-secondary fw-bold">
-            <td colspan="4">Totals</td>
+            <td colspan="5">Totals</td> <!-- shifted because of new column -->
             <td>@totalRevenue.ToString("c")</td>
             <td>@totalCost.ToString("c")</td>
             <td>@totalProfit.ToString("c")</td>
