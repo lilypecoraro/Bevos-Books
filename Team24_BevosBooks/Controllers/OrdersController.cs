@@ -44,8 +44,17 @@ namespace Team24_BevosBooks.Controllers
 
             if (order == null)
             {
+                // Determine next OrderID manually (Option 2)
+                int nextOrderId = 1;
+
+                if (_context.Orders.Any())
+                {
+                    nextOrderId = _context.Orders.Max(o => o.OrderID) + 1;
+                }
+
                 order = new Order
                 {
+                    OrderID = nextOrderId,    // ⭐ manually assign new incremental OrderID
                     UserID = userId,
                     OrderDate = DateTime.Now,
                     OrderStatus = "InCart",
@@ -55,6 +64,7 @@ namespace Team24_BevosBooks.Controllers
 
                 _context.Orders.Add(order);
                 await _context.SaveChangesAsync();
+
             }
 
             return order;
