@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using Team24_BevosBooks.DAL;
 using Team24_BevosBooks.Models;
@@ -24,6 +25,20 @@ namespace Team24_BevosBooks.Controllers
             _roleManager = roleManager;
             _context = context;
         }
+
+
+
+        // ============================================================
+        // STATES
+        // ============================================================
+        private List<string> GetStates() => new()
+        {
+            "AL","AK","AZ","AR","CA","CO","CT","DE","FL","GA",
+            "HI","ID","IL","IN","IA","KS","KY","LA","ME","MD",
+            "MA","MI","MN","MS","MO","MT","NE","NV","NH","NJ",
+            "NM","NY","NC","ND","OH","OK","OR","PA","RI","SC",
+            "SD","TN","TX","UT","VT","VA","WA","WV","WI","WY"
+        };
 
         // ============================================================
         // MANAGE EMPLOYEES / ADMINS (Admin only)
@@ -53,6 +68,7 @@ namespace Team24_BevosBooks.Controllers
         [Authorize(Roles = "Admin")]
         public IActionResult CreateEmployee()
         {
+            ViewBag.States = new SelectList(GetStates());
             return View();
         }
 
@@ -60,7 +76,12 @@ namespace Team24_BevosBooks.Controllers
         [Authorize(Roles = "Admin")]
         public async Task<IActionResult> CreateEmployee(RegisterViewModel rvm)
         {
-            if (!ModelState.IsValid) return View(rvm);
+            if (!ModelState.IsValid)
+            {
+                // Repopulate states before returning the view
+                ViewBag.States = new SelectList(GetStates());
+                return View(rvm);
+            }
 
             AppUser employee = new AppUser
             {
@@ -97,9 +118,10 @@ namespace Team24_BevosBooks.Controllers
         [Authorize(Roles = "Admin")]
         public async Task<IActionResult> EditEmployee(string id)
         {
+
             AppUser employee = await _userManager.FindByIdAsync(id);
             if (employee == null) return NotFound();
-
+            ViewBag.States = new SelectList(GetStates());
             return View(employee);
         }
 
@@ -110,6 +132,7 @@ namespace Team24_BevosBooks.Controllers
         {
             if (!ModelState.IsValid)
             {
+                ViewBag.States = new SelectList(GetStates());
                 return View(edited);
             }
 
