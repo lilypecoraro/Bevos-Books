@@ -820,15 +820,18 @@ namespace Team24_BevosBooks.Controllers
             // Fill blanks with low/no‑rated same‑genre books
             if (recs.Count < 3)
             {
+                // First pass: enforce distinct authors
+                var existingAuthors = new HashSet<string>(recs.Select(r => r.Authors));
                 var fillers = sameGenrePool
                     .OrderByDescending(b => AvgApproved(b))
-                    .Where(b => !recs.Any(r => r.BookID == b.BookID))
+                    .Where(b => !recs.Any(r => r.BookID == b.BookID)
+                             && !existingAuthors.Contains(b.Authors))
                     .Take(3 - recs.Count)
                     .ToList();
 
                 recs.AddRange(fillers);
 
-                // Relaxed second pass if still short
+                // Second pass: relax author restriction if still short
                 if (recs.Count < 3)
                 {
                     var relaxedFillers = sameGenrePool
@@ -841,8 +844,8 @@ namespace Team24_BevosBooks.Controllers
                 }
             }
 
-            // If no genre books, fallback to highest rated overall
-            if (recs.Count == 0 || (recs.Count < 3 && !sameGenrePool.Any()))
+            // Always run overall fallback if fewer than 3 recs
+            if (recs.Count < 3)
             {
                 var overallCandidates = await _context.Books
                     .Include(b => b.Reviews)
@@ -863,6 +866,7 @@ namespace Team24_BevosBooks.Controllers
             ViewBag.AssignedRecommendations = recs.Take(3).ToList();
             return View(order);
         }
+
 
     }
 }
