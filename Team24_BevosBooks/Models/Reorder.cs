@@ -22,7 +22,7 @@ namespace Team24_BevosBooks.Models
         public DateTime Date { get; set; }   // Reorder date
 
         [Required, StringLength(50)]
-        public string ReorderStatus { get; set; }  // e.g., Pending, Completed
+        public string ReorderStatus { get; set; }  // e.g., InCart, Ordered
 
         // Navigation property
         public Book Book { get; set; }
