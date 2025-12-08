@@ -163,7 +163,7 @@ namespace Team24_BevosBooks.Controllers
         public async Task<IActionResult> Logout()
         {
             await _signInManager.SignOutAsync();
-            TempData["Message"] = "You have been logged out.";
+            TempData["LogoutMessage"] = "You have been logged out.";
             return RedirectToAction("Index", "Home");
         }
 
