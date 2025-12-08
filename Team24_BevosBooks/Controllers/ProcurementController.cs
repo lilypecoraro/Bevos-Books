@@ -113,19 +113,19 @@ namespace Team24_BevosBooks.Controllers
                 }
             }
 
-            // ✅ Calculate margins in memory
+            // Calculate profit per unit and margin percentage
             var avgMargins = books.ToDictionary(
                 b => b.BookID,
                 b =>
                 {
                     var cost = lastCosts.ContainsKey(b.BookID) ? lastCosts[b.BookID] : b.Cost;
-                    return b.Price > 0 ? (b.Price - cost) : 0m;
+                    if (b.Price <= 0) return 0m;
+                    var profitPerUnit = b.Price - cost;
+                    var marginPercent = (profitPerUnit / b.Price) * 100;
+                    return profitPerUnit; // keep decimal
                 });
-
-
-
-            ViewBag.LastCosts = lastCosts;
-            ViewBag.AvgMargins = avgMargins;
+            ViewBag.LastCosts = lastCosts;   // supplier/seeded cost
+            ViewBag.AvgMargins = avgMargins; // profit per unit
 
             return View(books);
         }
@@ -232,18 +232,21 @@ namespace Team24_BevosBooks.Controllers
 
 
 
-            // ✅ Calculate margins in memory
+            // Calculate profit per unit and margin percentage
             var avgMargins = books.ToDictionary(
                 b => b.BookID,
                 b =>
                 {
                     var cost = lastCosts.ContainsKey(b.BookID) ? lastCosts[b.BookID] : b.Cost;
-                    return b.Price > 0 ? (b.Price - cost) : 0m;
+                    if (b.Price <= 0) return 0m;
+                    var profitPerUnit = b.Price - cost;
+                    var marginPercent = (profitPerUnit / b.Price) * 100;
+                    return profitPerUnit; // keep decimal
                 });
+            ViewBag.LastCosts = lastCosts;   // supplier/seeded cost
+            ViewBag.AvgMargins = avgMargins; // profit per unit
 
 
-            ViewBag.LastCosts = lastCosts;
-            ViewBag.AvgMargins = avgMargins;
 
             return View(result);
         }
