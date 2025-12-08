@@ -348,7 +348,7 @@ namespace Team24_BevosBooks.Controllers
         // =========================================================
         // DISCONTINUE
         // =========================================================
-        [Authorize(Roles = "Admin")] // this is fine as is because this doesn't lead to a page -- Sean
+        [Authorize(Roles = "Admin")]
         [HttpPost]
         [ActionName("Discontinue")]
         [ValidateAntiForgeryToken]
@@ -373,26 +373,36 @@ namespace Team24_BevosBooks.Controllers
                 TempData["Message"] = $"Book '{book.Title}' has been discontinued.";
                 TempData["MessageType"] = "warning";
 
-                _ = Task.Run(async () =>
+                // 🔹 Notify only users who have this book in their cart (NO Task.Run)
+                var affectedUserIds = await _context.Orders
+                    .Where(o => o.OrderStatus == "InCart")
+                    .Where(o => o.OrderDetails.Any(od => od.BookID == book.BookID))
+                    .Select(o => o.UserID)
+                    .Distinct()
+                    .ToListAsync();
+
+                if (affectedUserIds.Count > 0)
                 {
-                    var users = await _context.Users
-                        .Where(u => u.Status == AppUser.UserStatus.Customer && u.Email != null)
+                    var affectedUsers = await _context.Users
+                        .Where(u => affectedUserIds.Contains(u.Id) && u.Email != null)
                         .ToListAsync();
 
-                    foreach (var user in users)
+                    foreach (var user in affectedUsers)
                     {
                         await _emailSender.SendEmailAsync(
-                            user.Email,
-                            "Team 24: Book Discontinued",
+                            user.Email!,
+                            "Team 24: Book in Your Cart Was Discontinued",
                             EmailTemplate.Wrap($@"
-                                <h2>Book Discontinued</h2>
-                                <p>Hello {user.FirstName},</p>
-                                <p>The book <strong>{book.Title}</strong> by {book.Authors} is now discontinued.</p>
-                                <p>Genre: {book.Genre?.GenreName}</p>
-                                <p>Thank you for being part of Bevo's Books! 🤘</p>
-                            "));
+                        <h2>Book Discontinued</h2>
+                        <p>Hello {user.FirstName},</p>
+                        <p>The book <strong>{book.Title}</strong> by {book.Authors} has just been discontinued and was removed from your cart.</p>
+                        <p>Genre: {book.Genre?.GenreName}</p>
+                        <p>You can continue shopping for similar titles on our site.</p>
+                        <p>Thank you for being part of Bevo's Books! 🤘</p>
+                    ")
+                        );
                     }
-                });
+                }
             }
             else
             {
