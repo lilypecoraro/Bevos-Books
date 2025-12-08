@@ -23,10 +23,10 @@
 </style>
 
 
-@if (TempData["ErrorMessages"] != null)
+@if (TempData["AutoErrorMessages"] != null)
 {
-    <div class="alert alert-danger">
-        @Html.Raw(TempData["ErrorMessages"])
+    <div class="alert alert-danger" style="color:#000;">
+        @Html.Raw(TempData["AutoErrorMessages"])
     </div>
 }
 
@@ -39,7 +39,6 @@
 
 <h2>Automatic Reorder</h2>
 <p>These books are below their reorder point. Adjust quantities or costs before placing orders. You can delete rows you don’t need before submitting.</p>
-
 <form asp-action="AutoReorder" method="post" id="autoReorderForm">
     <table class="table table-striped" id="reorderTable">
         <thead class="table-dark">
@@ -75,9 +74,7 @@
                     <td>@book.InventoryQuantity</td>
                     <td>@book.ReorderPoint</td>
                     <td>@(lastCost > 0 ? lastCost.ToString("C") : "N/A")</td>
-                    <td>@($"{profit:C} ({marginPercent:F2}%)")</td>   <!-- NEW CELL -->
-                    <td>
-                        <!-- Change min="0" to min="1" -->
+                    <td>@($"{profit:C} ({marginPercent:F2}%)")</td>
                     <td>
                         <input type="number" name="qty_@book.BookID" value="5" min="1"
                                class="form-control text-dark" style="width:90px;" />
@@ -88,7 +85,6 @@
                                min="0.01"
                                class="form-control text-dark" style="width:90px;" />
                     </td>
-
                     <td>
                         <button type="button" class="btn btn-danger btn-sm" onclick="this.closest('tr').remove();">
                             Delete

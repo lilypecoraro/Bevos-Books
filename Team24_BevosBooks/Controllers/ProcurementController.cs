@@ -163,7 +163,7 @@ namespace Team24_BevosBooks.Controllers
                 {
                     foreach (var error in ModelState.Values.SelectMany(v => v.Errors))
                     {
-                        TempData["ErrorMessages"] = (TempData["ErrorMessages"] ?? "") + error.ErrorMessage + "<br/>";
+                        TempData["ManualErrorMessages"] = (TempData["ManualErrorMessages"] ?? "") + error.ErrorMessage + "<br/>";
                     }
                     return RedirectToAction("ManualReorder");
                 }
@@ -275,10 +275,9 @@ namespace Team24_BevosBooks.Controllers
                 // ✅ Validate using ModelState
                 if (!TryValidateModel(reorder))
                 {
-                    // Collect errors and redisplay AutoReorder view
                     foreach (var error in ModelState.Values.SelectMany(v => v.Errors))
                     {
-                        TempData["ErrorMessages"] = (TempData["ErrorMessages"] ?? "") + error.ErrorMessage + "<br/>";
+                        TempData["AutoErrorMessages"] = (TempData["AutoErrorMessages"] ?? "") + error.ErrorMessage + "<br/>";
                     }
                     return RedirectToAction("AutoReorder");
                 }
