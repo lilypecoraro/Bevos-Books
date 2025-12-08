@@ -69,7 +69,7 @@
             <th>Stock Status</th>
             <th>Rating</th>
             <th>Price</th>
-            <th></th>
+            <th>Details</th>
         </tr>
     </thead>
     <tbody>
@@ -84,38 +84,43 @@
             decimal effectivePrice = effectiveMap.TryGetValue(book.BookID, out var ep) ? ep : book.Price;
             bool hasItemDiscount = effectivePrice < book.Price;
 
-            <tr>
-                <td>@book.Title</td>
-                <td>@book.Authors</td>
-                <td>@book.BookNumber</td>
-                <td>
-                    @(
-                        book.BookStatus == "Discontinued"
-                        ? "Discontinued"
-                        : (book.InventoryQuantity > 0 ? "In Stock" : "Out of Stock")
-                    )
-                </td>
-                <td>
-                    @(avgRating > 0 ? $"{avgRating:0.0}" : "No Ratings")
-                </td>
-                <td>
-                    @if (hasItemDiscount)
-                    {
-                        <div>
-                            <s class="text-dark">@book.Price.ToString("C")</s><br />
-                            <span class="text-success fw-bold">@effectivePrice.ToString("C")</span>
-                        </div>
-                    }
-                    else
-                    {
-                        @book.Price.ToString("C")
-                    }
-                </td>
-                <td>
-                    <a asp-action="Details" asp-route-id="@book.BookID"
-                       class="btn btn-sm btn-outline-primary">View</a>
-                </td>
-            </tr>
+<tr onclick="window.location='@Url.Action("Details", "Books", new { id = book.BookID })'" style="cursor:pointer;">
+    <td>
+        <a asp-action="Details" asp-route-id="@book.BookID" class="text-dark">
+            @book.Title
+        </a>
+    </td>
+    <td>@book.Authors</td>
+    <td>@book.BookNumber</td>
+    <td>
+        @(
+            book.BookStatus == "Discontinued"
+            ? "Discontinued"
+            : (book.InventoryQuantity > 0 ? "In Stock" : "Out of Stock")
+        )
+    </td>
+    <td>
+        @(avgRating > 0 ? $"{avgRating:0.0}" : "No Ratings")
+    </td>
+    <td>
+        @if (hasItemDiscount)
+        {
+            <div>
+                <s class="text-dark">@book.Price.ToString("C")</s><br />
+                <span class="text-success fw-bold">@effectivePrice.ToString("C")</span>
+            </div>
+        }
+        else
+        {
+            @book.Price.ToString("C")
+        }
+    </td>
+    <td>
+        <a asp-action="Details" asp-route-id="@book.BookID"
+           class="btn btn-sm btn-outline-primary">View</a>
+    </td>
+</tr>
+
         }
     </tbody>
 </table>
