@@ -274,21 +274,19 @@ namespace Team24_BevosBooks.Controllers
 
             return RedirectToAction("ManageEmployees");
         }
-        // ============================================================
-        // CREATE CUSTOMER (Admin + Employee)
-        // ============================================================
-        [Authorize(Roles = "Admin,Employee")]
-        public IActionResult CreateCustomer()
-        {
-            return View();
-        }
-
         [HttpPost]
         [Authorize(Roles = "Admin,Employee")]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> CreateCustomer(RegisterViewModel rvm)
         {
             if (!ModelState.IsValid) return View(rvm);
+
+            // ⭐ Determine the next available customer number ⭐
+            int nextCustomerNumber = _context.Users
+                .Where(u => u.CustomerNumber.HasValue)
+                .Select(u => u.CustomerNumber.Value)
+                .DefaultIfEmpty(9000)  // ensures numbers start correctly after seed (9010–9060)
+                .Max() + 1;
 
             AppUser customer = new AppUser
             {
@@ -301,7 +299,10 @@ namespace Team24_BevosBooks.Controllers
                 City = rvm.City,
                 State = rvm.State,
                 ZipCode = rvm.ZipCode,
-                Status = AppUser.UserStatus.Customer
+                Status = AppUser.UserStatus.Customer,
+
+                // ⭐ Assign the next sequential customer number ⭐
+                CustomerNumber = nextCustomerNumber
             };
 
             IdentityResult ir = await _userManager.CreateAsync(customer, rvm.Password);
@@ -315,9 +316,11 @@ namespace Team24_BevosBooks.Controllers
 
             await _userManager.AddToRoleAsync(customer, "Customer");
 
-            TempData["Message"] = $"Customer {customer.FirstName} {customer.LastName} created successfully.";
+            TempData["Message"] = $"Customer #{customer.CustomerNumber}: {customer.FirstName} {customer.LastName} created successfully.";
+
             return RedirectToAction("ManageCustomers");
         }
+
 
         // ============================================================
         // EDIT CUSTOMER (Admin + Employee)

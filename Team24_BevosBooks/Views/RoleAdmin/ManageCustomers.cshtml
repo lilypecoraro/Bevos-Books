@@ -14,6 +14,7 @@
 <table class="table table-striped">
     <thead class="table-dark">
         <tr>
+            <th>Customer #</th>
             <th>Name</th>
             <th>Email</th>
             <th>Status</th>
@@ -25,6 +26,13 @@
         @foreach (var cust in Model)
         {
             <tr>
+                <td>
+                    @(
+                                    cust.CustomerNumber.HasValue
+                                    ? cust.CustomerNumber.Value.ToString()
+                                    : "—"
+                                    )
+                </td>
                 <td>@cust.FirstName @cust.LastName</td>
                 <td>@cust.Email</td>
                 <td>@cust.Status</td>
