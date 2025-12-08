@@ -16,12 +16,11 @@
         }
 </style>
 
-@if (TempData["ErrorMessages"] != null)
-{
-    <div class="alert alert-danger">
-        @Html.Raw(TempData["ErrorMessages"])
-    </div>
-}
+<style>
+    .alert-danger {
+        color: #000 !important; /* force black text */
+    }
+</style>
 
 @model IEnumerable<Team24_BevosBooks.Models.Book>
 
@@ -104,7 +103,7 @@
                     <td>@book.InventoryQuantity</td>
                     <td>@book.ReorderPoint</td>
                     <td>
-                        <input type="number" name="qty_@book.BookID" min="1"
+                        <input type="number" name="qty_@book.BookID" min="0"
                                class="form-control text-dark" style="width:90px;" />
                     </td>
                     <td>
@@ -113,8 +112,6 @@
                                min="0.01"
                                class="form-control text-dark" style="width:90px;" />
                     </td>
-
-
                     <td>
                         <input type="checkbox" name="bookIds" value="@book.BookID" />
                     </td>
