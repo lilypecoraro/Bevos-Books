@@ -61,6 +61,20 @@ namespace Team24_BevosBooks.Controllers
             if (!ModelState.IsValid)
                 return View(rvm);
 
+            // ⭐ Determine the next available customer number ⭐
+            int nextCustomerNumber;
+            if (_context.Users.Any(u => u.CustomerNumber.HasValue))
+            {
+                nextCustomerNumber = _context.Users
+                    .Where(u => u.CustomerNumber.HasValue)
+                    .Max(u => u.CustomerNumber.Value) + 1;
+            }
+            else
+            {
+                // First customer after reseed should start at 9010
+                nextCustomerNumber = 9010;
+            }
+
             AppUser newUser = new()
             {
                 UserName = rvm.Email,
@@ -72,7 +86,10 @@ namespace Team24_BevosBooks.Controllers
                 State = rvm.State,
                 ZipCode = rvm.ZipCode,
                 PhoneNumber = rvm.PhoneNumber,
-                Status = AppUser.UserStatus.Customer
+                Status = AppUser.UserStatus.Customer,
+
+                // ⭐ Assign the next sequential customer number ⭐
+                CustomerNumber = nextCustomerNumber
             };
 
             IdentityResult result = await _userManager.CreateAsync(newUser, rvm.Password);
@@ -93,13 +110,13 @@ namespace Team24_BevosBooks.Controllers
                 newUser.Email,
                 "Team 24: Welcome to Bevo's Books!",
                 EmailTemplate.Wrap($@"
-                    <h2>Welcome, {newUser.FirstName}!</h2>
-                    <p>Your Bevo's Books account has been successfully created.</p>
-                    <p>We're excited to have you 🤘</p>
-                ")
+            <h2>Welcome, {newUser.FirstName}!</h2>
+            <p>Your Bevo's Books account has been successfully created.</p>
+            <p>We're excited to have you 🤘</p>
+        ")
             );
 
-            TempData["Message"] = "Account created successfully!";
+            TempData["Message"] = $"Account created successfully! Your customer number is {newUser.CustomerNumber}.";
             return RedirectToAction("Index", "Home");
         }
 
