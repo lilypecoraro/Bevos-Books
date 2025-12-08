@@ -90,7 +90,7 @@
                     <td>@book.Genre?.GenreName</td>
                     <td>@book.Price.ToString("C")</td>
                     <td>@(lastCost > 0 ? lastCost.ToString("C") : "N/A")</td>
-                    <td>@(avgMargin > 0 ? avgMargin.ToString("P1") : "N/A")</td>
+                    <td>@avgMargin.ToString("C")</td>
                     <td>@book.InventoryQuantity</td>
                     <td>@book.ReorderPoint</td>
                     <td>
