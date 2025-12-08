@@ -21,6 +21,7 @@ builder.Services.AddSession(options =>
     options.Cookie.IsEssential = true;
 });
 
+
 // Email sender (SMTP)
 builder.Services.AddTransient<IEmailSender, SmtpEmailSender>();
 
@@ -54,6 +55,7 @@ builder.Services.Configure<IdentityOptions>(options =>
 // Cookie
 builder.Services.ConfigureApplicationCookie(options =>
 {
+    options.Cookie.Name = "BevosBooksAuth_v2";
     options.Cookie.HttpOnly = true;
     options.LoginPath = "/Account/Login";
     options.AccessDeniedPath = "/Account/AccessDenied";
