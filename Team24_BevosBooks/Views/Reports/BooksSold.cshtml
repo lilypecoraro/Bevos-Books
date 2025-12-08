@@ -37,7 +37,7 @@
                    name="MaxPrice" value="@Model.Filter.MaxPrice" placeholder="$999" />
         </div>
 
-        <!-- AVG COST RANGE (NEW) -->
+        <!-- AVG COST RANGE -->
         <div class="col-md-2">
             <label class="form-label">Min Avg Cost</label>
             <input class="form-control" type="number" step="0.01"
@@ -50,7 +50,7 @@
                    name="MaxAvgCost" value="@Model.Filter.MaxAvgCost" placeholder="$999" />
         </div>
 
-        <!-- PROFIT MARGIN RANGE (NEW) -->
+        <!-- PROFIT MARGIN RANGE -->
         <div class="col-md-2">
             <label class="form-label">Min Profit Margin</label>
             <input class="form-control" type="number" step="0.01"
@@ -63,17 +63,17 @@
                    name="MaxProfit" value="@Model.Filter.MaxProfit" placeholder="$999" />
         </div>
 
-        <!-- BOOK / CUSTOMER -->
-        <div class="col-md-2">
-            <label class="form-label">Book ID</label>
-            <input class="form-control" type="number"
-                   name="BookId" value="@Model.Filter.BookId" placeholder="Ex: 222011" />
+        <!-- BOOK / CUSTOMER (text filters) -->
+        <div class="col-md-3">
+            <label class="form-label">Book Name</label>
+            <input class="form-control" type="text"
+                   name="BookName" value="@Model.Filter.BookName" placeholder="e.g., Dune" />
         </div>
 
-        <div class="col-md-2">
-            <label class="form-label">Customer #</label>
-            <input class="form-control" type="number"
-                   name="CustomerId" value="@Model.Filter.CustomerId" placeholder="User ID" />
+        <div class="col-md-3">
+            <label class="form-label">Customer Name</label>
+            <input class="form-control" type="text"
+                   name="CustomerName" value="@Model.Filter.CustomerName" placeholder="e.g., Jane Doe" />
         </div>
 
         <!-- SORTING -->
@@ -90,13 +90,9 @@
         </div>
 
         <!-- BUTTONS -->
-        <div class="col-md-2 d-flex gap-2">
+        <div class="col-md-3 d-flex gap-2">
             <button class="btn btn-primary w-100" type="submit">Apply</button>
-
-            <a class="btn btn-secondary w-100"
-               href="@Url.Action("BooksSold", "Reports")">
-                Clear
-            </a>
+            <a class="btn btn-secondary w-100" href="@Url.Action("BooksSold", "Reports")">Clear</a>
         </div>
 
     </div>
@@ -108,7 +104,7 @@
 <table class="table table-striped">
     <thead>
         <tr>
-            <th>Book</th>
+            <th>Book Name</th>
             <th>Qty</th>
             <th>Order #</th>
             <th>Customer</th>

@@ -8,13 +8,19 @@ namespace Team24_BevosBooks.ViewModels
         public DateTime? EndDate { get; set; }
         public decimal? MinPrice { get; set; }
         public decimal? MaxPrice { get; set; }
-        public int? CustomerId { get; set; }
-        public int? BookId { get; set; }
+
+        // REPLACED: name-based filtering fields
+        public string? CustomerName { get; set; }
+        public string? BookName { get; set; }
 
         // NEW: filters for weighted average cost and profit margin
         public decimal? MinAvgCost { get; set; }
         public decimal? MaxAvgCost { get; set; }
         public decimal? MinProfit { get; set; }
         public decimal? MaxProfit { get; set; }
+
+        // NEW: per-order revenue filters
+        public decimal? MinRevenue { get; set; }
+        public decimal? MaxRevenue { get; set; }
     }
 }

@@ -9,7 +9,11 @@ namespace Team24_BevosBooks.ViewModels
         public string Title { get; set; } = "";
         public int Quantity { get; set; }
         public int OrderID { get; set; }
+
+        // NEW: Customer ID alongside name
+        public string CustomerId { get; set; } = "";
         public string CustomerName { get; set; } = "";
+
         public decimal SellingPrice { get; set; }
         public decimal AverageCost { get; set; }
         public decimal ProfitMargin { get; set; }

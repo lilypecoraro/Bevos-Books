@@ -85,6 +85,8 @@ namespace Team24_BevosBooks.Controllers
             decimal? MaxProfit,
             int? BookId,
             int? CustomerId,
+            string? BookName,
+            string? CustomerName,
             string sort = "recent")
         {
             var avgCost = await GetWeightedAverageCostByBook();
@@ -114,6 +116,22 @@ namespace Team24_BevosBooks.Controllers
             if (CustomerId.HasValue)
                 q = q.Where(od => od.Order.UserID == CustomerId.Value.ToString());
 
+            // Name-based filters (case-insensitive)
+            if (!string.IsNullOrWhiteSpace(BookName))
+            {
+                var bookNameLower = BookName.Trim().ToLower();
+                q = q.Where(od => od.Book.Title.ToLower().Contains(bookNameLower));
+            }
+
+            if (!string.IsNullOrWhiteSpace(CustomerName))
+            {
+                var customerNameLower = CustomerName.Trim().ToLower();
+                q = q.Where(od =>
+                    (od.Order.User.FirstName + " " + od.Order.User.LastName)
+                        .ToLower()
+                        .Contains(customerNameLower));
+            }
+
             // Project rows (avg cost and profit computed in memory using the dictionary)
             var items = await q.Select(od => new BookSaleRowVM
             {
@@ -121,6 +139,7 @@ namespace Team24_BevosBooks.Controllers
                 Title = od.Book.Title,
                 Quantity = od.Quantity,
                 OrderID = od.OrderID,
+                CustomerId = od.Order.UserID,
                 CustomerName = od.Order.User.FirstName + " " + od.Order.User.LastName,
                 SellingPrice = od.Price,
                 AverageCost = avgCost.ContainsKey(od.BookID) ? avgCost[od.BookID] : 0m,
@@ -129,7 +148,7 @@ namespace Team24_BevosBooks.Controllers
                 OrderDate = od.Order.OrderDate
             }).ToListAsync();
 
-            // Apply AvgCost and Profit filters on the materialized list (cannot be applied in SQL due to avgCost dict)
+            // Apply AvgCost and Profit filters on the materialized list
             if (MinAvgCost.HasValue)
                 items = items.Where(i => i.AverageCost >= MinAvgCost.Value).ToList();
 
@@ -165,13 +184,12 @@ namespace Team24_BevosBooks.Controllers
                     EndDate = EndDate,
                     MinPrice = MinPrice,
                     MaxPrice = MaxPrice,
-                    // NEW
                     MinAvgCost = MinAvgCost,
                     MaxAvgCost = MaxAvgCost,
                     MinProfit = MinProfit,
                     MaxProfit = MaxProfit,
-                    BookId = BookId,
-                    CustomerId = CustomerId
+                    CustomerName = CustomerName,
+                    BookName = BookName
                 }
             };
 
@@ -179,9 +197,17 @@ namespace Team24_BevosBooks.Controllers
         }
 
         // ========= B. Orders Report =========
+        [HttpGet]
+        [Route("Reports/OrdersReport")]
         public async Task<IActionResult> OrdersReport(
             DateTime? StartDate,
             DateTime? EndDate,
+            decimal? MinAvgCost,
+            decimal? MaxAvgCost,
+            decimal? MinProfit,
+            decimal? MaxProfit,
+            decimal? MinRevenue,
+            decimal? MaxRevenue,
             string sort = "recent")
         {
             var avgCost = await GetWeightedAverageCostByBook();
@@ -200,27 +226,45 @@ namespace Team24_BevosBooks.Controllers
 
             var grouped = list
                 .GroupBy(od => od.OrderID)
-                .Select(g => new OrderReportRowVM
+                .Select(g =>
                 {
-                    OrderID = g.Key,
-                    OrderDate = g.Max(x => x.Order.OrderDate),
-                    CustomerName = g.Max(x => x.Order.User.FirstName + " " + x.Order.User.LastName),
-                    TotalQuantity = g.Sum(x => x.Quantity),
-                    OrderRevenue = g.Sum(x => x.Price * x.Quantity),
-                    OrderCost = g.Sum(x => (avgCost.ContainsKey(x.BookID) ? avgCost[x.BookID] : 0m) * x.Quantity),
-                    OrderProfit = g.Sum(x => x.Price * x.Quantity) -
-                                  g.Sum(x => (avgCost.ContainsKey(x.BookID) ? avgCost[x.BookID] : 0m) * x.Quantity),
-                    OrderMargin = g.Sum(x => x.Price * x.Quantity) > 0
-                        ? (g.Sum(x => x.Price * x.Quantity) - g.Sum(x => (avgCost.ContainsKey(x.BookID) ? avgCost[x.BookID] : 0m) * x.Quantity))
-                          / g.Sum(x => x.Price * x.Quantity)
-                        : 0m
+                    var revenue = g.Sum(x => x.Price * x.Quantity);
+                    var cost = g.Sum(x => (avgCost.ContainsKey(x.BookID) ? avgCost[x.BookID] : 0m) * x.Quantity);
+                    var profit = revenue - cost;
+                    var margin = revenue > 0 ? profit / revenue : 0m;
+
+                    return new OrderReportRowVM
+                    {
+                        OrderID = g.Key,
+                        OrderDate = g.Max(x => x.Order.OrderDate),
+                        CustomerName = g.Max(x => x.Order.User.FirstName + " " + x.Order.User.LastName),
+                        TotalQuantity = g.Sum(x => x.Quantity),
+                        OrderRevenue = revenue,
+                        OrderCost = cost,
+                        OrderProfit = profit,
+                        OrderMargin = margin
+                    };
                 })
                 .ToList();
 
+            if (MinAvgCost.HasValue)
+                grouped = grouped.Where(r => r.OrderCost >= MinAvgCost.Value).ToList();
+            if (MaxAvgCost.HasValue)
+                grouped = grouped.Where(r => r.OrderCost <= MaxAvgCost.Value).ToList();
+            if (MinProfit.HasValue)
+                grouped = grouped.Where(r => r.OrderProfit >= MinProfit.Value).ToList();
+            if (MaxProfit.HasValue)
+                grouped = grouped.Where(r => r.OrderProfit <= MaxProfit.Value).ToList();
+
+            if (MinRevenue.HasValue)
+                grouped = grouped.Where(r => r.OrderRevenue >= MinRevenue.Value).ToList();
+            if (MaxRevenue.HasValue)
+                grouped = grouped.Where(r => r.OrderRevenue <= MaxRevenue.Value).ToList();
+
             grouped = sort switch
             {
-                "profitAsc" => grouped.OrderBy(r => r.OrderProfit).ToList(),
-                "profitDesc" => grouped.OrderByDescending(r => r.OrderProfit).ToList(),
+                "marginAsc" => grouped.OrderBy(r => r.OrderMargin).ToList(),
+                "marginDesc" => grouped.OrderByDescending(r => r.OrderMargin).ToList(),
                 "priceAsc" => grouped.OrderBy(r => r.OrderRevenue).ToList(),
                 "priceDesc" => grouped.OrderByDescending(r => r.OrderRevenue).ToList(),
                 _ => grouped.OrderByDescending(r => r.OrderDate).ToList()
@@ -234,7 +278,13 @@ namespace Team24_BevosBooks.Controllers
                 Filter = new ReportFilterVM
                 {
                     StartDate = StartDate,
-                    EndDate = EndDate
+                    EndDate = EndDate,
+                    MinAvgCost = MinAvgCost,
+                    MaxAvgCost = MaxAvgCost,
+                    MinProfit = MinProfit,
+                    MaxProfit = MaxProfit,
+                    MinRevenue = MinRevenue,
+                    MaxRevenue = MaxRevenue
                 }
             };
 
