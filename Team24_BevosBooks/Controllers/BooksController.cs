@@ -79,7 +79,7 @@ namespace Team24_BevosBooks.Controllers
                 "popularity" => query.OrderByDescending(b =>
                     _context.OrderDetails
                         .Where(od => od.BookID == b.BookID &&
-                                     od.Order.OrderStatus == "Completed")
+                                     od.Order.OrderStatus == "Ordered")
                         .Sum(od => (int?)od.Quantity) ?? 0
                 ),
 
@@ -149,7 +149,7 @@ namespace Team24_BevosBooks.Controllers
             if (!string.IsNullOrEmpty(userId) && User.IsInRole("Customer"))
             {
                 purchased = await _context.Orders
-                    .Where(o => o.UserID == userId && o.OrderStatus == "Completed")
+                    .Where(o => o.UserID == userId && o.OrderStatus == "Ordered")
                     .AnyAsync(o => o.OrderDetails.Any(od => od.BookID == id));
 
                 hasReviewed = await _context.Reviews
@@ -406,7 +406,7 @@ namespace Team24_BevosBooks.Controllers
                 .OrderByDescending(b =>
                     _context.OrderDetails
                         .Where(od => od.BookID == b.BookID &&
-                                     od.Order.OrderStatus == "Completed")
+                                     od.Order.OrderStatus == "Ordered")
                         .Sum(od => (int?)od.Quantity) ?? 0)
                 .Take(6)
                 .ToListAsync();
