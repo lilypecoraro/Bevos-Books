@@ -1,0 +1,147 @@
+﻿@{
+    ViewData["Title"] = "Contact Us";
+}
+
+<div class="contact-page container py-5">
+
+    <h1 class="mb-4 contact-title">Get in Touch</h1>
+
+    <p class="mb-4" style="max-width: 600px;">
+        Have a question about your order, a book recommendation, or technical support?
+        We’re here to help! Use the contact information below or send us a message using the form.
+    </p>
+
+    <div class="row">
+        <!-- LEFT: Contact Info -->
+        <div class="col-md-5 mb-4">
+            <div class="contact-box p-4">
+                <h3 class="section-heading mb-3">Contact Information</h3>
+
+                <p><strong>Email:</strong> <a href="mailto:team24.bevobooks@gmail.com">team24.bevobooks@gmail.com</a></p>
+                <p><strong>Support Hours:</strong><br>Monday–Friday, 9:00 AM – 5:00 PM CST</p>
+                <p>
+                    <strong>Team Members:</strong><br>
+                    Lillian Pecoraro<br>
+                    Skylar Nguyen<br>
+                    Sean Tran<br>
+                    Sachi Sooda
+                </p>
+            </div>
+        </div>
+
+        <!-- RIGHT: Contact Form -->
+        <div class="col-md-7">
+            <div class="contact-form p-4">
+                <h3 class="section-heading mb-3">Send Us a Message</h3>
+
+                <form asp-action="Contact" method="post" id="contactForm">
+                    @Html.AntiForgeryToken()
+
+                    <!-- Name -->
+                    <div class="mb-3">
+                        <label class="form-label">Your Name</label>
+                        <input type="text" name="Name" class="form-control" required />
+                    </div>
+
+                    <!-- Email -->
+                    <div class="mb-3">
+                        <label class="form-label">Your Email</label>
+                        <input type="email" name="Email" class="form-control" required />
+                    </div>
+
+                    <!-- Category -->
+                    <div class="mb-3">
+                        <label class="form-label">Issue Category</label>
+                        <select name="Category" id="categoryDropdown" class="form-control" required>
+                            <option value="">-- Select a Category --</option>
+                            <option>Order Issue</option>
+                            <option>Account / Login Problem</option>
+                            <option>Website Bug</option>
+                            <option>Payment / Billing Issue</option>
+                            <option>Book Recommendation Request</option>
+                            <option>General Question</option>
+                            <option>Other</option>
+                        </select>
+                    </div>
+
+                    <!-- Order Number (conditional) -->
+                    <div class="mb-3" id="orderNumberField" style="display: none;">
+                        <label class="form-label">Order Number (if applicable)</label>
+                        <input type="text" name="OrderNumber" class="form-control" placeholder="e.g., 1045" />
+                    </div>
+
+                    <!-- Urgency -->
+                    <div class="mb-3">
+                        <label class="form-label">Urgency</label>
+                        <select name="Urgency" class="form-control">
+                            <option>Low</option>
+                            <option>Medium</option>
+                            <option>High</option>
+                            <option>Critical</option>
+                        </select>
+                    </div>
+
+                    <!-- Message -->
+                    <div class="mb-3">
+                        <label class="form-label">Message</label>
+                        <textarea name="Message" class="form-control" rows="5" required></textarea>
+                    </div>
+
+                    <button type="submit" class="btn btn-primary px-4 mt-2">Send Message</button>
+
+                    @if (ViewBag.StatusMessage != null)
+                    {
+                        <div class="alert alert-success mt-3">
+                            @ViewBag.StatusMessage
+                        </div>
+                    }
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .contact-title {
+        font-family: "VT323", monospace;
+        color: #f5b338;
+        text-shadow: 0 0 12px rgba(0,0,0,0.7);
+        font-size: 3rem;
+    }
+
+    .contact-box, .contact-form {
+        background: #111111;
+        border: 1px solid #693330;
+        border-radius: 12px;
+        color: #f0e6d6;
+        box-shadow: 0 0 15px rgba(0,0,0,0.4);
+    }
+
+    .section-heading {
+        font-family: "VT323", monospace;
+        color: #f5b338;
+        font-size: 1.8rem;
+    }
+
+    .form-label {
+        font-family: "JetBrains Mono", monospace;
+    }
+
+    input.form-control, textarea.form-control, select.form-control {
+        background-color: #222;
+        color: #f0e6d6;
+        border: 1px solid #693330;
+    }
+
+    input.form-control:focus, textarea.form-control:focus, select.form-control:focus {
+        border-color: #f5b338;
+        box-shadow: 0 0 8px #f5b33880;
+    }
+</style>
+
+<script>
+    document.getElementById("categoryDropdown").addEventListener("change", function () {
+        const field = document.getElementById("orderNumberField");
+        field.style.display = (this.value === "Order Issue") ? "block" : "none";
+    });
+</script>
