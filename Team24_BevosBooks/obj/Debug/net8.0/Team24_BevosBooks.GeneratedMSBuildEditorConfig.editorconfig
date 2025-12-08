@@ -17,263 +17,271 @@ build_property._SupportedPlatformList = Linux,macOS,Windows
 build_property._SupportedPlatformList = Linux,macOS,Windows
 build_property.RootNamespace = Team24_BevosBooks
 build_property.RootNamespace = Team24_BevosBooks
-build_property.ProjectDir = /Users/lilypecoraro/Projects/Team24_BevosBooks/Team24_BevosBooks/
+build_property.ProjectDir = /Users/sachisooda/Desktop/MIS 333K/Team24BevosBooks/Group-24/Team24_BevosBooks/
 build_property.EnableComHosting = 
 build_property.EnableGeneratedComInterfaceComImportInterop = 
 build_property.RazorLangVersion = 8.0
 build_property.SupportLocalizedComponentNames = 
 build_property.GenerateRazorMetadataSourceChecksumAttributes = 
-build_property.MSBuildProjectDirectory = /Users/lilypecoraro/Projects/Team24_BevosBooks/Team24_BevosBooks
+build_property.MSBuildProjectDirectory = /Users/sachisooda/Desktop/MIS 333K/Team24BevosBooks/Group-24/Team24_BevosBooks
 build_property._RazorSourceGeneratorDebug = 
 
-[/Users/lilypecoraro/Projects/Team24_BevosBooks/Team24_BevosBooks/Views/Account/AddCard.cshtml]
+[/Users/sachisooda/Desktop/MIS 333K/Team24BevosBooks/Group-24/Team24_BevosBooks/Views/Account/AddCard.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3MvQWNjb3VudC9BZGRDYXJkLmNzaHRtbA==
 build_metadata.AdditionalFiles.CssScope = 
 
-[/Users/lilypecoraro/Projects/Team24_BevosBooks/Team24_BevosBooks/Views/Account/ChangePassword.cshtml]
+[/Users/sachisooda/Desktop/MIS 333K/Team24BevosBooks/Group-24/Team24_BevosBooks/Views/Account/ChangePassword.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3MvQWNjb3VudC9DaGFuZ2VQYXNzd29yZC5jc2h0bWw=
 build_metadata.AdditionalFiles.CssScope = 
 
-[/Users/lilypecoraro/Projects/Team24_BevosBooks/Team24_BevosBooks/Views/Account/Index.cshtml]
+[/Users/sachisooda/Desktop/MIS 333K/Team24BevosBooks/Group-24/Team24_BevosBooks/Views/Account/Index.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3MvQWNjb3VudC9JbmRleC5jc2h0bWw=
 build_metadata.AdditionalFiles.CssScope = 
 
-[/Users/lilypecoraro/Projects/Team24_BevosBooks/Team24_BevosBooks/Views/Account/Login.cshtml]
+[/Users/sachisooda/Desktop/MIS 333K/Team24BevosBooks/Group-24/Team24_BevosBooks/Views/Account/Login.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3MvQWNjb3VudC9Mb2dpbi5jc2h0bWw=
 build_metadata.AdditionalFiles.CssScope = 
 
-[/Users/lilypecoraro/Projects/Team24_BevosBooks/Team24_BevosBooks/Views/Account/Manage.cshtml]
+[/Users/sachisooda/Desktop/MIS 333K/Team24BevosBooks/Group-24/Team24_BevosBooks/Views/Account/Manage.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3MvQWNjb3VudC9NYW5hZ2UuY3NodG1s
 build_metadata.AdditionalFiles.CssScope = 
 
-[/Users/lilypecoraro/Projects/Team24_BevosBooks/Team24_BevosBooks/Views/Account/MyCards.cshtml]
+[/Users/sachisooda/Desktop/MIS 333K/Team24BevosBooks/Group-24/Team24_BevosBooks/Views/Account/MyCards.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3MvQWNjb3VudC9NeUNhcmRzLmNzaHRtbA==
 build_metadata.AdditionalFiles.CssScope = 
 
-[/Users/lilypecoraro/Projects/Team24_BevosBooks/Team24_BevosBooks/Views/Account/Register.cshtml]
+[/Users/sachisooda/Desktop/MIS 333K/Team24BevosBooks/Group-24/Team24_BevosBooks/Views/Account/Register.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3MvQWNjb3VudC9SZWdpc3Rlci5jc2h0bWw=
 build_metadata.AdditionalFiles.CssScope = 
 
-[/Users/lilypecoraro/Projects/Team24_BevosBooks/Team24_BevosBooks/Views/Books/Create.cshtml]
+[/Users/sachisooda/Desktop/MIS 333K/Team24BevosBooks/Group-24/Team24_BevosBooks/Views/Books/Create.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3MvQm9va3MvQ3JlYXRlLmNzaHRtbA==
 build_metadata.AdditionalFiles.CssScope = 
 
-[/Users/lilypecoraro/Projects/Team24_BevosBooks/Team24_BevosBooks/Views/Books/Details.cshtml]
+[/Users/sachisooda/Desktop/MIS 333K/Team24BevosBooks/Group-24/Team24_BevosBooks/Views/Books/Details.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3MvQm9va3MvRGV0YWlscy5jc2h0bWw=
 build_metadata.AdditionalFiles.CssScope = 
 
-[/Users/lilypecoraro/Projects/Team24_BevosBooks/Team24_BevosBooks/Views/Books/Discontinue.cshtml]
+[/Users/sachisooda/Desktop/MIS 333K/Team24BevosBooks/Group-24/Team24_BevosBooks/Views/Books/Discontinue.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3MvQm9va3MvRGlzY29udGludWUuY3NodG1s
 build_metadata.AdditionalFiles.CssScope = 
 
-[/Users/lilypecoraro/Projects/Team24_BevosBooks/Team24_BevosBooks/Views/Books/Discover.cshtml]
+[/Users/sachisooda/Desktop/MIS 333K/Team24BevosBooks/Group-24/Team24_BevosBooks/Views/Books/Discover.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3MvQm9va3MvRGlzY292ZXIuY3NodG1s
 build_metadata.AdditionalFiles.CssScope = 
 
-[/Users/lilypecoraro/Projects/Team24_BevosBooks/Team24_BevosBooks/Views/Books/Edit.cshtml]
+[/Users/sachisooda/Desktop/MIS 333K/Team24BevosBooks/Group-24/Team24_BevosBooks/Views/Books/Edit.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3MvQm9va3MvRWRpdC5jc2h0bWw=
 build_metadata.AdditionalFiles.CssScope = 
 
-[/Users/lilypecoraro/Projects/Team24_BevosBooks/Team24_BevosBooks/Views/Books/Index.cshtml]
+[/Users/sachisooda/Desktop/MIS 333K/Team24BevosBooks/Group-24/Team24_BevosBooks/Views/Books/Index.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3MvQm9va3MvSW5kZXguY3NodG1s
 build_metadata.AdditionalFiles.CssScope = 
 
-[/Users/lilypecoraro/Projects/Team24_BevosBooks/Team24_BevosBooks/Views/Cards/Index.cshtml]
+[/Users/sachisooda/Desktop/MIS 333K/Team24BevosBooks/Group-24/Team24_BevosBooks/Views/Cards/Index.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3MvQ2FyZHMvSW5kZXguY3NodG1s
 build_metadata.AdditionalFiles.CssScope = 
 
-[/Users/lilypecoraro/Projects/Team24_BevosBooks/Team24_BevosBooks/Views/Coupons/Create.cshtml]
+[/Users/sachisooda/Desktop/MIS 333K/Team24BevosBooks/Group-24/Team24_BevosBooks/Views/Coupons/Create.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3MvQ291cG9ucy9DcmVhdGUuY3NodG1s
 build_metadata.AdditionalFiles.CssScope = 
 
-[/Users/lilypecoraro/Projects/Team24_BevosBooks/Team24_BevosBooks/Views/Coupons/Details.cshtml]
+[/Users/sachisooda/Desktop/MIS 333K/Team24BevosBooks/Group-24/Team24_BevosBooks/Views/Coupons/Details.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3MvQ291cG9ucy9EZXRhaWxzLmNzaHRtbA==
 build_metadata.AdditionalFiles.CssScope = 
 
-[/Users/lilypecoraro/Projects/Team24_BevosBooks/Team24_BevosBooks/Views/Coupons/Index.cshtml]
+[/Users/sachisooda/Desktop/MIS 333K/Team24BevosBooks/Group-24/Team24_BevosBooks/Views/Coupons/Index.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3MvQ291cG9ucy9JbmRleC5jc2h0bWw=
 build_metadata.AdditionalFiles.CssScope = 
 
-[/Users/lilypecoraro/Projects/Team24_BevosBooks/Team24_BevosBooks/Views/EmailTest/Index.cshtml]
+[/Users/sachisooda/Desktop/MIS 333K/Team24BevosBooks/Group-24/Team24_BevosBooks/Views/EmailTest/Index.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3MvRW1haWxUZXN0L0luZGV4LmNzaHRtbA==
 build_metadata.AdditionalFiles.CssScope = 
 
-[/Users/lilypecoraro/Projects/Team24_BevosBooks/Team24_BevosBooks/Views/Genres/Create.cshtml]
+[/Users/sachisooda/Desktop/MIS 333K/Team24BevosBooks/Group-24/Team24_BevosBooks/Views/Genres/Create.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3MvR2VucmVzL0NyZWF0ZS5jc2h0bWw=
 build_metadata.AdditionalFiles.CssScope = 
 
-[/Users/lilypecoraro/Projects/Team24_BevosBooks/Team24_BevosBooks/Views/Genres/Edit.cshtml]
+[/Users/sachisooda/Desktop/MIS 333K/Team24BevosBooks/Group-24/Team24_BevosBooks/Views/Genres/Edit.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3MvR2VucmVzL0VkaXQuY3NodG1s
 build_metadata.AdditionalFiles.CssScope = 
 
-[/Users/lilypecoraro/Projects/Team24_BevosBooks/Team24_BevosBooks/Views/Genres/Index.cshtml]
+[/Users/sachisooda/Desktop/MIS 333K/Team24BevosBooks/Group-24/Team24_BevosBooks/Views/Genres/Index.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3MvR2VucmVzL0luZGV4LmNzaHRtbA==
 build_metadata.AdditionalFiles.CssScope = 
 
-[/Users/lilypecoraro/Projects/Team24_BevosBooks/Team24_BevosBooks/Views/Home/AboutUs.cshtml]
+[/Users/sachisooda/Desktop/MIS 333K/Team24BevosBooks/Group-24/Team24_BevosBooks/Views/Home/AboutUs.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3MvSG9tZS9BYm91dFVzLmNzaHRtbA==
 build_metadata.AdditionalFiles.CssScope = 
 
-[/Users/lilypecoraro/Projects/Team24_BevosBooks/Team24_BevosBooks/Views/Home/Index.cshtml]
+[/Users/sachisooda/Desktop/MIS 333K/Team24BevosBooks/Group-24/Team24_BevosBooks/Views/Home/Index.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3MvSG9tZS9JbmRleC5jc2h0bWw=
 build_metadata.AdditionalFiles.CssScope = 
 
-[/Users/lilypecoraro/Projects/Team24_BevosBooks/Team24_BevosBooks/Views/OrderDetails/Index.cshtml]
+[/Users/sachisooda/Desktop/MIS 333K/Team24BevosBooks/Group-24/Team24_BevosBooks/Views/ItemDiscounts/Create.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3MvSXRlbURpc2NvdW50cy9DcmVhdGUuY3NodG1s
+build_metadata.AdditionalFiles.CssScope = 
+
+[/Users/sachisooda/Desktop/MIS 333K/Team24BevosBooks/Group-24/Team24_BevosBooks/Views/ItemDiscounts/Index.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3MvSXRlbURpc2NvdW50cy9JbmRleC5jc2h0bWw=
+build_metadata.AdditionalFiles.CssScope = 
+
+[/Users/sachisooda/Desktop/MIS 333K/Team24BevosBooks/Group-24/Team24_BevosBooks/Views/OrderDetails/Index.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3MvT3JkZXJEZXRhaWxzL0luZGV4LmNzaHRtbA==
 build_metadata.AdditionalFiles.CssScope = 
 
-[/Users/lilypecoraro/Projects/Team24_BevosBooks/Team24_BevosBooks/Views/Orders/AllOrders.cshtml]
+[/Users/sachisooda/Desktop/MIS 333K/Team24BevosBooks/Group-24/Team24_BevosBooks/Views/Orders/AllOrders.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3MvT3JkZXJzL0FsbE9yZGVycy5jc2h0bWw=
 build_metadata.AdditionalFiles.CssScope = 
 
-[/Users/lilypecoraro/Projects/Team24_BevosBooks/Team24_BevosBooks/Views/Orders/Cart.cshtml]
+[/Users/sachisooda/Desktop/MIS 333K/Team24BevosBooks/Group-24/Team24_BevosBooks/Views/Orders/Cart.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3MvT3JkZXJzL0NhcnQuY3NodG1s
 build_metadata.AdditionalFiles.CssScope = 
 
-[/Users/lilypecoraro/Projects/Team24_BevosBooks/Team24_BevosBooks/Views/Orders/Checkout.cshtml]
+[/Users/sachisooda/Desktop/MIS 333K/Team24BevosBooks/Group-24/Team24_BevosBooks/Views/Orders/Checkout.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3MvT3JkZXJzL0NoZWNrb3V0LmNzaHRtbA==
 build_metadata.AdditionalFiles.CssScope = 
 
-[/Users/lilypecoraro/Projects/Team24_BevosBooks/Team24_BevosBooks/Views/Orders/History.cshtml]
+[/Users/sachisooda/Desktop/MIS 333K/Team24BevosBooks/Group-24/Team24_BevosBooks/Views/Orders/History.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3MvT3JkZXJzL0hpc3RvcnkuY3NodG1s
 build_metadata.AdditionalFiles.CssScope = 
 
-[/Users/lilypecoraro/Projects/Team24_BevosBooks/Team24_BevosBooks/Views/Orders/Index.cshtml]
+[/Users/sachisooda/Desktop/MIS 333K/Team24BevosBooks/Group-24/Team24_BevosBooks/Views/Orders/Index.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3MvT3JkZXJzL0luZGV4LmNzaHRtbA==
 build_metadata.AdditionalFiles.CssScope = 
 
-[/Users/lilypecoraro/Projects/Team24_BevosBooks/Team24_BevosBooks/Views/Orders/OrderConfirmation.cshtml]
+[/Users/sachisooda/Desktop/MIS 333K/Team24BevosBooks/Group-24/Team24_BevosBooks/Views/Orders/OrderConfirmation.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3MvT3JkZXJzL09yZGVyQ29uZmlybWF0aW9uLmNzaHRtbA==
 build_metadata.AdditionalFiles.CssScope = 
 
-[/Users/lilypecoraro/Projects/Team24_BevosBooks/Team24_BevosBooks/Views/Procurement/AutoReorder.cshtml]
+[/Users/sachisooda/Desktop/MIS 333K/Team24BevosBooks/Group-24/Team24_BevosBooks/Views/Procurement/AutoReorder.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3MvUHJvY3VyZW1lbnQvQXV0b1Jlb3JkZXIuY3NodG1s
 build_metadata.AdditionalFiles.CssScope = 
 
-[/Users/lilypecoraro/Projects/Team24_BevosBooks/Team24_BevosBooks/Views/Procurement/CheckIn.cshtml]
+[/Users/sachisooda/Desktop/MIS 333K/Team24BevosBooks/Group-24/Team24_BevosBooks/Views/Procurement/CheckIn.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3MvUHJvY3VyZW1lbnQvQ2hlY2tJbi5jc2h0bWw=
 build_metadata.AdditionalFiles.CssScope = 
 
-[/Users/lilypecoraro/Projects/Team24_BevosBooks/Team24_BevosBooks/Views/Procurement/Details.cshtml]
+[/Users/sachisooda/Desktop/MIS 333K/Team24BevosBooks/Group-24/Team24_BevosBooks/Views/Procurement/Details.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3MvUHJvY3VyZW1lbnQvRGV0YWlscy5jc2h0bWw=
 build_metadata.AdditionalFiles.CssScope = 
 
-[/Users/lilypecoraro/Projects/Team24_BevosBooks/Team24_BevosBooks/Views/Procurement/ManualReorder.cshtml]
+[/Users/sachisooda/Desktop/MIS 333K/Team24BevosBooks/Group-24/Team24_BevosBooks/Views/Procurement/ManualReorder.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3MvUHJvY3VyZW1lbnQvTWFudWFsUmVvcmRlci5jc2h0bWw=
 build_metadata.AdditionalFiles.CssScope = 
 
-[/Users/lilypecoraro/Projects/Team24_BevosBooks/Team24_BevosBooks/Views/Procurement/ViewOrders.cshtml]
+[/Users/sachisooda/Desktop/MIS 333K/Team24BevosBooks/Group-24/Team24_BevosBooks/Views/Procurement/ViewOrders.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3MvUHJvY3VyZW1lbnQvVmlld09yZGVycy5jc2h0bWw=
 build_metadata.AdditionalFiles.CssScope = 
 
-[/Users/lilypecoraro/Projects/Team24_BevosBooks/Team24_BevosBooks/Views/Reports/BooksSold.cshtml]
+[/Users/sachisooda/Desktop/MIS 333K/Team24BevosBooks/Group-24/Team24_BevosBooks/Views/Reports/BooksSold.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3MvUmVwb3J0cy9Cb29rc1NvbGQuY3NodG1s
 build_metadata.AdditionalFiles.CssScope = 
 
-[/Users/lilypecoraro/Projects/Team24_BevosBooks/Team24_BevosBooks/Views/Reports/CurrentInventory.cshtml]
+[/Users/sachisooda/Desktop/MIS 333K/Team24BevosBooks/Group-24/Team24_BevosBooks/Views/Reports/CurrentInventory.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3MvUmVwb3J0cy9DdXJyZW50SW52ZW50b3J5LmNzaHRtbA==
 build_metadata.AdditionalFiles.CssScope = 
 
-[/Users/lilypecoraro/Projects/Team24_BevosBooks/Team24_BevosBooks/Views/Reports/CustomersReport.cshtml]
+[/Users/sachisooda/Desktop/MIS 333K/Team24BevosBooks/Group-24/Team24_BevosBooks/Views/Reports/CustomersReport.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3MvUmVwb3J0cy9DdXN0b21lcnNSZXBvcnQuY3NodG1s
 build_metadata.AdditionalFiles.CssScope = 
 
-[/Users/lilypecoraro/Projects/Team24_BevosBooks/Team24_BevosBooks/Views/Reports/OrdersReport.cshtml]
+[/Users/sachisooda/Desktop/MIS 333K/Team24BevosBooks/Group-24/Team24_BevosBooks/Views/Reports/OrdersReport.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3MvUmVwb3J0cy9PcmRlcnNSZXBvcnQuY3NodG1s
 build_metadata.AdditionalFiles.CssScope = 
 
-[/Users/lilypecoraro/Projects/Team24_BevosBooks/Team24_BevosBooks/Views/Reports/ReviewsReport.cshtml]
+[/Users/sachisooda/Desktop/MIS 333K/Team24BevosBooks/Group-24/Team24_BevosBooks/Views/Reports/ReviewsReport.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3MvUmVwb3J0cy9SZXZpZXdzUmVwb3J0LmNzaHRtbA==
 build_metadata.AdditionalFiles.CssScope = 
 
-[/Users/lilypecoraro/Projects/Team24_BevosBooks/Team24_BevosBooks/Views/Reports/Totals.cshtml]
+[/Users/sachisooda/Desktop/MIS 333K/Team24BevosBooks/Group-24/Team24_BevosBooks/Views/Reports/Totals.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3MvUmVwb3J0cy9Ub3RhbHMuY3NodG1s
 build_metadata.AdditionalFiles.CssScope = 
 
-[/Users/lilypecoraro/Projects/Team24_BevosBooks/Team24_BevosBooks/Views/Reviews/Edit.cshtml]
+[/Users/sachisooda/Desktop/MIS 333K/Team24BevosBooks/Group-24/Team24_BevosBooks/Views/Reviews/Edit.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3MvUmV2aWV3cy9FZGl0LmNzaHRtbA==
 build_metadata.AdditionalFiles.CssScope = 
 
-[/Users/lilypecoraro/Projects/Team24_BevosBooks/Team24_BevosBooks/Views/Reviews/Index.cshtml]
+[/Users/sachisooda/Desktop/MIS 333K/Team24BevosBooks/Group-24/Team24_BevosBooks/Views/Reviews/Index.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3MvUmV2aWV3cy9JbmRleC5jc2h0bWw=
 build_metadata.AdditionalFiles.CssScope = 
 
-[/Users/lilypecoraro/Projects/Team24_BevosBooks/Team24_BevosBooks/Views/Reviews/Manage.cshtml]
+[/Users/sachisooda/Desktop/MIS 333K/Team24BevosBooks/Group-24/Team24_BevosBooks/Views/Reviews/Manage.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3MvUmV2aWV3cy9NYW5hZ2UuY3NodG1s
 build_metadata.AdditionalFiles.CssScope = 
 
-[/Users/lilypecoraro/Projects/Team24_BevosBooks/Team24_BevosBooks/Views/Reviews/Pending.cshtml]
+[/Users/sachisooda/Desktop/MIS 333K/Team24BevosBooks/Group-24/Team24_BevosBooks/Views/Reviews/Pending.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3MvUmV2aWV3cy9QZW5kaW5nLmNzaHRtbA==
 build_metadata.AdditionalFiles.CssScope = 
 
-[/Users/lilypecoraro/Projects/Team24_BevosBooks/Team24_BevosBooks/Views/Reviews/Submit.cshtml]
+[/Users/sachisooda/Desktop/MIS 333K/Team24BevosBooks/Group-24/Team24_BevosBooks/Views/Reviews/Submit.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3MvUmV2aWV3cy9TdWJtaXQuY3NodG1s
 build_metadata.AdditionalFiles.CssScope = 
 
-[/Users/lilypecoraro/Projects/Team24_BevosBooks/Team24_BevosBooks/Views/RoleAdmin/CreateCustomer.cshtml]
+[/Users/sachisooda/Desktop/MIS 333K/Team24BevosBooks/Group-24/Team24_BevosBooks/Views/RoleAdmin/CreateCustomer.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3MvUm9sZUFkbWluL0NyZWF0ZUN1c3RvbWVyLmNzaHRtbA==
 build_metadata.AdditionalFiles.CssScope = 
 
-[/Users/lilypecoraro/Projects/Team24_BevosBooks/Team24_BevosBooks/Views/RoleAdmin/CreateEmployee.cshtml]
+[/Users/sachisooda/Desktop/MIS 333K/Team24BevosBooks/Group-24/Team24_BevosBooks/Views/RoleAdmin/CreateEmployee.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3MvUm9sZUFkbWluL0NyZWF0ZUVtcGxveWVlLmNzaHRtbA==
 build_metadata.AdditionalFiles.CssScope = 
 
-[/Users/lilypecoraro/Projects/Team24_BevosBooks/Team24_BevosBooks/Views/RoleAdmin/EditCustomer.cshtml]
+[/Users/sachisooda/Desktop/MIS 333K/Team24BevosBooks/Group-24/Team24_BevosBooks/Views/RoleAdmin/EditCustomer.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3MvUm9sZUFkbWluL0VkaXRDdXN0b21lci5jc2h0bWw=
 build_metadata.AdditionalFiles.CssScope = 
 
-[/Users/lilypecoraro/Projects/Team24_BevosBooks/Team24_BevosBooks/Views/RoleAdmin/EditEmployee.cshtml]
+[/Users/sachisooda/Desktop/MIS 333K/Team24BevosBooks/Group-24/Team24_BevosBooks/Views/RoleAdmin/EditEmployee.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3MvUm9sZUFkbWluL0VkaXRFbXBsb3llZS5jc2h0bWw=
 build_metadata.AdditionalFiles.CssScope = 
 
-[/Users/lilypecoraro/Projects/Team24_BevosBooks/Team24_BevosBooks/Views/RoleAdmin/ManageCustomers.cshtml]
+[/Users/sachisooda/Desktop/MIS 333K/Team24BevosBooks/Group-24/Team24_BevosBooks/Views/RoleAdmin/ManageCustomers.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3MvUm9sZUFkbWluL01hbmFnZUN1c3RvbWVycy5jc2h0bWw=
 build_metadata.AdditionalFiles.CssScope = 
 
-[/Users/lilypecoraro/Projects/Team24_BevosBooks/Team24_BevosBooks/Views/RoleAdmin/ManageEmployees.cshtml]
+[/Users/sachisooda/Desktop/MIS 333K/Team24BevosBooks/Group-24/Team24_BevosBooks/Views/RoleAdmin/ManageEmployees.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3MvUm9sZUFkbWluL01hbmFnZUVtcGxveWVlcy5jc2h0bWw=
 build_metadata.AdditionalFiles.CssScope = 
 
-[/Users/lilypecoraro/Projects/Team24_BevosBooks/Team24_BevosBooks/Views/Seed/Confirm.cshtml]
+[/Users/sachisooda/Desktop/MIS 333K/Team24BevosBooks/Group-24/Team24_BevosBooks/Views/Seed/Confirm.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3MvU2VlZC9Db25maXJtLmNzaHRtbA==
 build_metadata.AdditionalFiles.CssScope = 
 
-[/Users/lilypecoraro/Projects/Team24_BevosBooks/Team24_BevosBooks/Views/Seed/Error.cshtml]
+[/Users/sachisooda/Desktop/MIS 333K/Team24BevosBooks/Group-24/Team24_BevosBooks/Views/Seed/Error.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3MvU2VlZC9FcnJvci5jc2h0bWw=
 build_metadata.AdditionalFiles.CssScope = 
 
-[/Users/lilypecoraro/Projects/Team24_BevosBooks/Team24_BevosBooks/Views/Seed/Index.cshtml]
+[/Users/sachisooda/Desktop/MIS 333K/Team24BevosBooks/Group-24/Team24_BevosBooks/Views/Seed/Index.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3MvU2VlZC9JbmRleC5jc2h0bWw=
 build_metadata.AdditionalFiles.CssScope = 
 
-[/Users/lilypecoraro/Projects/Team24_BevosBooks/Team24_BevosBooks/Views/Shared/AccessDenied.cshtml]
+[/Users/sachisooda/Desktop/MIS 333K/Team24BevosBooks/Group-24/Team24_BevosBooks/Views/Shared/AccessDenied.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3MvU2hhcmVkL0FjY2Vzc0RlbmllZC5jc2h0bWw=
 build_metadata.AdditionalFiles.CssScope = 
 
-[/Users/lilypecoraro/Projects/Team24_BevosBooks/Team24_BevosBooks/Views/Shared/AccessDeniedEmployee.cshtml]
+[/Users/sachisooda/Desktop/MIS 333K/Team24BevosBooks/Group-24/Team24_BevosBooks/Views/Shared/AccessDeniedEmployee.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3MvU2hhcmVkL0FjY2Vzc0RlbmllZEVtcGxveWVlLmNzaHRtbA==
 build_metadata.AdditionalFiles.CssScope = 
 
-[/Users/lilypecoraro/Projects/Team24_BevosBooks/Team24_BevosBooks/Views/Shared/_DiscoverBookCard.cshtml]
+[/Users/sachisooda/Desktop/MIS 333K/Team24BevosBooks/Group-24/Team24_BevosBooks/Views/Shared/_DiscoverBookCard.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3MvU2hhcmVkL19EaXNjb3ZlckJvb2tDYXJkLmNzaHRtbA==
 build_metadata.AdditionalFiles.CssScope = 
 
-[/Users/lilypecoraro/Projects/Team24_BevosBooks/Team24_BevosBooks/Views/Shared/_Layout.cshtml]
+[/Users/sachisooda/Desktop/MIS 333K/Team24BevosBooks/Group-24/Team24_BevosBooks/Views/Shared/_Layout.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3MvU2hhcmVkL19MYXlvdXQuY3NodG1s
 build_metadata.AdditionalFiles.CssScope = 
 
-[/Users/lilypecoraro/Projects/Team24_BevosBooks/Team24_BevosBooks/Views/Shared/_LoginPartial.cshtml]
+[/Users/sachisooda/Desktop/MIS 333K/Team24BevosBooks/Group-24/Team24_BevosBooks/Views/Shared/_LoginPartial.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3MvU2hhcmVkL19Mb2dpblBhcnRpYWwuY3NodG1s
 build_metadata.AdditionalFiles.CssScope = 
 
-[/Users/lilypecoraro/Projects/Team24_BevosBooks/Team24_BevosBooks/Views/ShippingSettings/Edit.cshtml]
+[/Users/sachisooda/Desktop/MIS 333K/Team24BevosBooks/Group-24/Team24_BevosBooks/Views/ShippingSettings/Edit.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3MvU2hpcHBpbmdTZXR0aW5ncy9FZGl0LmNzaHRtbA==
 build_metadata.AdditionalFiles.CssScope = 
 
-[/Users/lilypecoraro/Projects/Team24_BevosBooks/Team24_BevosBooks/Views/_ViewImports.cshtml]
+[/Users/sachisooda/Desktop/MIS 333K/Team24BevosBooks/Group-24/Team24_BevosBooks/Views/_ViewImports.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3MvX1ZpZXdJbXBvcnRzLmNzaHRtbA==
 build_metadata.AdditionalFiles.CssScope = 
 
-[/Users/lilypecoraro/Projects/Team24_BevosBooks/Team24_BevosBooks/Views/_ViewStart.cshtml]
+[/Users/sachisooda/Desktop/MIS 333K/Team24BevosBooks/Group-24/Team24_BevosBooks/Views/_ViewStart.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3MvX1ZpZXdTdGFydC5jc2h0bWw=
 build_metadata.AdditionalFiles.CssScope = 

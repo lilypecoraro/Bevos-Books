@@ -1,20 +1,20 @@
 {
   "format": 1,
   "restore": {
-    "/Users/lilypecoraro/Projects/Team24_BevosBooks/Team24_BevosBooks/Team24_BevosBooks.csproj": {}
+    "/Users/sachisooda/Desktop/MIS 333K/Team24BevosBooks/Group-24/Team24_BevosBooks/Team24_BevosBooks.csproj": {}
   },
   "projects": {
-    "/Users/lilypecoraro/Projects/Team24_BevosBooks/Team24_BevosBooks/Team24_BevosBooks.csproj": {
+    "/Users/sachisooda/Desktop/MIS 333K/Team24BevosBooks/Group-24/Team24_BevosBooks/Team24_BevosBooks.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "/Users/lilypecoraro/Projects/Team24_BevosBooks/Team24_BevosBooks/Team24_BevosBooks.csproj",
+        "projectUniqueName": "/Users/sachisooda/Desktop/MIS 333K/Team24BevosBooks/Group-24/Team24_BevosBooks/Team24_BevosBooks.csproj",
         "projectName": "Team24_BevosBooks",
-        "projectPath": "/Users/lilypecoraro/Projects/Team24_BevosBooks/Team24_BevosBooks/Team24_BevosBooks.csproj",
-        "packagesPath": "/Users/lilypecoraro/.nuget/packages/",
-        "outputPath": "/Users/lilypecoraro/Projects/Team24_BevosBooks/Team24_BevosBooks/obj/",
+        "projectPath": "/Users/sachisooda/Desktop/MIS 333K/Team24BevosBooks/Group-24/Team24_BevosBooks/Team24_BevosBooks.csproj",
+        "packagesPath": "/Users/sachisooda/.nuget/packages/",
+        "outputPath": "/Users/sachisooda/Desktop/MIS 333K/Team24BevosBooks/Group-24/Team24_BevosBooks/obj/",
         "projectStyle": "PackageReference",
         "configFilePaths": [
-          "/Users/lilypecoraro/.nuget/NuGet/NuGet.Config"
+          "/Users/sachisooda/.nuget/NuGet/NuGet.Config"
         ],
         "originalTargetFrameworks": [
           "net8.0"
@@ -32,6 +32,11 @@
           "warnAsError": [
             "NU1605"
           ]
+        },
+        "restoreAuditProperties": {
+          "enableAudit": "true",
+          "auditLevel": "low",
+          "auditMode": "direct"
         }
       },
       "frameworks": {

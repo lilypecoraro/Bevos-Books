@@ -58,7 +58,7 @@
                     <td>@book.InventoryQuantity</td>
                     <td>@book.ReorderPoint</td>
                     <td>@(lastCost > 0 ? lastCost.ToString("C") : "N/A")</td>
-                    <td>@(avgMargin > 0 ? avgMargin.ToString("P1") : "N/A")</td>
+                    <td>@avgMargin.ToString("C")</td>
                     <td>
                         <input type="number" name="qty_@book.BookID" value="5" min="0"
                                class="form-control text-dark" style="width:90px;" />
