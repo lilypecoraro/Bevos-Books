@@ -7,6 +7,9 @@
     int resultCount = Model?.Count() ?? 0;
     // Total count of all books in database (set in controller)
     int totalCount = ViewBag.TotalCount ?? resultCount;
+
+    // Map of BookID -> effective price (from controller)
+    var effectiveMap = ViewBag.EffectivePrices as IDictionary<int, decimal> ?? new Dictionary<int, decimal>();
 }
 
 <h2 class="mb-4">Browse Books</h2>
@@ -77,22 +80,37 @@
                 ? book.Reviews.Where(r => r.DisputeStatus == "Approved").Average(r => r.Rating)
                 : 0;
 
+            // Effective price from controller; fall back to Book.Price
+            decimal effectivePrice = effectiveMap.TryGetValue(book.BookID, out var ep) ? ep : book.Price;
+            bool hasItemDiscount = effectivePrice < book.Price;
+
             <tr>
                 <td>@book.Title</td>
                 <td>@book.Authors</td>
                 <td>@book.BookNumber</td>
                 <td>
                     @(
-                                    book.BookStatus == "Discontinued"
-                                    ? "Discontinued"
-                                    : (book.InventoryQuantity > 0 ? "In Stock" : "Out of Stock")
-                                    )
-
+                        book.BookStatus == "Discontinued"
+                        ? "Discontinued"
+                        : (book.InventoryQuantity > 0 ? "In Stock" : "Out of Stock")
+                    )
                 </td>
                 <td>
                     @(avgRating > 0 ? $"{avgRating:0.0}" : "No Ratings")
                 </td>
-                <td>@book.Price.ToString("C")</td>
+                <td>
+                    @if (hasItemDiscount)
+                    {
+                        <div>
+                            <s class="text-dark">@book.Price.ToString("C")</s><br />
+                            <span class="text-success fw-bold">@effectivePrice.ToString("C")</span>
+                        </div>
+                    }
+                    else
+                    {
+                        @book.Price.ToString("C")
+                    }
+                </td>
                 <td>
                     <a asp-action="Details" asp-route-id="@book.BookID"
                        class="btn btn-sm btn-outline-primary">View</a>

@@ -95,7 +95,18 @@ namespace Team24_BevosBooks.Controllers
             ViewBag.InStockOnly = inStockOnly;
             ViewBag.SortOrder = sortOrder;
 
-            return View(await query.ToListAsync());
+            var books = await query.ToListAsync();
+
+            // Compute effective prices for all listed books (item discounts applied)
+            var effectivePrices = new Dictionary<int, decimal>(books.Count);
+            foreach (var b in books)
+            {
+                var ep = await Pricing.GetEffectivePriceAsync(_context, b);
+                effectivePrices[b.BookID] = ep;
+            }
+            ViewBag.EffectivePrices = effectivePrices;
+
+            return View(books);
         }
 
         // =========================================================
@@ -117,8 +128,13 @@ namespace Team24_BevosBooks.Controllers
                 .Where(r => r.DisputeStatus == "Approved")
                 .ToList();
 
+            // Compute effective price considering any active item discount
+            var effectivePrice = await Pricing.GetEffectivePriceAsync(_context, book);
+            ViewBag.EffectivePrice = effectivePrice;
+
             var userId = _userManager.GetUserId(User);
 
+            // Count other carts containing this book
             int cartsContaining = await _context.OrderDetails
                 .Where(od => od.BookID == id)
                 .Where(od => od.Order.OrderStatus == "InCart")

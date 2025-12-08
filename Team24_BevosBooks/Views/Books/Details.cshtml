@@ -3,6 +3,9 @@
 @{
     ViewData["Title"] = "Book Details";
     var reviews = Model.Reviews ?? new List<Review>();
+    // Effective price from controller (considers item discount); default to model price if not present
+    decimal effectivePrice = ViewBag.EffectivePrice is decimal ep ? ep : Model.Price;
+    bool hasItemDiscount = effectivePrice < Model.Price;
 }
 
 <style>
@@ -127,7 +130,19 @@
             <dd class="col-sm-9">@Model.BookNumber</dd>
 
             <dt class="col-sm-3">Price</dt>
-            <dd class="col-sm-9">@Model.Price.ToString("c")</dd>
+            <dd class="col-sm-9">
+                @if (hasItemDiscount)
+                {
+                    <div>
+                        <s>@Model.Price.ToString("c")</s><br />
+                        <span class="text-success fw-bold">@effectivePrice.ToString("c")</span>
+                    </div>
+                }
+                else
+                {
+                    @Model.Price.ToString("c")
+                }
+            </dd>
 
             <dt class="col-sm-3">Publish Date</dt>
             <dd class="col-sm-9">@Model.PublishDate.ToShortDateString()</dd>
@@ -233,7 +248,17 @@
 
             <p class="mb-3">
                 <strong>Price:</strong>
-                <span class="book-details-price">@Model.Price.ToString("c")</span>
+                @if (hasItemDiscount)
+                {
+                    <div>
+                        <span class="book-details-price"><s>@Model.Price.ToString("c")</s></span><br />
+                        <span class="book-details-price text-success">@effectivePrice.ToString("c")</span>
+                    </div>
+                }
+                else
+                {
+                    <span class="book-details-price">@Model.Price.ToString("c")</span>
+                }
                 <br />
 
                 <strong>Availability:</strong>

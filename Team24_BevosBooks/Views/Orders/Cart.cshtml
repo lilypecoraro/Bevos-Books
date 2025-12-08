@@ -63,10 +63,24 @@ else
                 <tbody>
                     @foreach (var detail in Model.OrderDetails)
                     {
+                        bool hasItemDiscount = detail.Price < detail.Book.Price;
+
                         <tr>
                             <td>@detail.Book.Title</td>
 
-                            <td>@detail.Price.ToString("c")</td>
+                            <td>
+                                @if (hasItemDiscount)
+                                {
+                                    <span class="text-dark">
+                                        <s class="text-dark">@detail.Book.Price.ToString("c")</s>
+                                        <span class="ms-2 text-success fw-bold">@detail.Price.ToString("c")</span>
+                                    </span>
+                                }
+                                else
+                                {
+                                    @detail.Price.ToString("c")
+                                }
+                            </td>
 
                             <td>
                                 <form asp-action="UpdateQuantity" method="post" class="d-flex align-items-center">

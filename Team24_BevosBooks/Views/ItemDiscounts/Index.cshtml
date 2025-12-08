@@ -35,3 +35,10 @@
     }
     </tbody>
 </table>
+
+@if (!Model.Any())
+{
+    <div class="no-results-box text-dark">
+        No item discounts created.
+    </div>
+}

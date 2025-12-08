@@ -11,6 +11,7 @@ using Team24_BevosBooks.DAL;
 using Team24_BevosBooks.Models;
 using Team24_BevosBooks.Models.ViewModels;
 using Team24_BevosBooks.Services;
+using Team24_BevosBooks.Services; // ensure Pricing is available
 
 namespace Team24_BevosBooks.Controllers
 {
@@ -90,7 +91,9 @@ namespace Team24_BevosBooks.Controllers
                     messages.Add($"Quantity for '{book.Title}' reduced to {book.InventoryQuantity} (max in stock).");
                 }
 
-                item.Price = book.Price;
+                // UPDATED: use effective (discounted) price
+                var effectivePrice = await Pricing.GetEffectivePriceAsync(_context, book);
+                item.Price = effectivePrice;
                 item.Cost = book.Cost;
             }
 
@@ -157,7 +160,6 @@ namespace Team24_BevosBooks.Controllers
             var book = await _context.Books.FindAsync(id);
             if (book == null) return NotFound();
 
-            // Check availability
             if (book.InventoryQuantity <= 0 || book.BookStatus == "Discontinued")
             {
                 TempData["CartMessage"] = "This book is not available.";
@@ -167,11 +169,12 @@ namespace Team24_BevosBooks.Controllers
             var cart = await GetOrCreateCart(user.Id);
 
             var existing = await _context.OrderDetails
-                .FirstOrDefaultAsync(od => od.OrderID == cart.OrderID &&
-                                       od.BookID == id);
+                .FirstOrDefaultAsync(od => od.OrderID == cart.OrderID && od.BookID == id);
 
             if (existing == null)
             {
+                var effectivePrice = await Pricing.GetEffectivePriceAsync(_context, book); // UPDATED
+
                 var newDetail = new OrderDetail
                 {
                     OrderID = cart.OrderID,
@@ -179,7 +182,7 @@ namespace Team24_BevosBooks.Controllers
                     BookID = id,
                     Book = book,
                     Quantity = 1,
-                    Price = book.Price,
+                    Price = effectivePrice, // UPDATED
                     Cost = book.Cost
                 };
 
@@ -228,8 +231,7 @@ namespace Team24_BevosBooks.Controllers
                 .Include(od => od.Book)
                 .FirstOrDefaultAsync(od => od.OrderDetailID == orderDetailId);
 
-            if (detail == null)
-                return NotFound();
+            if (detail == null) return NotFound();
 
             if (quantity <= 0)
             {
@@ -245,6 +247,10 @@ namespace Team24_BevosBooks.Controllers
             {
                 detail.Quantity = quantity;
             }
+
+            // UPDATED: refresh to effective price
+            var effectivePrice = await Pricing.GetEffectivePriceAsync(_context, detail.Book);
+            detail.Price = effectivePrice;
 
             await _context.SaveChangesAsync();
             return RedirectToAction("Cart");
@@ -384,10 +390,11 @@ namespace Team24_BevosBooks.Controllers
                 return RedirectToAction("Checkout");
             }
 
-            // Reset coupon state
+            // UPDATED: reset to effective (discounted) price and clear coupon
             foreach (var od in cart.OrderDetails)
             {
-                od.Price = od.Book.Price;
+                var effectivePrice = await Pricing.GetEffectivePriceAsync(_context, od.Book);
+                od.Price = effectivePrice;
                 od.CouponID = null;
             }
 

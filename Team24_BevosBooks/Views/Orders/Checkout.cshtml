@@ -118,8 +118,36 @@ else
                     </div>
 
                     <div class="card-body">
+                        <ul class="list-group mb-3">
+                            @foreach (var od in Model.Order!.OrderDetails)
+                            {
+                                bool hasItemDiscount = od.Price < od.Book.Price;
 
-                        <!-- ORIGINAL SUBTOTAL -->
+                                <li class="list-group-item d-flex justify-content-between align-items-center">
+                                    <div>
+                                        <div class="fw-semibold">@od.Book.Title</div>
+                                        <small>
+                                            @od.Quantity ×
+                                            @if (hasItemDiscount)
+                                            {
+                                                <span class="text-dark">
+                                                    <s class="text-dark">@od.Book.Price.ToString("c")</s>
+                                                    <span class="ms-2 text-success fw-bold">@od.Price.ToString("c")</span>
+                                                </span>
+                                            }
+                                            else
+                                            {
+                                                @od.Price.ToString("c")
+                                            }
+                                        </small>
+                                    </div>
+                                    <span class="badge bg-light text-dark">
+                                        @((od.Price * od.Quantity).ToString("c"))
+                                    </span>
+                                </li>
+                            }
+                        </ul>
+
                         @if (Model.Discount > 0)
                         {
                             <p>
