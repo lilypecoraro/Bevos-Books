@@ -133,7 +133,7 @@ namespace Team24_BevosBooks.Controllers
 
             // Enforce purchase requirement and no duplicate reviews
             var purchased = await _context.Orders
-                .Where(o => o.UserID == userId && o.OrderStatus == "Completed")
+                .Where(o => o.UserID == userId && o.OrderStatus == "Ordered")
                 .AnyAsync(o => o.OrderDetails.Any(od => od.BookID == review.BookID));
 
             var hasReviewed = await _context.Reviews

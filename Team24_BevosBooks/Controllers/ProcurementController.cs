@@ -68,7 +68,7 @@ namespace Team24_BevosBooks.Controllers
                         : 0),
                 "popularity" => query.OrderByDescending(b =>
                     _context.OrderDetails
-                        .Where(od => od.BookID == b.BookID && od.Order.OrderStatus == "Completed")
+                        .Where(od => od.BookID == b.BookID && od.Order.OrderStatus == "Ordered")
                         .Sum(od => (int?)od.Quantity) ?? 0),
                 _ => query.OrderBy(b => b.Title),
             };
@@ -117,7 +117,7 @@ namespace Team24_BevosBooks.Controllers
 
 
             var avgMargins = await _context.OrderDetails
-                .Where(od => od.Order.OrderStatus == "Completed")
+                .Where(od => od.Order.OrderStatus == "Ordered")
                 .GroupBy(od => od.BookID)
                 .Select(g => new { BookID = g.Key, AvgMargin = g.Average(x => (x.Price - x.Cost) / x.Price) })
                 .ToDictionaryAsync(x => x.BookID, x => x.AvgMargin);
@@ -229,7 +229,7 @@ namespace Team24_BevosBooks.Controllers
             }
 
             var avgMargins = await _context.OrderDetails
-                .Where(od => od.Order.OrderStatus == "Completed")
+                .Where(od => od.Order.OrderStatus == "Ordered")
                 .GroupBy(od => od.BookID)
                 .Select(g => new { BookID = g.Key, AvgMargin = g.Average(x => (x.Price - x.Cost) / x.Price) })
                 .ToDictionaryAsync(x => x.BookID, x => x.AvgMargin);
@@ -396,7 +396,7 @@ namespace Team24_BevosBooks.Controllers
                 .FirstOrDefault();
 
             var avgMargin = _context.OrderDetails
-                .Where(od => od.BookID == book.BookID && od.Order.OrderStatus == "Completed")
+                .Where(od => od.BookID == book.BookID && od.Order.OrderStatus == "Ordered")
                 .AsEnumerable()
                 .Select(od => (od.Price - od.Cost) / od.Price)
                 .DefaultIfEmpty(0)

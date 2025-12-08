@@ -432,10 +432,7 @@ namespace Team24_BevosBooks.Migrations
             modelBuilder.Entity("Team24_BevosBooks.Models.Order", b =>
                 {
                     b.Property<int>("OrderID")
-                        .ValueGeneratedOnAdd()
                         .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("OrderID"));
 
                     b.Property<int?>("CouponID")
                         .HasColumnType("int");

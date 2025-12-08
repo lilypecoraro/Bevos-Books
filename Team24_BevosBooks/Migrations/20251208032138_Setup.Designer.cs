@@ -12,7 +12,7 @@ using Team24_BevosBooks.DAL;
 namespace Team24_BevosBooks.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20251208014333_Setup")]
+    [Migration("20251208032138_Setup")]
     partial class Setup
     {
         /// <inheritdoc />
@@ -435,10 +435,7 @@ namespace Team24_BevosBooks.Migrations
             modelBuilder.Entity("Team24_BevosBooks.Models.Order", b =>
                 {
                     b.Property<int>("OrderID")
-                        .ValueGeneratedOnAdd()
                         .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("OrderID"));
 
                     b.Property<int?>("CouponID")
                         .HasColumnType("int");

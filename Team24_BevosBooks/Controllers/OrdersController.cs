@@ -420,7 +420,7 @@ namespace Team24_BevosBooks.Controllers
             bool alreadyUsed = await _context.OrderDetails
                 .Include(od => od.Order)
                 .AnyAsync(od => od.Order.UserID == user.Id &&
-                                od.Order.OrderStatus == "Completed" &&
+                                od.Order.OrderStatus == "Ordered" &&
                                 od.CouponID == coupon.CouponID);
 
             if (alreadyUsed)
@@ -554,7 +554,7 @@ namespace Team24_BevosBooks.Controllers
                     bool alreadyUsed = await _context.OrderDetails
                         .Include(od => od.Order)
                         .AnyAsync(od => od.Order.UserID == user.Id &&
-                                        od.Order.OrderStatus == "Completed" &&
+                                        od.Order.OrderStatus == "Ordered" &&
                                         od.CouponID == coupon.CouponID);
 
                     if (alreadyUsed)
@@ -648,7 +648,7 @@ namespace Team24_BevosBooks.Controllers
             }
 
             // Finalize order
-            cart.OrderStatus = "Completed";
+            cart.OrderStatus = "Ordered";
             cart.OrderDate = DateTime.Now;
             cart.ShippingFee = totals.shipping;
             cart.CouponID = couponApplied && coupon != null ? coupon.CouponID : null;
