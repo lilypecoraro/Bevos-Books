@@ -69,20 +69,17 @@ namespace Team24_BevosBooks.Controllers
                 "oldest" => query.OrderBy(b => b.PublishDate),
                 "priceAsc" => query.OrderBy(b => b.Price),
                 "priceDesc" => query.OrderByDescending(b => b.Price),
-
                 "rating" => query.OrderByDescending(b =>
                     b.Reviews.Any(r => r.DisputeStatus == "Approved")
                         ? b.Reviews.Where(r => r.DisputeStatus == "Approved").Average(r => r.Rating)
                         : 0
                 ),
-
                 "popularity" => query.OrderByDescending(b =>
                     _context.OrderDetails
                         .Where(od => od.BookID == b.BookID &&
                                      od.Order.OrderStatus == "Ordered")
                         .Sum(od => (int?)od.Quantity) ?? 0
                 ),
-
                 _ => query.OrderBy(b => b.Title),
             };
 
@@ -95,15 +92,60 @@ namespace Team24_BevosBooks.Controllers
             ViewBag.InStockOnly = inStockOnly;
             ViewBag.SortOrder = sortOrder;
 
+            // Materialize current result set
             var books = await query.ToListAsync();
 
-            // Compute effective prices for all listed books (item discounts applied)
+            // Batch-prefetch active discounts only for result set
+            var bookIds = books.Select(b => b.BookID).ToList();
+            var now = DateTime.Now;
+
+            var discounts = await _context.ItemDiscounts
+                .Where(d => bookIds.Contains(d.BookID) && d.Status == "Enabled")
+                .Where(d =>
+                    (!d.StartDate.HasValue || d.StartDate <= now) &&
+                    (!d.EndDate.HasValue || d.EndDate >= now))
+                .GroupBy(d => d.BookID)
+                .Select(g => new
+                {
+                    BookID = g.Key,
+                    // Prefer highest percent; if none, highest amount
+                    BestPercent = g.Where(x => x.DiscountPercent.HasValue && x.DiscountPercent.Value > 0)
+                                   .Max(x => (decimal?)x.DiscountPercent.Value),
+                    BestAmount = g.Where(x => (!x.DiscountPercent.HasValue || x.DiscountPercent.Value <= 0) &&
+                                          x.DiscountAmount.HasValue && x.DiscountAmount.Value > 0)
+                                   .Max(x => (decimal?)x.DiscountAmount.Value)
+                })
+                .ToListAsync();
+
+            var discMap = discounts.ToDictionary(x => x.BookID, x => x);
             var effectivePrices = new Dictionary<int, decimal>(books.Count);
+
             foreach (var b in books)
             {
-                var ep = await Pricing.GetEffectivePriceAsync(_context, b);
-                effectivePrices[b.BookID] = ep;
+                if (discMap.TryGetValue(b.BookID, out var info))
+                {
+                    if (info.BestPercent.HasValue && info.BestPercent.Value > 0)
+                    {
+                        var pct = info.BestPercent.Value / 100m;
+                        var discounted = b.Price * (1 - pct);
+                        effectivePrices[b.BookID] = discounted < 0 ? 0 : discounted;
+                    }
+                    else if (info.BestAmount.HasValue && info.BestAmount.Value > 0)
+                    {
+                        var discounted = b.Price - info.BestAmount.Value;
+                        effectivePrices[b.BookID] = discounted < 0 ? 0 : discounted;
+                    }
+                    else
+                    {
+                        effectivePrices[b.BookID] = b.Price;
+                    }
+                }
+                else
+                {
+                    effectivePrices[b.BookID] = b.Price;
+                }
             }
+
             ViewBag.EffectivePrices = effectivePrices;
 
             return View(books);
