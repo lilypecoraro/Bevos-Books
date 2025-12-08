@@ -123,15 +123,7 @@ namespace Team24_BevosBooks.Controllers
                 });
 
 
-<<<<<<< Updated upstream
-            var avgMargins = await _context.OrderDetails
-                .Where(od => od.Order.OrderStatus == "Ordered")
-                .GroupBy(od => od.BookID)
-                .Select(g => new { BookID = g.Key, AvgMargin = g.Average(x => (x.Price - x.Cost) / x.Price) })
-                .ToDictionaryAsync(x => x.BookID, x => x.AvgMargin);
 
-=======
->>>>>>> Stashed changes
             ViewBag.LastCosts = lastCosts;
             ViewBag.AvgMargins = avgMargins;
 
@@ -238,13 +230,8 @@ namespace Team24_BevosBooks.Controllers
                 }
             }
 
-<<<<<<< Updated upstream
-            var avgMargins = await _context.OrderDetails
-                .Where(od => od.Order.OrderStatus == "Ordered")
-                .GroupBy(od => od.BookID)
-                .Select(g => new { BookID = g.Key, AvgMargin = g.Average(x => (x.Price - x.Cost) / x.Price) })
-                .ToDictionaryAsync(x => x.BookID, x => x.AvgMargin);
-=======
+
+
             // ✅ Calculate margins in memory
             var avgMargins = books.ToDictionary(
                 b => b.BookID,
@@ -253,7 +240,7 @@ namespace Team24_BevosBooks.Controllers
                     var cost = lastCosts.ContainsKey(b.BookID) ? lastCosts[b.BookID] : b.Cost;
                     return b.Price > 0 ? (b.Price - cost) : 0m;
                 });
->>>>>>> Stashed changes
+
 
             ViewBag.LastCosts = lastCosts;
             ViewBag.AvgMargins = avgMargins;
