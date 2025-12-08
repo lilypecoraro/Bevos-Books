@@ -14,21 +14,20 @@
         }
 </style>
 
-
-
-@model IEnumerable<Team24_BevosBooks.Models.Order>
+@model IEnumerable<Team24_BevosBooks.Models.Reorder>
 
 @{
-    ViewData["Title"] = "Supplier Orders";
-    // ViewBag.ReceivedTotals is a Dictionary<int,int> (OrderDetailID -> cumulative received)
+    ViewData["Title"] = "Supplier Reorders";
+    // ViewBag.ReceivedTotals is a Dictionary<int,int> (ReorderID -> cumulative received)
+    // ViewBag.OutstandingBalances is a Dictionary<int,int> (ReorderID -> outstanding balance)
 }
 
-<h2>Supplier Orders</h2>
+<h2>Supplier Reorders</h2>
 
 <table class="table table-striped">
     <thead class="table-dark">
         <tr>
-            <th>Order #</th>
+            <th>Reorder #</th>
             <th>Date</th>
             <th>Status</th>
             <th>Book</th>
@@ -36,48 +35,45 @@
             <th>Received</th>
             <th>Outstanding</th>
             <th>Cost</th>
-            <th>Price</th>
             <th>Check In</th>
         </tr>
     </thead>
     <tbody>
-        @foreach (var order in Model)
+        @foreach (var reorder in Model)
         {
-            foreach (var detail in order.OrderDetails)
-            {
-                var received = (ViewBag.ReceivedTotals != null && ViewBag.ReceivedTotals.ContainsKey(detail.OrderDetailID))
-                    ? (int)ViewBag.ReceivedTotals[detail.OrderDetailID]
-                    : 0;
+            var received = (ViewBag.ReceivedTotals != null && ViewBag.ReceivedTotals.ContainsKey(reorder.ReorderID))
+                ? (int)ViewBag.ReceivedTotals[reorder.ReorderID]
+                : 0;
 
-                var outstanding = detail.Quantity - received;
+            var outstanding = (ViewBag.OutstandingBalances != null && ViewBag.OutstandingBalances.ContainsKey(reorder.ReorderID))
+                ? (int)ViewBag.OutstandingBalances[reorder.ReorderID]
+                : reorder.Quantity - received;
 
-                <tr>
-                    <td>@order.OrderID</td>
-                    <td>@order.OrderDate.ToShortDateString()</td>
-                    <td>@order.OrderStatus</td>
-                    <td>@detail.Book.Title</td>
-                    <td>@detail.Quantity</td>
-                    <td>@received</td>
-                    <td>@outstanding</td>
-                    <td>@detail.Cost.ToString("C")</td>
-                    <td>@detail.Price.ToString("C")</td>
-                    <td>
-                        @if (order.OrderStatus == "SupplierOrder" && outstanding > 0)
-                        {
-                            <form asp-action="CheckIn" method="post" class="d-flex">
-                                <input type="hidden" name="orderDetailId" value="@detail.OrderDetailID" />
-                                <input type="number" name="arrivedQty" min="0" max="@outstanding"
-                                       class="form-control text-dark me-2" style="width:90px;" />
-                                <button type="submit" class="btn btn-success btn-sm">Check In</button>
-                            </form>
-                        }
-                        else if (outstanding == 0)
-                        {
-                            <span class="text-success">Received</span>
-                        }
-                    </td>
-                </tr>
-            }
+            <tr>
+                <td>@reorder.ReorderID</td>
+                <td>@reorder.Date.ToShortDateString()</td>
+                <td>@reorder.ReorderStatus</td>
+                <td>@reorder.Book.Title</td>
+                <td>@reorder.Quantity</td>
+                <td>@received</td>
+                <td>@outstanding</td>
+                <td>@reorder.Cost.ToString("C")</td>
+                <td>
+                    @if (reorder.ReorderStatus == "Ordered" && outstanding > 0)
+                    {
+                        <form asp-action="CheckIn" method="post" class="d-flex">
+                            <input type="hidden" name="reorderId" value="@reorder.ReorderID" />
+                            <input type="number" name="arrivedQty" min="0" max="@outstanding"
+                                   class="form-control text-dark me-2" style="width:90px;" />
+                            <button type="submit" class="btn btn-success btn-sm">Check In</button>
+                        </form>
+                    }
+                    else if (outstanding == 0)
+                    {
+                        <span class="text-success">Received</span>
+                    }
+                </td>
+            </tr>
         }
     </tbody>
 </table>
