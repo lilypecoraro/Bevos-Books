@@ -82,10 +82,10 @@
                 <span asp-validation-for="ZipCode" class="text-danger"></span>
             </div>
 
-            <!-- PHONE NUMBER WITH AUTO FORMAT -->
+            <!-- PHONE NUMBER (no auto format) -->
             <div class="form-group mb-3">
                 <label asp-for="PhoneNumber"></label>
-                <input asp-for="PhoneNumber" id="PhoneInput" class="form-control" maxlength="12" />
+                <input asp-for="PhoneNumber" class="form-control" type="tel" inputmode="numeric" />
                 <span asp-validation-for="PhoneNumber" class="text-danger"></span>
             </div>
 
@@ -94,43 +94,3 @@
         </form>
     </div>
 </div>
-
-@section Scripts {
-    <script>const phoneBox = document.getElementById("PhoneInput");
-
-        phoneBox.addEventListener("input", function (e) {
-            // Save cursor position
-            const cursorPos = phoneBox.selectionStart;
-
-            // Get only digits
-            let digits = phoneBox.value.replace(/\D/g, "");
-
-            if (digits.length > 10)
-                digits = digits.substring(0, 10);
-
-            // Build formatted number
-            let formatted = "";
-            if (digits.length > 0) {
-                formatted += digits.substring(0, 3);
-            }
-            if (digits.length >= 4) {
-                formatted += "-" + digits.substring(3, 6);
-            }
-            if (digits.length >= 7) {
-                formatted += "-" + digits.substring(6, 10);
-            }
-
-            // Update value WITHOUT blocking deletion
-            phoneBox.value = formatted;
-
-            // Try to restore cursor position safely
-            let newCursorPos = cursorPos;
-
-            // Adjust for automatically inserted dashes
-            if (cursorPos === 4 || cursorPos === 8) {
-                newCursorPos = cursorPos + 1;
-            }
-
-            phoneBox.setSelectionRange(newCursorPos, newCursorPos);
-        });</script>
-}
