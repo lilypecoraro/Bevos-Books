@@ -1,5 +1,5 @@
 <div align="center">
-  <img src="wwwroot/images/bevos-books-logo.png">
+  <img src="wwwroot/BevoBookLogo.png">
 </div>
 
 <h1 align="center">Bevo’s Books</h1>
